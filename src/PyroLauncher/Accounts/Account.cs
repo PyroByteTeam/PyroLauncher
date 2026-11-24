@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Security.Cryptography;
@@ -97,7 +98,7 @@ public static class AccountManager
 
     public static Account AddOffline(string name)
     {
-        if (!OfflineAllowed) throw new InvalidOperationException("Offline accounts require developer mode.");
+        if (!OfflineAllowed) throw new InvalidOperationException(L.T("Offline accounts require developer mode."));
         var acc = new Account
         {
             Type = AccountType.Offline,
@@ -138,7 +139,7 @@ public static class AccountManager
         if (acc.Type != AccountType.Microsoft) return;
         if (acc.ExpiresAt > DateTimeOffset.UtcNow.AddMinutes(10)) return;
         if (string.IsNullOrEmpty(acc.MsRefreshToken))
-            throw new InvalidOperationException("Microsoft session expired. Please sign in again.");
+            throw new InvalidOperationException(L.T("Microsoft session expired. Please sign in again."));
         var refreshed = await MicrosoftAuth.RefreshAsync(acc.MsRefreshToken, ct);
         acc.AccessToken = refreshed.AccessToken;
         acc.MsRefreshToken = refreshed.MsRefreshToken;

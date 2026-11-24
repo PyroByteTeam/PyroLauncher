@@ -100,7 +100,7 @@ public class MemoryPicker : StackPanel
             Margin = new Thickness(0, 6, 0, 0),
             Text = "Any amount works, but stick to steps of 512 or 1024 MB where you can: Java's garbage collector divides " +
                    "memory into equal fixed-size regions, so round amounts map cleanly onto them, are easier to compare between " +
-                   "instances and avoid leaving odd slivers unused. Leave at least 2–4 GB for Windows.",
+                   "instances and avoid leaving odd slivers unused. Leave at least 2-4 GB for Windows.",
         };
         hint.SetResourceReference(StyleProperty, "Faint");
         _customPanel.Children.Add(hint);
@@ -140,7 +140,7 @@ public class MemoryPicker : StackPanel
             var share = (double)value / Math.Max(SystemMb, 1);
             _warning.Visibility = share >= 0.75 ? Visibility.Visible : Visibility.Collapsed;
             _warning.Text = $"⚠  {value / 1024.0:0.#} GB is {share:P0} of your {SystemMb / 1024.0:0.#} GB of memory. Windows, the launcher and other apps " +
-                            "need room too — with this much the game can stutter, freeze or crash. Most modpacks run well on 4–10 GB.";
+                            "need room too - with this much the game can stutter, freeze or crash. Most modpacks run well on 4-10 GB.";
         }
     }
 }

@@ -1,5 +1,6 @@
 <UserControl x:Class="PyroLauncher.UI.Controls.LogViewer"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:inst="clr-namespace:PyroLauncher.Instances">
     <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="4">
@@ -12,9 +13,9 @@
             </ListBox.CommandBindings>
             <ListBox.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Copy selected" Tag="&#xE8C8;" Click="CopySelected_Click"/>
-                    <MenuItem Header="Copy all" Tag="&#xE8C8;" Click="CopyAll_Click"/>
-                    <MenuItem Header="Select all" Tag="&#xE8B3;" Click="SelectAllMenu_Click"/>
+                    <MenuItem Header="{l:T 'Copy selected'}" Tag="&#xE8C8;" Click="CopySelected_Click"/>
+                    <MenuItem Header="{l:T 'Copy all'}" Tag="&#xE8C8;" Click="CopyAll_Click"/>
+                    <MenuItem Header="{l:T 'Select all'}" Tag="&#xE8B3;" Click="SelectAllMenu_Click"/>
                 </ContextMenu>
             </ListBox.ContextMenu>
             <ListBox.ItemContainerStyle>

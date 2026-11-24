@@ -46,24 +46,24 @@ public partial class ContentTabViewModel : ObservableObject
     public GridLength DetailWidth => Detail == null ? new GridLength(0) : new GridLength(1.25, GridUnitType.Star);
     public string ToggleTooltip => Type switch
     {
-        ContentType.Mod => "Load this mod on launch",
-        ContentType.ResourcePack => "Active in game",
-        _ => "Use this shader pack (only one at a time)",
+        ContentType.Mod => L.T("Load this mod on launch"),
+        ContentType.ResourcePack => L.T("Active in game"),
+        _ => L.T("Use this shader pack (only one at a time)"),
     };
     public string SearchPlaceholder => SuggestionsEnabled
-        ? $"Search Modrinth{(CurseForgeApi.HasKey ? " and CurseForge" : "")}…"
-        : $"Filter installed {Type.Display().ToLower()}…";
+        ? (CurseForgeApi.HasKey ? L.T("Search Modrinth and CurseForge…") : L.T("Search Modrinth…"))
+        : L.F("Filter installed {0}…", Type.Display().ToLower());
     public string EmptyText => Type switch
     {
-        ContentType.Mod => "No mods installed yet. Turn on suggestions to browse Modrinth and CurseForge.",
-        ContentType.ResourcePack => "No resource packs yet. Turn on suggestions to browse online.",
-        _ => "No shader packs yet. You'll need a shader mod like Iris or Oculus to use them.",
+        ContentType.Mod => L.T("No mods installed yet. Turn on suggestions to browse Modrinth and CurseForge."),
+        ContentType.ResourcePack => L.T("No resource packs yet. Turn on suggestions to browse online."),
+        _ => L.T("No shader packs yet. You'll need a shader mod like Iris or Oculus to use them."),
     };
     public string CountText => Type switch
     {
-        ContentType.Mod => $"{Installed.Count} installed · {List.EnabledCount} enabled",
-        ContentType.ResourcePack => $"{Installed.Count} installed · {List.EnabledCount} active",
-        _ => $"{Installed.Count} installed · {(List.ActiveShader != null ? "using " + List.ActiveShader : "shaders off")}",
+        ContentType.Mod => L.F("{0} installed · {1} enabled", Installed.Count, List.EnabledCount),
+        ContentType.ResourcePack => L.F("{0} installed · {1} active", Installed.Count, List.EnabledCount),
+        _ => $"{Installed.Count} installed · {(List.ActiveShader != null ? "using " + List.ActiveShader : L.T("shaders off"))}",
     };
 
     public ContentTabViewModel(Instance inst, ContentType type)
@@ -159,20 +159,20 @@ public partial class ContentTabViewModel : ObservableObject
     private async Task BulkUpdate()
     {
         var list = Checked.Where(i => i.HasUpdate).ToList();
-        if (list.Count == 0) { Dialogs.Toast("None of the selected items has a known update — run Check for updates first."); return; }
+        if (list.Count == 0) { Dialogs.Toast(L.T("None of the selected items has a known update - run Check for updates first.")); return; }
         int ok = 0;
         foreach (var item in list)
         {
-            BusyText = $"Updating {item.Name} ({ok + 1}/{list.Count})…";
+            BusyText = L.F("Updating {0} ({1}/{2})…", item.Name, ok + 1, list.Count);
             try
             {
                 await ContentService.InstallAsync(Instance, Type, item.Update!, item.Ref?.Title ?? item.Name, item.Ref?.IconUrl, item, null, CancellationToken.None);
                 ok++;
             }
-            catch (Exception ex) { Dialogs.Toast($"{item.Name}: {ex.Message}", true); }
+            catch (Exception ex) { Dialogs.Toast(L.F("{0}: {1}", item.Name, ex.Message), true); }
         }
         BusyText = null;
-        Dialogs.Toast($"Updated {ok} of {list.Count}");
+        Dialogs.Toast(L.F("Updated {0} of {1}", ok, list.Count));
         await List.RefreshAsync();
         UpdatesCount = Installed.Count(i => i.HasUpdate);
     }
@@ -182,9 +182,9 @@ public partial class ContentTabViewModel : ObservableObject
     {
         var items = Checked;
         if (items.Count == 0) return;
-        var names = string.Join("\n", items.Take(12).Select(i => "• " + i.Name)) + (items.Count > 12 ? $"\n…and {items.Count - 12} more" : "");
-        if (!await Dialogs.ConfirmAsync($"Delete {items.Count} item{(items.Count == 1 ? "" : "s")}",
-                $"These files will be deleted from the instance:\n\n{names}", "Delete", true)) return;
+        var names = string.Join("\n", items.Take(12).Select(i => "• " + i.Name)) + (items.Count > 12 ? L.F("\n…and {0} more", items.Count - 12) : "");
+        if (!await Dialogs.ConfirmAsync(L.F("Delete selected ({0})", items.Count),
+                L.F("These files will be deleted from the instance:\n\n{0}", names), L.T("Delete"), true)) return;
         int failed = 0;
         foreach (var i in items)
         {
@@ -196,7 +196,7 @@ public partial class ContentTabViewModel : ObservableObject
             }
             catch { failed++; }
         }
-        if (failed > 0) Dialogs.Toast($"{failed} file(s) could not be deleted (in use?).", true);
+        if (failed > 0) Dialogs.Toast(L.F("{0} file(s) could not be deleted (in use?).", failed), true);
         await List.RefreshAsync();
     }
 
@@ -233,7 +233,7 @@ public partial class ContentTabViewModel : ObservableObject
     [ObservableProperty] private string _statusFilter = "all";
     [ObservableProperty] private SearchSort _sort = SearchSort.Relevance;
     [ObservableProperty] private string _category = AnyCategory;
-    [ObservableProperty] private string _environment = "Any side";
+    [ObservableProperty] private string _environment = L.T("Any side");
     [ObservableProperty] private int _updatesCount;
     [ObservableProperty] private bool _isCheckingUpdates;
     [ObservableProperty] private string? _updateStatus;
@@ -241,8 +241,8 @@ public partial class ContentTabViewModel : ObservableObject
     public ObservableCollection<string> Categories { get; } = [AnyCategory];
     public List<SearchSort> Sorts { get; } = [SearchSort.Relevance, SearchSort.Downloads, SearchSort.Newest, SearchSort.Updated];
     public List<string> Environments { get; } = ["Any side", "Client", "Server"];
-    public string EnabledFilterText => Type == ContentType.Mod ? "Enabled" : "Active";
-    public string DisabledFilterText => Type == ContentType.Mod ? "Disabled" : "Inactive";
+    public string EnabledFilterText => Type == ContentType.Mod ? L.T("Enabled") : L.T("Active");
+    public string DisabledFilterText => Type == ContentType.Mod ? L.T("Disabled") : L.T("Inactive");
     private bool _categoriesLoaded;
 
     partial void OnStatusFilterChanged(string value) => InstalledView.Refresh();
@@ -286,19 +286,19 @@ public partial class ContentTabViewModel : ObservableObject
     private async Task CheckUpdates()
     {
         IsCheckingUpdates = true;
-        UpdateStatus = "Checking for updates…";
+        UpdateStatus = L.T("Checking for updates…");
         try
         {
             await ContentService.IdentifyAsync(Instance, Installed.ToList(), CancellationToken.None);
             var updates = await ContentService.CheckUpdatesAsync(Instance, Type, Installed.ToList(), CancellationToken.None);
             foreach (var i in Installed) i.Update = updates.GetValueOrDefault(i);
             UpdatesCount = updates.Count;
-            UpdateStatus = updates.Count == 0 ? "Everything is up to date." : $"{updates.Count} update{(updates.Count == 1 ? "" : "s")} available";
+            UpdateStatus = updates.Count == 0 ? L.T("Everything is up to date.") : L.F("Updates available: {0}", updates.Count);
             if (updates.Count > 0) StatusFilter = "updates";
             var unlinked = Installed.Count(i => i.Ref == null);
-            if (unlinked > 0) UpdateStatus += $" · {unlinked} file{(unlinked == 1 ? " isn't" : "s aren't")} on Modrinth/CurseForge";
+            if (unlinked > 0) UpdateStatus += " · " + L.F("Not on Modrinth or CurseForge: {0}", unlinked);
         }
-        catch (Exception ex) { UpdateStatus = $"Update check failed: {ex.Message}"; }
+        catch (Exception ex) { UpdateStatus = L.F("Update check failed: {0}", ex.Message); }
         finally { IsCheckingUpdates = false; }
     }
 
@@ -308,12 +308,12 @@ public partial class ContentTabViewModel : ObservableObject
         if (item.Update == null) return;
         try
         {
-            BusyText = $"Updating {item.Name}…";
+            BusyText = L.F("Updating {0}…", item.Name);
             await ContentService.InstallAsync(Instance, Type, item.Update, item.Ref?.Title ?? item.Name, item.Ref?.IconUrl, item, null, CancellationToken.None);
             UpdatesCount = Math.Max(0, UpdatesCount - 1);
             await List.RefreshAsync();
         }
-        catch (Exception ex) { Dialogs.Toast($"{item.Name}: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("{0}: {1}", item.Name, ex.Message), true); }
         finally { BusyText = null; }
     }
 
@@ -324,16 +324,16 @@ public partial class ContentTabViewModel : ObservableObject
         int ok = 0;
         foreach (var item in list)
         {
-            BusyText = $"Updating {item.Name} ({ok + 1}/{list.Count})…";
+            BusyText = L.F("Updating {0} ({1}/{2})…", item.Name, ok + 1, list.Count);
             try
             {
                 await ContentService.InstallAsync(Instance, Type, item.Update!, item.Ref?.Title ?? item.Name, item.Ref?.IconUrl, item, null, CancellationToken.None);
                 ok++;
             }
-            catch (Exception ex) { Dialogs.Toast($"{item.Name}: {ex.Message}", true); }
+            catch (Exception ex) { Dialogs.Toast(L.F("{0}: {1}", item.Name, ex.Message), true); }
         }
         BusyText = null;
-        Dialogs.Toast($"Updated {ok} of {list.Count}");
+        Dialogs.Toast(L.F("Updated {0} of {1}", ok, list.Count));
         UpdatesCount = 0;
         UpdateStatus = null;
         StatusFilter = "all";
@@ -427,7 +427,7 @@ public partial class ContentTabViewModel : ObservableObject
     {
         var dlg = new OpenFileDialog
         {
-            Title = $"Add {Type.Display().ToLower()}",
+            Title = L.F("Add {0}", Type.Display().ToLower()),
             Multiselect = true,
             Filter = Type == ContentType.Mod ? "Mods (*.jar)|*.jar" : "Packs (*.zip)|*.zip",
         };
@@ -444,16 +444,16 @@ public partial class ContentTabViewModel : ObservableObject
             var ext = Path.GetExtension(f).ToLowerInvariant();
             if (Type == ContentType.Mod ? ext != ".jar" : ext != ".zip") continue;
             try { File.Copy(f, Path.Combine(List.Folder, Path.GetFileName(f)), true); n++; }
-            catch (Exception ex) { Dialogs.Toast($"{Path.GetFileName(f)}: {ex.Message}", true); }
+            catch (Exception ex) { Dialogs.Toast(L.F("{0}: {1}", Path.GetFileName(f), ex.Message), true); }
         }
-        if (n > 0) Dialogs.Toast($"Added {n} file{(n == 1 ? "" : "s")}");
+        if (n > 0) Dialogs.Toast(L.F("Added files: {0}", n));
         await List.RefreshAsync();
     }
 
     [RelayCommand]
     private async Task Delete(LocalItem item)
     {
-        if (!await Dialogs.ConfirmAsync("Remove file", $"Delete \"{item.Name}\" ({item.FileName}) from this instance?", "Delete", true)) return;
+        if (!await Dialogs.ConfirmAsync(L.T("Remove file"), L.F("Delete \"{0}\" ({1}) from this instance?", item.Name, item.FileName), L.T("Delete"), true)) return;
         try
         {
             if (item.IsEnabled && Type != ContentType.Mod) item.IsEnabled = false;
@@ -461,7 +461,7 @@ public partial class ContentTabViewModel : ObservableObject
             if (Detail?.Installed == item) CloseDetail();
             await List.RefreshAsync();
         }
-        catch (Exception ex) { Dialogs.Toast($"Delete failed: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Delete failed: {0}", ex.Message), true); }
     }
 
     [RelayCommand]
@@ -499,16 +499,16 @@ public partial class ContentTabViewModel : ObservableObject
     {
         try
         {
-            BusyText = $"Installing {p.Title}…";
+            BusyText = L.F("Installing {0}…", p.Title);
             var versions = await ContentService.GetVersionsAsync(p.Source, p.Id, Type, Instance, true, CancellationToken.None);
             var v = versions.FirstOrDefault(x => x.ReleaseType == "release") ?? versions.FirstOrDefault();
             if (v == null)
             {
-                Dialogs.Toast($"{p.Title} has no version for {Instance.Config.MinecraftVersion} {Instance.LoaderText}.", true);
+                Dialogs.Toast(L.F("{0} has no version for {1} {2}.", p.Title, Instance.Config.MinecraftVersion, Instance.LoaderText), true);
                 return;
             }
             await ContentService.InstallAsync(Instance, Type, v, p.Title, p.IconUrl, null, null, CancellationToken.None);
-            Dialogs.Toast($"Installed {p.Title} {v.VersionNumber}");
+            Dialogs.Toast(L.F("Installed {0} {1}", p.Title, v.VersionNumber));
             Suggestions.Remove(p);
             await List.RefreshAsync();
         }

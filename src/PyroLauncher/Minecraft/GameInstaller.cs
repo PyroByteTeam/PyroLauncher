@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json.Nodes;
@@ -180,7 +181,7 @@ public static class GameInstaller
         if (isVirtual || mapToResources)
         {
             var target = mapToResources ? Path.Combine(gameDir, "resources") : Path.Combine(AppPaths.Assets, "virtual", id);
-            progress?.Report(new TaskProgress("Copying legacy assets…"));
+            progress?.Report(new TaskProgress(L.T("Copying legacy assets…")));
             await Task.Run(() =>
             {
                 foreach (var (name, objPath) in mapping)

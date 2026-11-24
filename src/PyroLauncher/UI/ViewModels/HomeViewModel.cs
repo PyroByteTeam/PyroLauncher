@@ -14,7 +14,7 @@ public partial class CategoryGroup : ObservableObject
     public bool IsUser => Key != null;
     public ObservableCollection<Instance> Items { get; } = [];
     [ObservableProperty] private bool _isExpanded = true;
-    public string CountText => Items.Count == 1 ? "1 instance" : $"{Items.Count} instances";
+    public string CountText => Items.Count == 1 ? L.T("1 instance") : L.F("{0} instances", Items.Count);
 }
 
 public partial class HomeViewModel : ObservableObject
@@ -73,7 +73,7 @@ public partial class HomeViewModel : ObservableObject
         var rest = all.Where(i => i.Config.Category == null || !cats.Contains(i.Config.Category)).ToList();
         if (rest.Count > 0 || (Groups.Count == 0 && InstanceManager.Instances.Count > 0))
         {
-            var g = new CategoryGroup { Name = cats.Count == 0 ? "All instances" : "Uncategorized", Key = null, IsExpanded = _expanded.GetValueOrDefault("", true) };
+            var g = new CategoryGroup { Name = cats.Count == 0 ? L.T("All instances") : L.T("Uncategorized"), Key = null, IsExpanded = _expanded.GetValueOrDefault("", true) };
             foreach (var i in rest) g.Items.Add(i);
             Groups.Add(g);
         }
@@ -86,7 +86,7 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task NewCategory()
     {
-        var name = await Dialogs.PromptAsync("New category", "Category name", "", "Create");
+        var name = await Dialogs.PromptAsync(L.T("New category"), L.T("Category name"), "", L.T("Create"));
         if (name != null) InstanceManager.AddCategory(name);
     }
 
@@ -94,7 +94,7 @@ public partial class HomeViewModel : ObservableObject
     private async Task RenameCategory(CategoryGroup g)
     {
         if (g.Key == null) return;
-        var name = await Dialogs.PromptAsync("Rename category", "Category name", g.Name);
+        var name = await Dialogs.PromptAsync(L.T("Rename category"), L.T("Category name"), g.Name);
         if (name != null && name != g.Name && !SettingsService.Current.Categories.Contains(name))
             InstanceManager.RenameCategory(g.Key, name);
     }
@@ -103,7 +103,7 @@ public partial class HomeViewModel : ObservableObject
     private async Task DeleteCategory(CategoryGroup g)
     {
         if (g.Key == null) return;
-        if (await Dialogs.ConfirmAsync("Delete category", $"Delete \"{g.Name}\"? Its instances will move to Uncategorized; nothing is deleted from disk.", "Delete category"))
+        if (await Dialogs.ConfirmAsync(L.T("Delete category"), L.F("Delete \"{0}\"? Its instances will move to Uncategorized; nothing is deleted from disk.", g.Name), L.T("Delete category")))
             InstanceManager.DeleteCategory(g.Key);
     }
 
@@ -113,22 +113,21 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task Launch(Instance inst)
     {
-        if (inst.IsRunning || inst.IsBusy) LaunchService.Stop(inst);
-        else await LaunchService.LaunchAsync(inst);
+        await LaunchService.PrimaryActionAsync(inst);
     }
 
     [RelayCommand]
     private async Task MoveToCategory(Instance inst)
     {
-        const string none = "— No category —";
+        const string none = "- No category -";
         var options = SettingsService.Current.Categories.ToList();
         options.Add(none);
         options.Add("+ New category…");
-        var choice = await Dialogs.ChooseAsync("Move to category", $"Choose a category for \"{inst.Name}\".", options);
+        var choice = await Dialogs.ChooseAsync(L.T("Move to category"), L.F("Choose a category for \"{0}\".", inst.Name), options);
         if (choice == null) return;
         if (choice == "+ New category…")
         {
-            choice = await Dialogs.PromptAsync("New category", "Category name", "", "Create");
+            choice = await Dialogs.PromptAsync(L.T("New category"), L.T("Category name"), "", L.T("Create"));
             if (choice == null) return;
             InstanceManager.AddCategory(choice);
         }
@@ -147,11 +146,11 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task Delete(Instance inst)
     {
-        if (inst.IsRunning || inst.IsBusy) { Dialogs.Toast("Stop the instance before deleting it.", true); return; }
-        if (!await Dialogs.ConfirmAsync("Delete instance",
-                $"Permanently delete \"{inst.Name}\" including its worlds, mods and screenshots? This cannot be undone.", "Delete", true))
+        if (inst.IsRunning || inst.IsBusy) { Dialogs.Toast(L.T("Stop the instance before deleting it."), true); return; }
+        if (!await Dialogs.ConfirmAsync(L.T("Delete instance"),
+                L.F("Permanently delete \"{0}\" including its worlds, mods and screenshots? This cannot be undone.", inst.Name), L.T("Delete"), true))
             return;
         try { InstanceManager.Delete(inst); }
-        catch (Exception ex) { Dialogs.Toast($"Delete failed: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Delete failed: {0}", ex.Message), true); }
     }
 }

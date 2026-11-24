@@ -1,5 +1,6 @@
 <UserControl x:Class="PyroLauncher.UI.Views.ChoiceDialogView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="Self">
     <Border Style="{StaticResource DialogCard}" Width="420">
@@ -16,7 +17,7 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-            <Button Content="Cancel" Command="{Binding CancelCommand}" HorizontalAlignment="Right" Margin="0,16,0,0" IsCancel="True"/>
+            <Button Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}" HorizontalAlignment="Right" Margin="0,16,0,0" IsCancel="True"/>
         </StackPanel>
     </Border>
 </UserControl>

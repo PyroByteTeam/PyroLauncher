@@ -15,7 +15,7 @@ public partial class InstanceSettingsViewModel : ObservableObject
     private static GameSettings G => SettingsService.Current.Game;
 
     [ObservableProperty] private string _name;
-    public List<string> Categories { get; } = ["— None —", .. SettingsService.Current.Categories];
+    public List<string> Categories { get; } = ["- None -", .. SettingsService.Current.Categories];
     [ObservableProperty] private string _category;
 
     public ObservableCollection<string> LoaderVersions { get; } = [];
@@ -36,8 +36,12 @@ public partial class InstanceSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _fullscreen;
     [ObservableProperty] private bool _isDirty;
 
+    public List<Content.ContentPreset> Presets => SettingsService.Current.Presets;
+    public bool HasPresets => Presets.Count > 0;
+    [ObservableProperty] private Content.ContentPreset? _selectedPreset;
+
     public string DefaultJava => string.IsNullOrWhiteSpace(G.JavaPath) ? "Default: automatic (Adoptium)" : $"Default: {G.JavaPath}";
-    public string DefaultMemory => $"Default: {G.MinMemoryMb} – {G.MaxMemoryMb} MB";
+    public string DefaultMemory => $"Default: {G.MinMemoryMb} - {G.MaxMemoryMb} MB";
     public string DefaultJvm => string.IsNullOrWhiteSpace(G.JvmArgs) ? "Default: none" : $"Default: {G.JvmArgs}";
     public string DefaultResolution => $"Default: {G.WindowWidth} × {G.WindowHeight}";
     public string DefaultFullscreen => $"Default: {(G.Fullscreen == true ? "on" : "off")}";
@@ -67,6 +71,7 @@ public partial class InstanceSettingsViewModel : ObservableObject
         _useFullscreen = o.Fullscreen != null;
         _fullscreen = o.Fullscreen ?? G.Fullscreen ?? false;
         if (c.LoaderVersion != null) LoaderVersions.Add(c.LoaderVersion);
+        _selectedPreset = Presets.FirstOrDefault();
         if (HasLoader) _ = LoadLoaderVersionsAsync();
     }
 
@@ -88,7 +93,7 @@ public partial class InstanceSettingsViewModel : ObservableObject
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (e.PropertyName != nameof(IsDirty)) IsDirty = true;
+        if (e.PropertyName is not (nameof(IsDirty) or nameof(SelectedPreset))) IsDirty = true;
     }
 
     [RelayCommand]
@@ -96,7 +101,7 @@ public partial class InstanceSettingsViewModel : ObservableObject
     {
         if (Instance.IsRunning || Instance.IsBusy)
         {
-            Dialogs.Toast("Settings will apply on the next launch.");
+            Dialogs.Toast(L.T("Settings will apply on the next launch."));
         }
         var c = Instance.Config;
         var o = c.Overrides;
@@ -114,13 +119,13 @@ public partial class InstanceSettingsViewModel : ObservableObject
         o.WindowHeight = UseResolution ? Height : null;
         o.Fullscreen = UseFullscreen ? Fullscreen : null;
 
-        if (o.MinMemoryMb > o.MaxMemoryMb) { Dialogs.Toast("Minimum memory can't be larger than maximum.", true); return; }
+        if (o.MinMemoryMb > o.MaxMemoryMb) { Dialogs.Toast(L.T("Minimum memory can't be larger than maximum."), true); return; }
 
         Instance.Save();
         Instance.Refresh();
         InstanceManager.NotifyChanged();
         IsDirty = false;
-        Dialogs.Toast("Instance settings saved");
+        Dialogs.Toast(L.T("Instance settings saved"));
     }
 
     [RelayCommand]
@@ -153,17 +158,35 @@ public partial class InstanceSettingsViewModel : ObservableObject
     private void OpenFolder() => Dialogs.OpenPath(Instance.Dir);
 
     [RelayCommand]
+    private void Export() => Dialogs.Show(new ExportViewModel(Instance));
+
+    [RelayCommand]
+    private void ApplyPreset()
+    {
+        var p = SelectedPreset ?? Presets.FirstOrDefault();
+        if (p == null) { Dialogs.Toast(L.T("Create a preset in the Presets tab first."), true); return; }
+        if (p.Items.Count == 0) { Dialogs.Toast(L.F("The preset \"{0}\" is empty.", p.Name), true); return; }
+        MainViewModel.Instance.OpenPresetsApply(Instance, p);
+    }
+
+    [RelayCommand]
+    private void ManagePresets()
+    {
+        MainViewModel.Instance.Nav = "presets";
+    }
+
+    [RelayCommand]
     private async Task Delete()
     {
-        if (Instance.IsRunning || Instance.IsBusy) { Dialogs.Toast("Stop the instance before deleting it.", true); return; }
-        if (!await Dialogs.ConfirmAsync("Delete instance",
-                $"Permanently delete \"{Instance.Name}\" including its worlds, mods and screenshots? This cannot be undone.", "Delete", true))
+        if (Instance.IsRunning || Instance.IsBusy) { Dialogs.Toast(L.T("Stop the instance before deleting it."), true); return; }
+        if (!await Dialogs.ConfirmAsync(L.T("Delete instance"),
+                L.F("Permanently delete \"{0}\" including its worlds, mods and screenshots? This cannot be undone.", Instance.Name), L.T("Delete"), true))
             return;
         try
         {
             InstanceManager.Delete(Instance);
             MainViewModel.Instance.GoHomeCommand.Execute(null);
         }
-        catch (Exception ex) { Dialogs.Toast($"Delete failed: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Delete failed: {0}", ex.Message), true); }
     }
 }

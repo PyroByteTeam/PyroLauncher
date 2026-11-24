@@ -22,7 +22,10 @@ public static class InstanceManager
             var cfg = JsonUtil.Load<InstanceConfig>(Path.Combine(dir, "instance.json"));
             if (cfg == null) continue;
             cfg.Overrides ??= new GameSettings();
-            Instances.Add(new Instance(dir, cfg));
+            var inst = new Instance(dir, cfg);
+            // Instances launched before the Install button existed are already installed.
+            if (cfg.PreparedKey == null && cfg.LastPlayed != null) cfg.PreparedKey = inst.CurrentKey;
+            Instances.Add(inst);
         }
         NotifyChanged();
     }

@@ -1,0 +1,230 @@
+<UserControl x:Class="PyroLauncher.UI.Views.DiscoverView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:PyroLauncher.UI.Controls"
+             x:Name="Self">
+    <UserControl.Resources>
+        <Style x:Key="PlatformBadge" TargetType="Border" BasedOn="{StaticResource Badge}">
+            <Setter Property="Background" Value="#E6000000"/>
+            <Setter Property="BorderBrush" Value="#33FFFFFF"/>
+        </Style>
+
+        <!-- Grid card -->
+        <DataTemplate x:Key="GridItem">
+            <Button Command="{Binding DataContext.OpenCommand, ElementName=Self}" CommandParameter="{Binding}" Width="268" Margin="0,0,16,16" Padding="0" Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Style="{StaticResource Card}">
+                            <StackPanel>
+                                <Grid Height="140">
+                                    <Border CornerRadius="11,11,0,0" Background="{StaticResource Bg3}" ClipToBounds="True">
+                                        <Grid>
+                                            <!-- blurred fill + the whole image on top, so banners and square icons are never cropped by the title -->
+                                            <Image c:RemoteImage.DecodeWidth="200" c:RemoteImage.Url="{Binding BackdropUrl}" Stretch="UniformToFill" Opacity="0.35">
+                                                <Image.Effect><BlurEffect Radius="24"/></Image.Effect>
+                                            </Image>
+                                            <Image c:RemoteImage.DecodeWidth="1000" c:RemoteImage.Url="{Binding ImageUrl}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
+                                                   Visibility="{Binding HasBanner, Converter={StaticResource VisibleIf}}"/>
+                                            <!-- no gallery image: show the icon at its own size instead of stretching a tiny picture -->
+                                            <Border Width="84" Height="84" CornerRadius="16" ClipToBounds="True" Background="{StaticResource Bg3}"
+                                                    Visibility="{Binding HasBanner, Converter={StaticResource VisibleIf}, ConverterParameter=invert}">
+                                                <Image c:RemoteImage.DecodeWidth="192" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                    <Border Style="{StaticResource PlatformBadge}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10">
+                                        <TextBlock Text="{Binding SourceText}" Style="{StaticResource BadgeText}" Foreground="White"/>
+                                    </Border>
+                                </Grid>
+                                <DockPanel Margin="14,12,14,0">
+                                    <Border Width="40" Height="40" CornerRadius="9" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0" DockPanel.Dock="Left">
+                                        <Grid>
+                                            <TextBlock Text="{Binding Initials}" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Image c:RemoteImage.DecodeWidth="96" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                        </Grid>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}"/>
+                                        <TextBlock Style="{StaticResource Faint}" TextTrimming="CharacterEllipsis"><Run Text="{l:T 'by'}"/> <Run Text="{Binding Author, Mode=OneWay}"/></TextBlock>
+                                    </StackPanel>
+                                </DockPanel>
+                                <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                           Height="38" Margin="14,8,14,0" ToolTip="{Binding Description}"/>
+                                <WrapPanel Margin="14,8,14,0">
+                                    <TextBlock Text="{Binding GameVersionsText}" Style="{StaticResource Faint}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{Binding LoadersText}" Style="{StaticResource Faint}"/>
+                                </WrapPanel>
+                                <Border BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Margin="0,10,0,0" Padding="14,9">
+                                    <UniformGrid Columns="3">
+                                        <StackPanel ToolTip="{l:T 'Downloads'}">
+                                            <TextBlock Text="{l:T 'DOWNLOADS'}" Style="{StaticResource Overline}" FontSize="9.5"/>
+                                            <TextBlock Text="{Binding DownloadsText}" FontWeight="SemiBold" FontSize="12"/>
+                                        </StackPanel>
+                                        <StackPanel ToolTip="{l:T 'Last update'}">
+                                            <TextBlock Text="{l:T 'UPDATED'}" Style="{StaticResource Overline}" FontSize="9.5"/>
+                                            <TextBlock Text="{Binding UpdatedText}" FontWeight="SemiBold" FontSize="12"/>
+                                        </StackPanel>
+                                        <StackPanel ToolTip="{l:T 'First release'}">
+                                            <TextBlock Text="{l:T 'RELEASED'}" Style="{StaticResource Overline}" FontSize="9.5"/>
+                                            <TextBlock Text="{Binding CreatedText}" FontWeight="SemiBold" FontSize="12"/>
+                                        </StackPanel>
+                                    </UniformGrid>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="BorderBrush" Value="{StaticResource Fg3}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </DataTemplate>
+
+        <!-- List row -->
+        <DataTemplate x:Key="ListItem">
+            <Button Command="{Binding DataContext.OpenCommand, ElementName=Self}" CommandParameter="{Binding}" Margin="0,0,0,10" Padding="0" Cursor="Hand" HorizontalContentAlignment="Stretch">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="b" Style="{StaticResource Card}" Padding="14">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="72" Height="72" CornerRadius="12" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,16,0" VerticalAlignment="Top">
+                                    <Grid>
+                                        <TextBlock Text="{Binding Initials}" FontWeight="Bold" FontSize="18" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Image c:RemoteImage.DecodeWidth="144" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                    </Grid>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Style="{StaticResource Faint}" Margin="10,0,0,0" VerticalAlignment="Bottom"><Run Text="{l:T 'by'}"/> <Run Text="{Binding Author, Mode=OneWay}"/></TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                                    <WrapPanel Margin="0,8,0,0">
+                                        <Border Style="{StaticResource Badge}" Margin="0,0,6,0"><TextBlock Text="{Binding SourceText}" Style="{StaticResource BadgeText}"/></Border>
+                                        <Border Style="{StaticResource Badge}" Margin="0,0,6,0" Visibility="{Binding GameVersionsText, Converter={StaticResource VisibleIf}}">
+                                            <TextBlock Text="{Binding GameVersionsText}" Style="{StaticResource BadgeText}"/>
+                                        </Border>
+                                        <Border Style="{StaticResource Badge}" Margin="0,0,6,0" Visibility="{Binding LoadersText, Converter={StaticResource VisibleIf}}">
+                                            <TextBlock Text="{Binding LoadersText}" Style="{StaticResource BadgeText}"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding CategoriesText}" Style="{StaticResource Faint}" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="20,0,4,0" VerticalAlignment="Center" MinWidth="170">
+                                    <DockPanel Margin="0,0,0,4" ToolTip="{l:T 'Downloads'}">
+                                        <TextBlock Text="&#xE896;" FontFamily="{StaticResource IconFont}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,2,8,0"/>
+                                        <TextBlock Text="{Binding DownloadsText}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{l:T 'downloads'}" Style="{StaticResource Faint}" Margin="5,1,0,0"/>
+                                    </DockPanel>
+                                    <DockPanel Margin="0,0,0,4" ToolTip="{l:T 'Last update'}">
+                                        <TextBlock Text="&#xE895;" FontFamily="{StaticResource IconFont}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,2,8,0"/>
+                                        <TextBlock Text="{l:T 'Updated'}" Style="{StaticResource Faint}" Margin="0,1,5,0"/>
+                                        <TextBlock Text="{Binding UpdatedText}"/>
+                                    </DockPanel>
+                                    <DockPanel ToolTip="{l:T 'First release'}">
+                                        <TextBlock Text="&#xE787;" FontFamily="{StaticResource IconFont}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,2,8,0"/>
+                                        <TextBlock Text="{l:T 'Released'}" Style="{StaticResource Faint}" Margin="0,1,5,0"/>
+                                        <TextBlock Text="{Binding CreatedText}"/>
+                                    </DockPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="b" Property="BorderBrush" Value="{StaticResource Fg3}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Margin="36,0,20,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="0,0,16,18">
+            <TextBlock Text="{l:T 'Discover'}" Style="{StaticResource H1}"/>
+            <TextBlock Text="{l:T 'Find modpacks on Modrinth and CurseForge and install them as new instances.'}" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Search + platform -->
+        <DockPanel Grid.Row="1" Margin="0,0,16,10">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center">
+                <RadioButton Style="{StaticResource SegmentButton}" Content="{l:T 'All'}" Padding="14,7" Margin="0,0,6,0" GroupName="platform"
+                             IsChecked="{Binding Platform, Converter={StaticResource Eq}, ConverterParameter=All}"/>
+                <RadioButton Style="{StaticResource SegmentButton}" Content="{l:T 'Modrinth'}" Padding="14,7" Margin="0,0,6,0" GroupName="platform"
+                             IsChecked="{Binding Platform, Converter={StaticResource Eq}, ConverterParameter=Modrinth}"/>
+                <RadioButton Style="{StaticResource SegmentButton}" Content="{l:T 'CurseForge'}" Padding="14,7" Margin="0" GroupName="platform"
+                             IsChecked="{Binding Platform, Converter={StaticResource Eq}, ConverterParameter=CurseForge}"/>
+            </StackPanel>
+            <Grid>
+                <TextBox Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" Tag="{l:T 'Search modpacks'}" Padding="34,9,10,9" FontSize="14"/>
+                <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" Foreground="{StaticResource Fg3}" FontSize="13"
+                           VerticalAlignment="Center" Margin="13,0,0,0" IsHitTestVisible="False"/>
+            </Grid>
+        </DockPanel>
+
+        <!-- Filters -->
+        <DockPanel Grid.Row="2" Margin="0,0,16,14">
+            <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Command="{Binding ClearFiltersCommand}" Padding="10,6" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE894;" FontFamily="{StaticResource IconFont}" FontSize="11" Margin="0,1,7,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{l:T 'Reset filters'}"/>
+                </StackPanel>
+            </Button>
+            <WrapPanel>
+                <ComboBox ItemsSource="{Binding GameVersions}" SelectedItem="{Binding GameVersion}" Width="160" Margin="0,0,8,0" ToolTip="{l:T 'Minecraft version'}"/>
+                <ComboBox ItemsSource="{Binding Loaders}" SelectedItem="{Binding Loader}" Width="175" Margin="0,0,8,0" ToolTip="{l:T 'Mod loader'}"/>
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}" Width="180" Margin="0,0,8,0" ToolTip="{l:T 'Category'}"/>
+                <ComboBox ItemsSource="{Binding Sorts}" SelectedItem="{Binding Sort}" Width="200" Margin="0,0,8,0" ToolTip="{l:T 'Sort by'}"/>
+            </WrapPanel>
+        </DockPanel>
+
+        <Grid Grid.Row="3">
+            <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" Padding="0,0,16,24" ScrollChanged="Scroller_ScrollChanged">
+                <StackPanel>
+                    <Border Background="{StaticResource Bg2}" CornerRadius="8" Padding="12,8" Margin="0,0,0,12"
+                            Visibility="{Binding Warning, Converter={StaticResource VisibleIf}}">
+                        <DockPanel>
+                            <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}" Foreground="{StaticResource Fg2}" Margin="0,1,10,0"/>
+                            <TextBlock Text="{Binding Warning}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap"/>
+                        </DockPanel>
+                    </Border>
+                    <ProgressBar IsIndeterminate="True" Margin="0,0,0,12" Visibility="{Binding IsLoading, Converter={StaticResource VisibleIf}}"/>
+                    <TextBlock Text="{Binding Error}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" Visibility="{Binding Error, Converter={StaticResource VisibleIf}}"/>
+                    <TextBlock Text="{l:T 'No modpacks match your search.'}" Style="{StaticResource Muted}" Margin="0,20,0,0" HorizontalAlignment="Center"
+                               Visibility="{Binding IsEmpty, Converter={StaticResource VisibleIf}}"/>
+
+                    <!-- grid -->
+                    <ItemsControl ItemsSource="{Binding Results}" ItemTemplate="{StaticResource GridItem}"
+                                  Visibility="{Binding IsGrid, Converter={StaticResource VisibleIf}}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <!-- list -->
+                    <ItemsControl ItemsSource="{Binding Results}" ItemTemplate="{StaticResource ListItem}"
+                                  Visibility="{Binding IsGrid, Converter={StaticResource VisibleIf}, ConverterParameter=invert}"/>
+
+                    <Button Content="{l:T 'Load more'}" Command="{Binding LoadMoreCommand}" HorizontalAlignment="Center" Margin="0,6,0,0" Padding="20,8"
+                            Visibility="{Binding CanLoadMore, Converter={StaticResource VisibleIf}}"/>
+                    <ProgressBar IsIndeterminate="True" Width="200" Margin="0,10,0,0" Visibility="{Binding IsLoadingMore, Converter={StaticResource VisibleIf}}"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

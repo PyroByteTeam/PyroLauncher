@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.IO;
 using System.Text.Json.Nodes;
 using PyroLauncher.Core;
@@ -54,7 +55,7 @@ public static class MojangMeta
         if (File.Exists(path)) return path;
         var versions = await GetVersionsAsync(ct);
         var info = versions.FirstOrDefault(v => v.Id == id)
-                   ?? throw new InvalidOperationException($"Minecraft version {id} was not found in the version manifest.");
+                   ?? throw new InvalidOperationException(L.F("Minecraft version {0} was not found in the version manifest.", id));
         await Downloader.DownloadOneAsync(new DownloadItem(info.Url, path, info.Sha1), ct);
         return path;
     }

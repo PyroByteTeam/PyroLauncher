@@ -30,8 +30,8 @@ public partial class NewInstanceViewModel : ObservableObject
     [ObservableProperty] private string? _loaderMessage;
     [ObservableProperty] private bool _loadingVersions = true;
 
-    public List<string> Categories { get; } = ["— None —", .. SettingsService.Current.Categories];
-    [ObservableProperty] private string _category = "— None —";
+    public List<string> Categories { get; } = ["- None -", .. SettingsService.Current.Categories];
+    [ObservableProperty] private string _category = L.T("- None -");
 
     // ---- import
     [ObservableProperty] private string? _importPath;
@@ -45,8 +45,8 @@ public partial class NewInstanceViewModel : ObservableObject
     [ObservableProperty] private double _progress = -1;
 
     public bool IsVanilla => Loader == ModLoader.Vanilla;
-    public string NamePlaceholder => SelectedVersion == null ? "Instance name" :
-        Loader == ModLoader.Vanilla ? $"Minecraft {SelectedVersion.Id}" : $"{Loader} {SelectedVersion.Id}";
+    public string NamePlaceholder => SelectedVersion == null ? L.T("Instance name") :
+        Loader == ModLoader.Vanilla ? L.F("Minecraft {0}", SelectedVersion.Id) : L.F("{0} {1}", Loader, SelectedVersion.Id);
 
     public NewInstanceViewModel()
     {
@@ -62,7 +62,7 @@ public partial class NewInstanceViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Dialogs.Toast($"Could not load Minecraft versions: {ex.Message}", true);
+            Dialogs.Toast(L.F("Could not load Minecraft versions: {0}", ex.Message), true);
         }
         finally { LoadingVersions = false; }
     }
@@ -128,12 +128,12 @@ public partial class NewInstanceViewModel : ObservableObject
             if (cts.IsCancellationRequested) return;
             foreach (var v in list) LoaderVersions.Add(v);
             SelectedLoaderVersion = LoaderVersions.FirstOrDefault();
-            if (LoaderVersions.Count == 0) LoaderMessage = $"{Loader} is not available for Minecraft {SelectedVersion.Id}.";
+            if (LoaderVersions.Count == 0) LoaderMessage = L.F("{0} is not available for Minecraft {1}.", Loader, SelectedVersion.Id);
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            if (!cts.IsCancellationRequested) LoaderMessage = $"Could not load {Loader} versions: {ex.Message}";
+            if (!cts.IsCancellationRequested) LoaderMessage = L.F("Could not load {0} versions: {1}", Loader, ex.Message);
         }
         finally
         {
@@ -152,7 +152,7 @@ public partial class NewInstanceViewModel : ObservableObject
         var name = string.IsNullOrWhiteSpace(Name) ? NamePlaceholder : Name.Trim();
         var inst = InstanceManager.Create(name, SelectedVersion.Id, Loader, SelectedLoaderVersion, CategoryValue);
         Dialogs.Close(this);
-        Dialogs.Toast($"Created \"{inst.Name}\"");
+        Dialogs.Toast(L.F("Created \"{0}\"", inst.Name));
         MainViewModel.Instance.OpenInstance(inst);
     }
 
@@ -163,8 +163,8 @@ public partial class NewInstanceViewModel : ObservableObject
     {
         var dlg = new OpenFileDialog
         {
-            Title = "Import modpack",
-            Filter = "Modpacks (*.mrpack;*.zip)|*.mrpack;*.zip|All files (*.*)|*.*",
+            Title = L.T("Import modpack"),
+            Filter = "Modpacks (*.mrpack;*.zip;*.pyropack)|*.mrpack;*.zip;*.pyropack|All files (*.*)|*.*",
         };
         if (dlg.ShowDialog() != true) return;
         SetImportFile(dlg.FileName);
@@ -202,13 +202,11 @@ public partial class NewInstanceViewModel : ObservableObject
             MainViewModel.Instance.OpenInstance(result.Instance);
             if (result.SkippedFiles.Count > 0)
             {
-                await Dialogs.ConfirmAsync("Some files need a manual download",
-                    "These mods don't allow third-party downloads. Download them from CurseForge and place them in the instance's mods folder:\n\n" +
-                    string.Join("\n", result.SkippedFiles), "OK");
+                Dialogs.Show(new ManualDownloadsViewModel(result.Instance, result.SkippedFiles));
             }
-            else Dialogs.Toast($"Imported \"{result.Instance.Name}\"");
+            else Dialogs.Toast(L.F("Imported \"{0}\"", result.Instance.Name));
         }
-        catch (OperationCanceledException) { Status = "Cancelled"; }
+        catch (OperationCanceledException) { Status = L.T("Cancelled"); }
         catch (Exception ex)
         {
             Log.Error("Import failed", ex);

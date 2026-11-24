@@ -16,11 +16,8 @@ public static class ModrinthApi
         SearchFilters? filters = null)
     {
         filters ??= new SearchFilters();
-        var facets = new JsonArray
-        {
-            new JsonArray($"project_type:{type.ModrinthType()}"),
-            new JsonArray($"versions:{mc}"),
-        };
+        var facets = new JsonArray { new JsonArray($"project_type:{type.ModrinthType()}") };
+        if (!string.IsNullOrEmpty(mc)) facets.Add(new JsonArray($"versions:{mc}"));
         if (type == ContentType.Mod && loader != ModLoader.Vanilla)
             facets.Add(new JsonArray($"categories:{loader.LoaderSlug()}"));
         if (!string.IsNullOrEmpty(filters.Category))
@@ -84,7 +81,7 @@ public static class ModrinthApi
             d.Author = owner?.Obj("user").Str("username") ?? "";
         }
         catch { /* not critical */ }
-        // Custom SPDX refs look like "LicenseRef-Polyform-Shield-1.0.0" — make them readable.
+        // Custom SPDX refs look like "LicenseRef-Polyform-Shield-1.0.0" - make them readable.
         if (d.License.StartsWith("LicenseRef-", StringComparison.OrdinalIgnoreCase))
             d.License = d.License["LicenseRef-".Length..].Replace('-', ' ');
         return d;
@@ -153,6 +150,8 @@ public static class ModrinthApi
                 .Where(dep => dep.Str("project_id") != null)
                 .Select(dep => new Dependency(dep.Str("project_id")!, dep.Str("version_id"), dep.Str("dependency_type") == "required", dep.Str("dependency_type") ?? "required"))
                 .ToList(),
+            ExtraFiles = v.Arr("files").Where(f => f != file && f.Str("url") != null)
+                .Select(f => new GalleryImage(f.Str("url")!, f.Str("filename"), null)).ToList(),
         };
     }
 

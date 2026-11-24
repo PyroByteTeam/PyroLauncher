@@ -1,5 +1,6 @@
 <UserControl x:Class="PyroLauncher.UI.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:PyroLauncher.UI.Controls"
              x:Name="Self">
@@ -34,7 +35,7 @@
         </Style>
 
         <StackPanel x:Key="PreviewTopNav" x:Shared="False">
-            <TextBlock Text="Top navigation" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock Text="{l:T 'Top navigation'}" FontWeight="SemiBold" Margin="0,0,0,6"/>
             <Border Style="{StaticResource MockFrame}">
                 <StackPanel>
                     <Border Style="{StaticResource MockBar}" Width="90" Height="8" Background="{StaticResource MockHi}"/>
@@ -55,11 +56,11 @@
                     <Border Style="{StaticResource MockCard}" Height="16" Margin="0"/>
                 </StackPanel>
             </Border>
-            <TextBlock Text="Sections are tabs across the top of the instance page." Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+            <TextBlock Text="{l:T 'Sections are tabs across the top of the instance page.'}" Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
         </StackPanel>
 
         <StackPanel x:Key="PreviewGridMenu" x:Shared="False">
-            <TextBlock Text="Grid" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock Text="{l:T 'Grid'}" FontWeight="SemiBold" Margin="0,0,0,6"/>
             <Border Style="{StaticResource MockFrame}">
                 <StackPanel>
                     <Border Style="{StaticResource MockBar}" Width="90" Height="8" Background="{StaticResource MockHi}" Margin="0,0,0,10"/>
@@ -73,11 +74,11 @@
                     </UniformGrid>
                 </StackPanel>
             </Border>
-            <TextBlock Text="An overview of section cards; drag them to rearrange." Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+            <TextBlock Text="{l:T 'An overview of section cards; drag them to rearrange.'}" Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
         </StackPanel>
 
         <StackPanel x:Key="PreviewList" x:Shared="False">
-            <TextBlock Text="List" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock Text="{l:T 'List'}" FontWeight="SemiBold" Margin="0,0,0,6"/>
             <Border Style="{StaticResource MockFrame}">
                 <StackPanel>
                     <Border Style="{StaticResource MockCard}" Height="22" Margin="0,0,0,6"><StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center"><Border Width="12" Height="7" CornerRadius="3.5" Background="{StaticResource MockHi}" Margin="0,0,6,0"/><Border Width="12" Height="12" CornerRadius="2" Background="#FF6A6A6A" Margin="0,0,6,0"/><Border Style="{StaticResource MockBar}" Width="80"/></StackPanel></Border>
@@ -86,11 +87,11 @@
                     <Border Style="{StaticResource MockCard}" Height="22" Margin="0,0,0,6"><StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center"><Border Width="12" Height="7" CornerRadius="3.5" Background="{StaticResource MockHi}" Margin="0,0,6,0"/><Border Width="12" Height="12" CornerRadius="2" Background="#FF6A6A6A" Margin="0,0,6,0"/><Border Style="{StaticResource MockBar}" Width="96"/></StackPanel></Border>
                 </StackPanel>
             </Border>
-            <TextBlock Text="Detailed rows with switch, name, version and source." Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+            <TextBlock Text="{l:T 'Detailed rows with switch, name, version and source.'}" Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
         </StackPanel>
 
         <StackPanel x:Key="PreviewGridList" x:Shared="False">
-            <TextBlock Text="Grid" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock Text="{l:T 'Grid'}" FontWeight="SemiBold" Margin="0,0,0,6"/>
             <Border Style="{StaticResource MockFrame}">
                 <UniformGrid Columns="6" Rows="3">
                     <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
@@ -109,7 +110,34 @@
                     <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
                 </UniformGrid>
             </Border>
-            <TextBlock Text="Compact icon tiles (or two letters when there's no icon)." Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+            <TextBlock Text="{l:T 'Compact icon tiles (or two letters when there\'s no icon).'}" Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel x:Key="PreviewDiscoverList" x:Shared="False">
+            <TextBlock Text="{l:T 'List'}" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <Border Style="{StaticResource MockFrame}">
+                <StackPanel>
+                    <Border Style="{StaticResource MockCard}" Height="38" Margin="0,0,0,6"><DockPanel Margin="5"><Border Width="26" Height="26" CornerRadius="4" Background="#FF6A6A6A" Margin="0,0,7,0"/><StackPanel DockPanel.Dock="Right" Margin="6,2,0,0"><Border Style="{StaticResource MockBar}" Width="26" Height="4" Margin="0,0,0,4"/><Border Style="{StaticResource MockBar}" Width="20" Height="4"/></StackPanel><StackPanel><Border Style="{StaticResource MockBar}" Width="70" Background="{StaticResource MockHi}" Margin="0,2,0,5"/><Border Style="{StaticResource MockBar}" Width="100" Height="4"/></StackPanel></DockPanel></Border>
+                    <Border Style="{StaticResource MockCard}" Height="38" Margin="0,0,0,6"><DockPanel Margin="5"><Border Width="26" Height="26" CornerRadius="4" Background="#FF8A8A8A" Margin="0,0,7,0"/><StackPanel DockPanel.Dock="Right" Margin="6,2,0,0"><Border Style="{StaticResource MockBar}" Width="26" Height="4" Margin="0,0,0,4"/><Border Style="{StaticResource MockBar}" Width="20" Height="4"/></StackPanel><StackPanel><Border Style="{StaticResource MockBar}" Width="54" Background="{StaticResource MockHi}" Margin="0,2,0,5"/><Border Style="{StaticResource MockBar}" Width="88" Height="4"/></StackPanel></DockPanel></Border>
+                    <Border Style="{StaticResource MockCard}" Height="38" Margin="0"><DockPanel Margin="5"><Border Width="26" Height="26" CornerRadius="4" Background="#FF5A5A5A" Margin="0,0,7,0"/><StackPanel DockPanel.Dock="Right" Margin="6,2,0,0"><Border Style="{StaticResource MockBar}" Width="26" Height="4" Margin="0,0,0,4"/><Border Style="{StaticResource MockBar}" Width="20" Height="4"/></StackPanel><StackPanel><Border Style="{StaticResource MockBar}" Width="80" Background="{StaticResource MockHi}" Margin="0,2,0,5"/><Border Style="{StaticResource MockBar}" Width="94" Height="4"/></StackPanel></DockPanel></Border>
+                </StackPanel>
+            </Border>
+            <TextBlock Text="{l:T 'Icon, description and download, update and release info in wide rows.'}" Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel x:Key="PreviewDiscoverGrid" x:Shared="False">
+            <TextBlock Text="{l:T 'Grid'}" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <Border Style="{StaticResource MockFrame}">
+                <UniformGrid Columns="3" Rows="2">
+                    <Border Style="{StaticResource MockCard}"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF4A4A4A"/><Border Style="{StaticResource MockBar}" Width="34" Background="{StaticResource MockHi}" Margin="4,5,0,3"/><Border Style="{StaticResource MockBar}" Width="44" Height="4" Margin="4,0,0,0"/></StackPanel></Border>
+                    <Border Style="{StaticResource MockCard}"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF5E5E5E"/><Border Style="{StaticResource MockBar}" Width="28" Background="{StaticResource MockHi}" Margin="4,5,0,3"/><Border Style="{StaticResource MockBar}" Width="40" Height="4" Margin="4,0,0,0"/></StackPanel></Border>
+                    <Border Style="{StaticResource MockCard}"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF3E3E3E"/><Border Style="{StaticResource MockBar}" Width="38" Background="{StaticResource MockHi}" Margin="4,5,0,3"/><Border Style="{StaticResource MockBar}" Width="36" Height="4" Margin="4,0,0,0"/></StackPanel></Border>
+                    <Border Style="{StaticResource MockCard}"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF565656"/><Border Style="{StaticResource MockBar}" Width="30" Background="{StaticResource MockHi}" Margin="4,5,0,3"/><Border Style="{StaticResource MockBar}" Width="42" Height="4" Margin="4,0,0,0"/></StackPanel></Border>
+                    <Border Style="{StaticResource MockCard}"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF464646"/><Border Style="{StaticResource MockBar}" Width="36" Background="{StaticResource MockHi}" Margin="4,5,0,3"/><Border Style="{StaticResource MockBar}" Width="38" Height="4" Margin="4,0,0,0"/></StackPanel></Border>
+                    <Border Style="{StaticResource MockCard}"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF626262"/><Border Style="{StaticResource MockBar}" Width="26" Background="{StaticResource MockHi}" Margin="4,5,0,3"/><Border Style="{StaticResource MockBar}" Width="44" Height="4" Margin="4,0,0,0"/></StackPanel></Border>
+                </UniformGrid>
+            </Border>
+            <TextBlock Text="{l:T 'Cards with the pack picture, name and stats.'}" Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
         </StackPanel>
 
         <Style x:Key="PreviewHint" TargetType="RadioButton" BasedOn="{StaticResource SegmentButton}">
@@ -133,15 +161,16 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Margin="0,0,0,18">
-            <TextBlock Text="Settings" Style="{StaticResource H1}"/>
-            <TextBlock Text="Changes are saved automatically." Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+            <TextBlock Text="{l:T 'Settings'}" Style="{StaticResource H1}"/>
+            <TextBlock Text="{l:T 'Changes are saved automatically.'}" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
         </StackPanel>
 
         <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,16,18">
             <StackPanel Orientation="Horizontal">
-                <RadioButton Style="{StaticResource TabButton}" Content="Launcher" Tag="&#xE8B7;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=launcher}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Appearance" Tag="&#xE790;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=appearance}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Minecraft (all instances)" Tag="&#xE7FC;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=minecraft}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Launcher'}" Tag="&#xE8B7;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=launcher}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Appearance'}" Tag="&#xE790;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=appearance}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Minecraft (all instances)'}" Tag="&#xE7FC;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=minecraft}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'About'}" Tag="&#xE946;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=about}"/>
             </StackPanel>
         </Border>
 
@@ -157,12 +186,12 @@
                         </Style>
                     </StackPanel.Style>
 
-                    <TextBlock Text="Services" Style="{StaticResource H2}" Margin="0,0,0,4"/>
+                    <TextBlock Text="{l:T 'Services'}" Style="{StaticResource H2}" Margin="0,0,0,4"/>
                     <Border Style="{StaticResource SettingRow}">
                         <StackPanel>
-                            <TextBlock Text="CurseForge API key" Style="{StaticResource RowTitle}"/>
+                            <TextBlock Text="{l:T 'CurseForge API key'}" Style="{StaticResource RowTitle}"/>
                             <TextBlock Style="{StaticResource Faint}" TextWrapping="Wrap" Margin="0,3,0,8">
-                                <Run Text="Enables CurseForge search, mod pages and CurseForge modpack import. Get a free key from the"/>
+                                <Run Text="{l:T 'Enables CurseForge search, mod pages and CurseForge modpack import. Get a free key from the'}"/>
                                 <Hyperlink Foreground="White" Command="{Binding OpenUrlCommand}" CommandParameter="https://console.curseforge.com/">CurseForge console</Hyperlink><Run Text="."/>
                             </TextBlock>
                             <TextBox Text="{Binding CurseForgeApiKey, UpdateSourceTrigger=PropertyChanged}" Tag="$2a$10$…" FontFamily="{StaticResource MonoFont}"/>
@@ -175,22 +204,24 @@
                                 <ColumnDefinition Width="120"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="Parallel downloads" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="How many files are downloaded at once (1–64)." Style="{StaticResource Faint}" Margin="0,3,0,0"/>
+                                <TextBlock Text="{l:T 'Parallel downloads'}" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'How many files are downloaded at once (1-64).'}" Style="{StaticResource Faint}" Margin="0,3,0,0"/>
                             </StackPanel>
                             <TextBox Grid.Column="1" Text="{Binding ConcurrentDownloads, UpdateSourceTrigger=LostFocus}" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
 
-                    <TextBlock Text="Java runtimes" Style="{StaticResource H2}" Margin="0,28,0,2"/>
-                    <TextBlock Text="Eclipse Temurin builds from Adoptium, downloaded automatically when an instance needs them." Style="{StaticResource Muted}" Margin="0,0,0,10"/>
+                    <TextBlock Text="{l:T 'Java runtimes'}" Style="{StaticResource H2}" Margin="0,28,0,2"/>
+                    <TextBlock Text="{l:T 'Eclipse Temurin builds from Adoptium, downloaded automatically when an instance needs them.'}" Style="{StaticResource Muted}" Margin="0,0,0,10"/>
                     <ItemsControl ItemsSource="{Binding JavaRuntimes}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,6">
                                     <DockPanel>
-                                        <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE74D;" FontSize="12" ToolTip="Remove"
+                                        <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE74D;" FontSize="12" ToolTip="{l:T 'Remove'}"
                                                 Command="{Binding DataContext.RemoveJavaCommand, ElementName=Self}" CommandParameter="{Binding}"/>
+                                        <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE838;" FontSize="12" ToolTip="{l:T 'Open folder'}"
+                                                Command="{Binding DataContext.OpenJavaFolderCommand, ElementName=Self}" CommandParameter="{Binding}"/>
                                         <Border Style="{StaticResource Badge}" Margin="0,0,12,0">
                                             <TextBlock Text="{Binding Major, StringFormat=Java {0}}" Style="{StaticResource BadgeText}" Foreground="{StaticResource Fg}"/>
                                         </Border>
@@ -204,32 +235,31 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0" IsEnabled="{Binding InstallingJava, Converter={StaticResource Not}}">
-                        <TextBlock Text="Install:" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <Button Content="Java 8" Command="{Binding InstallJavaCommand}" CommandParameter="8" Margin="0,0,6,0"/>
-                        <Button Content="Java 17" Command="{Binding InstallJavaCommand}" CommandParameter="17" Margin="0,0,6,0"/>
-                        <Button Content="Java 21" Command="{Binding InstallJavaCommand}" CommandParameter="21" Margin="0,0,6,0"/>
-                        <Button Content="Java 25" Command="{Binding InstallJavaCommand}" CommandParameter="25"/>
+                        <TextBlock Text="{l:T 'Install:'}" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <Button Content="{l:T 'Java 8'}" Command="{Binding InstallJavaCommand}" CommandParameter="8" Margin="0,0,6,0"/>
+                        <Button Content="{l:T 'Java 17'}" Command="{Binding InstallJavaCommand}" CommandParameter="17" Margin="0,0,6,0"/>
+                        <Button Content="{l:T 'Java 21'}" Command="{Binding InstallJavaCommand}" CommandParameter="21" Margin="0,0,6,0"/>
+                        <Button Content="{l:T 'Java 25'}" Command="{Binding InstallJavaCommand}" CommandParameter="25"/>
                     </StackPanel>
                     <StackPanel Margin="0,10,0,0" Visibility="{Binding InstallingJava, Converter={StaticResource VisibleIf}}">
                         <TextBlock Text="{Binding JavaStatus}" Style="{StaticResource Muted}"/>
                         <ProgressBar IsIndeterminate="True" Margin="0,6,0,0"/>
                     </StackPanel>
 
-                    <TextBlock Text="Advanced" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                    <TextBlock Text="{l:T 'Advanced'}" Style="{StaticResource H2}" Margin="0,28,0,4"/>
                     <Border Style="{StaticResource SettingRow}">
                         <DockPanel>
                             <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding DeveloperMode}" VerticalAlignment="Center"/>
                             <StackPanel>
-                                <TextBlock Text="Developer mode" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="Unlocks offline accounts for testing. Without it, only Microsoft accounts can be added and used." Style="{StaticResource Faint}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                <TextBlock Text="{l:T 'Developer mode'}" Style="{StaticResource RowTitle}"/>
                             </StackPanel>
                         </DockPanel>
                     </Border>
                     <Border Style="{StaticResource SettingRow}" BorderThickness="0">
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="Open folder" Command="{Binding OpenDataFolderCommand}"/>
+                            <Button DockPanel.Dock="Right" Content="{l:T 'Open folder'}" Command="{Binding OpenDataFolderCommand}"/>
                             <StackPanel>
-                                <TextBlock Text="Launcher data" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'Launcher data'}" Style="{StaticResource RowTitle}"/>
                                 <TextBlock Text="{Binding DataFolder}" Style="{StaticResource Faint}" Margin="0,3,0,0"/>
                             </StackPanel>
                         </DockPanel>
@@ -246,37 +276,7 @@
                         </Style>
                     </StackPanel.Style>
 
-                    <TextBlock Text="Layout" Style="{StaticResource H2}" Margin="0,0,0,4"/>
-                    <Border Style="{StaticResource SettingRow}">
-                        <DockPanel>
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                                <RadioButton Style="{StaticResource PreviewHint}" Content="Top navigation" GroupName="menu" ToolTip="{StaticResource PreviewTopNav}"
-                                             IsChecked="{Binding InstanceMenuStyle, Converter={StaticResource Eq}, ConverterParameter=TopNavigation}"/>
-                                <RadioButton Style="{StaticResource PreviewHint}" Content="Grid" GroupName="menu" Margin="0" ToolTip="{StaticResource PreviewGridMenu}"
-                                             IsChecked="{Binding InstanceMenuStyle, Converter={StaticResource Eq}, ConverterParameter=Grid}"/>
-                            </StackPanel>
-                            <StackPanel>
-                                <TextBlock Text="Instance menu" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="Tabs across the top, or an overview grid of section cards you can drag to rearrange." Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
-                    <Border Style="{StaticResource SettingRow}">
-                        <DockPanel>
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                                <RadioButton Style="{StaticResource PreviewHint}" Content="List" GroupName="list" ToolTip="{StaticResource PreviewList}"
-                                             IsChecked="{Binding ContentListStyle, Converter={StaticResource Eq}, ConverterParameter=List}"/>
-                                <RadioButton Style="{StaticResource PreviewHint}" Content="Grid" GroupName="list" Margin="0" ToolTip="{StaticResource PreviewGridList}"
-                                             IsChecked="{Binding ContentListStyle, Converter={StaticResource Eq}, ConverterParameter=Grid}"/>
-                            </StackPanel>
-                            <StackPanel>
-                                <TextBlock Text="Mod list style" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="How mods, resource packs and shader packs are listed: detailed rows or a grid of icons." Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
-
-                    <TextBlock Text="Behaviour" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                    <TextBlock Text="{l:T 'Language'}" Style="{StaticResource H2}" Margin="0,0,0,4"/>
                     <Border Style="{StaticResource SettingRow}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -284,8 +284,67 @@
                                 <ColumnDefinition Width="320"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="When the game starts" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="The launcher keeps tracking play time in every mode." Style="{StaticResource Faint}" Margin="0,3,0,0"/>
+                                <TextBlock Text="{l:T 'Launcher language'}" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'Automatic follows the Windows display language.'}" Style="{StaticResource Faint}" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <ComboBox Grid.Column="1" ItemsSource="{Binding LanguageOptions}" SelectedItem="{Binding Language}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="{l:T 'Layout'}" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="{l:T 'Top navigation'}" GroupName="menu" ToolTip="{StaticResource PreviewTopNav}"
+                                             IsChecked="{Binding InstanceMenuStyle, Converter={StaticResource Eq}, ConverterParameter=TopNavigation}"/>
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="{l:T 'Grid'}" GroupName="menu" Margin="0" ToolTip="{StaticResource PreviewGridMenu}"
+                                             IsChecked="{Binding InstanceMenuStyle, Converter={StaticResource Eq}, ConverterParameter=Grid}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'Instance menu'}" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'Tabs across the top, or an overview grid of section cards you can drag to rearrange.'}" Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="{l:T 'List'}" GroupName="list" ToolTip="{StaticResource PreviewList}"
+                                             IsChecked="{Binding ContentListStyle, Converter={StaticResource Eq}, ConverterParameter=List}"/>
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="{l:T 'Grid'}" GroupName="list" Margin="0" ToolTip="{StaticResource PreviewGridList}"
+                                             IsChecked="{Binding ContentListStyle, Converter={StaticResource Eq}, ConverterParameter=Grid}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'Mod list style'}" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'How mods, resource packs and shader packs are listed: detailed rows or a grid of icons.'}" Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="{l:T 'List'}" GroupName="discover" ToolTip="{StaticResource PreviewDiscoverList}"
+                                             IsChecked="{Binding DiscoverStyle, Converter={StaticResource Eq}, ConverterParameter=List}"/>
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="{l:T 'Grid'}" GroupName="discover" Margin="0" ToolTip="{StaticResource PreviewDiscoverGrid}"
+                                             IsChecked="{Binding DiscoverStyle, Converter={StaticResource Eq}, ConverterParameter=Grid}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'Discover layout'}" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'How modpacks are shown on the Discover page: wide rows with details, or cards with a picture.'}" Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <TextBlock Text="{l:T 'Behaviour'}" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                    <Border Style="{StaticResource SettingRow}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="320"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'When the game starts'}" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'The launcher keeps tracking play time in every mode.'}" Style="{StaticResource Faint}" Margin="0,3,0,0"/>
                             </StackPanel>
                             <ComboBox Grid.Column="1" ItemsSource="{Binding LaunchOptions}" SelectedItem="{Binding OnLaunch}" VerticalAlignment="Center"/>
                         </Grid>
@@ -294,10 +353,75 @@
                         <DockPanel>
                             <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding OpenConsoleOnLaunch}" VerticalAlignment="Center"/>
                             <StackPanel>
-                                <TextBlock Text="Separate game console window" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="Opens a live log window when a game starts or crashes. When off, logs are only shown on the instance's Logs page." Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
+                                <TextBlock Text="{l:T 'Separate game console window'}" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'Opens a live log window when a game starts or crashes. When off, logs are only shown on the instance\'s Logs page.'}" Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
                             </StackPanel>
                         </DockPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ================= About ================= -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel" BasedOn="{StaticResource Section}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Section}" Value="about"><Setter Property="Visibility" Value="Visible"/></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <Border Style="{StaticResource Card}" Padding="24,22">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left" Width="88" Height="88" CornerRadius="20" Margin="0,0,22,0" VerticalAlignment="Top" RenderOptions.BitmapScalingMode="HighQuality">
+                                <Border.Background><ImageBrush ImageSource="/Assets/logo.png" Stretch="UniformToFill"/></Border.Background>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="PyroLauncher" Style="{StaticResource H1}"/>
+                                <TextBlock Margin="0,6,0,0" FontSize="14">
+                                    <Run Text="{l:T 'Version'}" Foreground="{StaticResource Fg2}"/> <Run Text="{Binding AppVersion, Mode=OneWay}" FontWeight="SemiBold"/>
+                                </TextBlock>
+                                <TextBlock Text="{l:T 'Made by the PyroByte team.'}" Foreground="{StaticResource Fg2}" Margin="0,4,0,0"/>
+                                <TextBlock Text="{l:T 'A Minecraft launcher for modded instances: Modrinth and CurseForge content, modpacks, presets and managed Java.'}"
+                                           Style="{StaticResource Faint}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                                <WrapPanel Margin="0,16,0,0">
+                                    <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/PyroByteTeam/PyroLauncher" Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE8A7;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{l:T 'Source code'}"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/PyroByteTeam/PyroLauncher/issues" Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xEBE8;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{l:T 'Report a problem'}"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding OpenDataFolderCommand}" Margin="0,0,8,8">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE838;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{l:T 'Open data folder'}"/>
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <TextBlock Text="{l:T 'Details'}" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel><TextBlock Text="{Binding RuntimeText}" DockPanel.Dock="Right" Foreground="{StaticResource Fg2}"/><TextBlock Text="{l:T 'Runtime'}" Style="{StaticResource RowTitle}"/></DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel><TextBlock Text="{Binding DataFolder}" DockPanel.Dock="Right" Foreground="{StaticResource Fg2}" TextTrimming="CharacterEllipsis" MaxWidth="520"/><TextBlock Text="{l:T 'Data folder'}" Style="{StaticResource RowTitle}"/></DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}" BorderThickness="0">
+                        <StackPanel>
+                            <TextBlock Text="{l:T 'Thanks to'}" Style="{StaticResource RowTitle}"/>
+                            <TextBlock Text="{l:T 'Modrinth and CurseForge for their APIs, Adoptium for Java builds, Fabric, Forge and NeoForge for the mod loaders.'}"
+                                       Style="{StaticResource Faint}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                            <TextBlock Text="{l:T 'Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.'}"
+                                       Style="{StaticResource Faint}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
 
@@ -311,32 +435,32 @@
                         </Style>
                     </StackPanel.Style>
 
-                    <TextBlock Text="These defaults apply to every instance unless the instance overrides them in its own Settings tab." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                    <TextBlock Text="{l:T 'These defaults apply to every instance unless the instance overrides them in its own Settings tab.'}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,0,0,6"/>
 
                     <Border Style="{StaticResource SettingRow}">
                         <StackPanel>
-                            <TextBlock Text="Maximum memory" Style="{StaticResource RowTitle}"/>
+                            <TextBlock Text="{l:T 'Maximum memory'}" Style="{StaticResource RowTitle}"/>
                             <TextBlock Text="{Binding SystemMemory}" Style="{StaticResource Faint}" Margin="0,3,0,10"/>
                             <c:MemoryPicker Value="{Binding MaxMemory}"/>
                         </StackPanel>
                     </Border>
                     <Border Style="{StaticResource SettingRow}">
                         <StackPanel>
-                            <TextBlock Text="Minimum memory" Style="{StaticResource RowTitle}"/>
-                            <TextBlock Text="Memory reserved at start-up. Usually far below the maximum." Style="{StaticResource Faint}" Margin="0,3,0,10"/>
+                            <TextBlock Text="{l:T 'Minimum memory'}" Style="{StaticResource RowTitle}"/>
+                            <TextBlock Text="{l:T 'Memory reserved at start-up. Usually far below the maximum.'}" Style="{StaticResource Faint}" Margin="0,3,0,10"/>
                             <c:MemoryPicker Value="{Binding MinMemory}"/>
-                            <TextBlock Text="⚠  The minimum is higher than the maximum. The launcher will use the maximum for both when starting the game." Foreground="{StaticResource LogWarn}" TextWrapping="Wrap" Margin="0,8,0,0"
+                            <TextBlock Text="{l:T '⚠  The minimum is higher than the maximum. The launcher will use the maximum for both when starting the game.'}" Foreground="{StaticResource LogWarn}" TextWrapping="Wrap" Margin="0,8,0,0"
                                        Visibility="{Binding MinAboveMax, Converter={StaticResource VisibleIf}}"/>
                         </StackPanel>
                     </Border>
 
                     <Border Style="{StaticResource SettingRow}">
                         <StackPanel>
-                            <TextBlock Text="Java executable" Style="{StaticResource RowTitle}"/>
-                            <TextBlock Text="Leave empty to pick the right Java version automatically (recommended)." Style="{StaticResource Faint}" Margin="0,3,0,8"/>
+                            <TextBlock Text="{l:T 'Java executable'}" Style="{StaticResource RowTitle}"/>
+                            <TextBlock Text="{l:T 'Leave empty to pick the right Java version automatically (recommended).'}" Style="{StaticResource Faint}" Margin="0,3,0,8"/>
                             <DockPanel>
-                                <Button DockPanel.Dock="Right" Content="Browse…" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
-                                <TextBox Text="{Binding JavaPath, UpdateSourceTrigger=PropertyChanged}" Tag="Automatic (Adoptium)"/>
+                                <Button DockPanel.Dock="Right" Content="{l:T 'Browse…'}" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
+                                <TextBox Text="{Binding JavaPath, UpdateSourceTrigger=PropertyChanged}" Tag="{l:T 'Automatic (Adoptium)'}"/>
                             </DockPanel>
                         </StackPanel>
                     </Border>
@@ -344,10 +468,10 @@
                     <Border Style="{StaticResource SettingRow}">
                         <StackPanel>
                             <DockPanel>
-                                <Button DockPanel.Dock="Right" Content="Reset" Style="{StaticResource GhostButton}" Command="{Binding ResetJvmArgsCommand}"/>
+                                <Button DockPanel.Dock="Right" Content="{l:T 'Reset'}" Style="{StaticResource GhostButton}" Command="{Binding ResetJvmArgsCommand}"/>
                                 <StackPanel>
-                                    <TextBlock Text="JVM arguments" Style="{StaticResource RowTitle}"/>
-                                    <TextBlock Text="Extra flags passed to Java (memory flags are added separately)." Style="{StaticResource Faint}" Margin="0,3,0,0"/>
+                                    <TextBlock Text="{l:T 'JVM arguments'}" Style="{StaticResource RowTitle}"/>
+                                    <TextBlock Text="{l:T 'Extra flags passed to Java (memory flags are added separately).'}" Style="{StaticResource Faint}" Margin="0,3,0,0"/>
                                 </StackPanel>
                             </DockPanel>
                             <TextBox Margin="0,8,0,0" Text="{Binding JvmArgs, UpdateSourceTrigger=LostFocus}" FontFamily="{StaticResource MonoFont}" FontSize="12"
@@ -357,7 +481,7 @@
 
                     <Border Style="{StaticResource SettingRow}">
                         <StackPanel>
-                            <TextBlock Text="Window size" Style="{StaticResource RowTitle}"/>
+                            <TextBlock Text="{l:T 'Window size'}" Style="{StaticResource RowTitle}"/>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                 <TextBox Width="100" Text="{Binding Width, Converter={StaticResource NullableInt}, UpdateSourceTrigger=LostFocus}"/>
                                 <TextBlock Text="×" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="10,0"/>
@@ -370,13 +494,14 @@
                         <DockPanel>
                             <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding Fullscreen}"/>
                             <StackPanel>
-                                <TextBlock Text="Start in fullscreen" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="Passes --fullscreen to the game." Style="{StaticResource Faint}" Margin="0,3,0,0"/>
+                                <TextBlock Text="{l:T 'Start in fullscreen'}" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="{l:T 'Passes --fullscreen to the game.'}" Style="{StaticResource Faint}" Margin="0,3,0,0"/>
                             </StackPanel>
                         </DockPanel>
                     </Border>
                 </StackPanel>
             </Grid>
         </ScrollViewer>
+
     </Grid>
 </UserControl>

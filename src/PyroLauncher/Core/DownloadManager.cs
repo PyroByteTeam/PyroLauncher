@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -14,7 +15,11 @@ public partial class DownloadJob : ObservableObject, IDisposable
     public string Title { get; }
     public DateTime Started { get; } = DateTime.Now;
     public CancellationTokenSource? Cts { get; }
-    public bool CanCancel => Cts != null && IsActive;
+    /// <summary>Every job can be cancelled from the Downloads page; downloads inside the job observe this token.</summary>
+    private readonly CancellationTokenSource _own = new();
+    public CancellationToken Token => _own.Token;
+    public bool IsCancelled => _own.IsCancellationRequested || Cts?.IsCancellationRequested == true;
+    public bool CanCancel => IsActive;
 
     internal long Bytes;
     internal int FilesDone, FilesTotal;
@@ -38,11 +43,11 @@ public partial class DownloadJob : ObservableObject, IDisposable
     public bool IsPaused => State == JobState.Paused;
     public string StateText => State switch
     {
-        JobState.Running => "Downloading",
-        JobState.Paused => "Paused",
-        JobState.Completed => "Done",
-        JobState.Failed => "Failed",
-        _ => "Cancelled",
+        JobState.Running => L.T("Downloading"),
+        JobState.Paused => L.T("Paused"),
+        JobState.Completed => L.T("Done"),
+        JobState.Failed => L.T("Failed"),
+        _ => L.T("Cancelled"),
     };
 
     internal DownloadJob(string title, CancellationTokenSource? cts)
@@ -100,7 +105,7 @@ public partial class DownloadJob : ObservableObject, IDisposable
     public void Cancel()
     {
         Resume();
-        Cts?.Cancel();
+        try { _own.Cancel(); Cts?.Cancel(); } catch (ObjectDisposedException) { }
     }
 
     public void Fail() => _failed = true;
@@ -108,7 +113,7 @@ public partial class DownloadJob : ObservableObject, IDisposable
     public void Dispose()
     {
         Interlocked.Exchange(ref _resume, null)?.TrySetResult();
-        var final = Cts?.IsCancellationRequested == true ? JobState.Cancelled : _failed ? JobState.Failed : JobState.Completed;
+        var final = IsCancelled ? JobState.Cancelled : _failed ? JobState.Failed : JobState.Completed;
         DownloadManager.RunOnUi(() =>
         {
             Tick();
@@ -139,7 +144,7 @@ public partial class DownloadJob : ObservableObject, IDisposable
         Progress = total > 1 ? (double)done / total
             : curTotal > 0 ? Math.Min(1, (double)cur / curTotal)
             : total == 1 && done == 1 ? 1 : -1;
-        FilesText = total == 1 ? "1 file" : $"{done:N0} / {total:N0} files";
+        FilesText = total == 1 ? L.T("1 file") : L.F("{0:N0} / {1:N0} files", done, total);
         BytesText = DownloadManager.FormatBytes(bytes);
         SpeedText = State == JobState.Running && SpeedBytes > 1 ? DownloadManager.FormatBytes((long)SpeedBytes) + "/s" : "";
         CurrentFile = CurFile;
@@ -238,6 +243,14 @@ public static class DownloadManager
 
     public static void PauseAll() { foreach (var j in Jobs) j.Pause(); }
     public static void ResumeAll() { foreach (var j in Jobs) j.Resume(); }
+    public static void CancelAll() { foreach (var j in Jobs.ToList()) if (j.IsActive) j.Cancel(); }
+
+    /// <summary>Forgets the contacted-domains list. Hosts with downloads still running come back on their next request.</summary>
+    public static void ClearHosts()
+    {
+        HostCounters.Clear();
+        Hosts.Clear();
+    }
 
     public static void ClearFinished()
     {
@@ -270,7 +283,7 @@ public static class DownloadManager
             Summary.Progress = withProgress.Count == 0 ? -1 : withProgress.Average(j => j.Progress);
             var speed = active.Sum(j => j.SpeedBytes);
             var paused = active.All(j => j.IsPaused);
-            Summary.Text = paused ? "Paused"
+            Summary.Text = paused ? L.T("Paused")
                 : $"{(Summary.Progress >= 0 ? $"{Summary.Progress * 100:0}%" : "…")}{(speed > 1 ? " · " + FormatBytes((long)speed) + "/s" : "")}";
         }
     }
@@ -284,9 +297,9 @@ public static class DownloadManager
 
     public static string FormatBytes(long b) => b switch
     {
-        >= 1L << 30 => $"{b / (double)(1L << 30):0.00} GB",
-        >= 1L << 20 => $"{b / (double)(1L << 20):0.0} MB",
-        >= 1L << 10 => $"{b / 1024.0:0} KB",
+        >= 1L << 30 => L.F("{0:0.00} GB", b / (double)(1L << 30)),
+        >= 1L << 20 => L.F("{0:0.0} MB", b / (double)(1L << 20)),
+        >= 1L << 10 => L.F("{0:0} KB", b / 1024.0),
         _ => $"{b} B",
     };
 }

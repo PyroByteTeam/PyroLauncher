@@ -1,5 +1,6 @@
 <UserControl x:Class="PyroLauncher.UI.Views.InstanceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="Self">
     <Grid Margin="36,0,36,0">
@@ -17,7 +18,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Style="{StaticResource IconButton}" Content="&#xE72B;" Command="{Binding BackCommand}" ToolTip="Back to instances"
+            <Button Style="{StaticResource IconButton}" Content="&#xE72B;" Command="{Binding BackCommand}" ToolTip="{l:T 'Back to instances'}"
                     VerticalAlignment="Top" Margin="-8,0,10,0"/>
             <Border Grid.Column="1" Width="84" Height="84" CornerRadius="14" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line}" BorderThickness="1" ClipToBounds="True">
                 <Grid>
@@ -39,7 +40,7 @@
                     </Border>
                     <TextBlock Text="&#xE823;" FontFamily="{StaticResource IconFont}" Foreground="{StaticResource Fg2}" Margin="16,1,6,0" VerticalAlignment="Center"/>
                     <TextBlock VerticalAlignment="Center">
-                        <Run Text="{Binding Instance.PlayTimeClock, Mode=OneWay}" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}"/><Run Text=" played" Foreground="{StaticResource Fg2}"/>
+                        <Run Text="{Binding Instance.PlayTimeClock, Mode=OneWay}" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}"/><Run Text="{l:T ' played'}" Foreground="{StaticResource Fg2}"/>
                     </TextBlock>
                     <TextBlock Text="·" Foreground="{StaticResource Fg3}" Margin="8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding Instance.LastPlayedText}" Style="{StaticResource Muted}" VerticalAlignment="Center"/>
@@ -47,10 +48,10 @@
             </StackPanel>
             <StackPanel Grid.Column="3" VerticalAlignment="Center" Width="240">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource IconButton}" Content="&#xE756;" ToolTip="Open console" Command="{Binding OpenConsoleCommand}" Margin="0,0,4,0" Width="44" Height="44"
+                    <Button Style="{StaticResource IconButton}" Content="&#xE756;" ToolTip="{l:T 'Open console'}" Command="{Binding OpenConsoleCommand}" Margin="0,0,4,0" Width="44" Height="44"
                             Visibility="{Binding ConsoleEnabled, Converter={StaticResource VisibleIf}}"/>
-                    <Button Style="{StaticResource IconButton}" Content="&#xE838;" ToolTip="Open game folder" Command="{Binding OpenFolderCommand}" Margin="0,0,8,0" Width="44" Height="44"/>
-                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding LaunchCommand}" Padding="26,11" FontSize="15" MinWidth="140">
+                    <Button Style="{StaticResource IconButton}" Content="&#xE838;" ToolTip="{l:T 'Open game folder'}" Command="{Binding OpenFolderCommand}" Margin="0,0,8,0" Width="44" Height="44"/>
+                    <Button Style="{StaticResource PrimaryButton}" Command="{Binding LaunchCommand}" Padding="26,11" FontSize="15" MinWidth="140" ToolTip="{Binding LaunchTip}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding LaunchGlyph}" FontFamily="{StaticResource IconFont}" FontSize="14" Margin="0,1,10,0" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding LaunchText}"/>
@@ -62,7 +63,7 @@
                     <ProgressBar Margin="0,6,0,0" Value="{Binding Instance.Progress, Converter={StaticResource Percent}, Mode=OneWay}"
                                  IsIndeterminate="{Binding Instance.Progress, Converter={StaticResource Indeterminate}, Mode=OneWay}"/>
                 </StackPanel>
-                <TextBlock Text="Game is running" Style="{StaticResource Faint}" HorizontalAlignment="Right" Margin="0,10,0,0"
+                <TextBlock Text="{l:T 'Game is running'}" Style="{StaticResource Faint}" HorizontalAlignment="Right" Margin="0,10,0,0"
                            Visibility="{Binding Instance.IsRunning, Converter={StaticResource VisibleIf}}"/>
             </StackPanel>
         </Grid>
@@ -71,14 +72,16 @@
         <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,18"
                 Visibility="{Binding ShowTabs, Converter={StaticResource VisibleIf}}">
             <StackPanel Orientation="Horizontal">
-                <RadioButton Style="{StaticResource TabButton}" Content="Mods" Tag="&#xEA86;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=mods}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Resource Packs" Tag="&#xE790;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=resourcepacks}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Shaders" Tag="&#xE706;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=shaders}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Screenshots" Tag="&#xEB9F;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=screenshots}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Servers" Tag="&#xE774;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=servers}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Logs" Tag="&#xE9D9;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=logs}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Configs" Tag="&#xE90F;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=configs}"/>
-                <RadioButton Style="{StaticResource TabButton}" Content="Settings" Tag="&#xE713;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=settings}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Modpack'}" Tag="&#xE7B8;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=modpack}"
+                             Visibility="{Binding Instance.IsModpack, Converter={StaticResource VisibleIf}}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Mods'}" Tag="&#xEA86;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=mods}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Resource Packs'}" Tag="&#xE790;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=resourcepacks}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Shaders'}" Tag="&#xE706;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=shaders}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Screenshots'}" Tag="&#xEB9F;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=screenshots}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Servers'}" Tag="&#xE774;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=servers}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Logs'}" Tag="&#xE9D9;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=logs}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Configs'}" Tag="&#xE90F;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=configs}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="{l:T 'Settings'}" Tag="&#xE713;" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=settings}"/>
             </StackPanel>
         </Border>
 
@@ -102,7 +105,7 @@
                 <Button Style="{StaticResource GhostButton}" Command="{Binding ShowOverviewCommand}" Padding="10,6" Margin="-10,0,4,0">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE72B;" FontFamily="{StaticResource IconFont}" FontSize="12" Margin="0,1,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Overview"/>
+                        <TextBlock Text="{l:T 'Overview'}"/>
                     </StackPanel>
                 </Button>
                 <TextBlock Text="/" Foreground="{StaticResource Fg3}" VerticalAlignment="Center" Margin="0,0,10,0"/>
@@ -123,24 +126,24 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border x:Name="card" Style="{StaticResource Card}" Margin="0,0,14,14" Padding="18,16" Height="236" AllowDrop="True" Cursor="SizeAll"
-                                PreviewMouseLeftButtonDown="Card_MouseDown" MouseMove="Card_MouseMove" Drop="Card_Drop" DragOver="Card_DragOver" DragLeave="Card_DragLeave"
-                                ToolTip="Drag to rearrange">
+                        <Border x:Name="card" Style="{StaticResource Card}" Margin="0,0,14,14" Padding="18,16" Height="236" AllowDrop="True" Cursor="Hand"
+                                PreviewMouseLeftButtonDown="Card_MouseDown" MouseMove="Card_MouseMove" MouseLeftButtonUp="Card_MouseUp"
+                                Drop="Card_Drop" DragOver="Card_DragOver" DragLeave="Card_DragLeave">
                             <DockPanel>
-                                <DockPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
-                                    <Button DockPanel.Dock="Right" Command="{Binding DataContext.OpenSectionCommand, ElementName=Self}" CommandParameter="{Binding Key}"
-                                            Padding="14,6" Cursor="Hand">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="Open"/>
-                                            <TextBlock Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="10" Margin="8,1,0,0" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Button>
-                                    <TextBlock Text="&#xE76F;" FontFamily="{StaticResource IconFont}" Foreground="{StaticResource Fg3}" VerticalAlignment="Center" ToolTip="Drag to rearrange"/>
-                                </DockPanel>
-                                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                    <TextBlock Text="{l:T 'Open'}" Style="{StaticResource Faint}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="10" Foreground="{StaticResource Fg3}" Margin="8,1,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Border x:Name="grip" DockPanel.Dock="Right" Width="30" Height="30" Margin="0,-6,-8,0" CornerRadius="6" Background="Transparent"
+                                            Cursor="SizeAll" ToolTip="{l:T 'Drag to rearrange'}" VerticalAlignment="Top">
+                                        <TextBlock Text="&#xE76F;" FontFamily="{StaticResource IconFont}" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="20" VerticalAlignment="Center" Margin="0,0,12,0"/>
                                     <TextBlock Text="{Binding Title}" Style="{StaticResource H2}" FontSize="19" VerticalAlignment="Center"/>
                                 </StackPanel>
+                                </DockPanel>
                                 <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" Style="{StaticResource Muted}" Margin="0,8,0,12" TextTrimming="CharacterEllipsis"/>
                                 <Grid ClipToBounds="True">
                                     <!-- Icons of the first 50 items (mods / packs / shaders) -->
@@ -185,6 +188,9 @@
                         <DataTemplate.Triggers>
                             <Trigger SourceName="card" Property="IsMouseOver" Value="True">
                                 <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource Line2}"/>
+                            </Trigger>
+                            <Trigger SourceName="grip" Property="IsMouseOver" Value="True">
+                                <Setter TargetName="grip" Property="Background" Value="{StaticResource Bg4}"/>
                             </Trigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>

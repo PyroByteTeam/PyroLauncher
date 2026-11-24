@@ -25,7 +25,7 @@ public partial class DependencyItem : ObservableObject
         "optional" => "Optional",
         "incompatible" => "Incompatible",
         "embedded" => "Bundled",
-        _ => "Required",
+        _ => L.T("Required"),
     };
     public bool CanInstall => !IsInstalled && Kind is "required" or "optional";
     partial void OnIsInstalledChanged(bool value) => OnPropertyChanged(nameof(CanInstall));
@@ -37,7 +37,7 @@ public partial class ProjectDetailViewModel : ObservableObject
     public ObservableCollection<DependencyItem> Dependencies { get; } = [];
     [ObservableProperty] private bool _dependenciesExpanded;
     [ObservableProperty] private bool _loadingDependencies;
-    [ObservableProperty] private string _dependenciesHeader = "Dependencies";
+    [ObservableProperty] private string _dependenciesHeader = L.T("Dependencies");
     public bool HasDependencies => Dependencies.Count > 0;
     private CancellationTokenSource? _depsCts;
 
@@ -46,7 +46,7 @@ public partial class ProjectDetailViewModel : ObservableObject
         _depsCts?.Cancel();
         Dependencies.Clear();
         OnPropertyChanged(nameof(HasDependencies));
-        if (v == null || v.Version.Dependencies.Count == 0) { DependenciesHeader = "No dependencies"; return; }
+        if (v == null || v.Version.Dependencies.Count == 0) { DependenciesHeader = L.T("No dependencies"); return; }
         var cts = _depsCts = new CancellationTokenSource();
         LoadingDependencies = true;
         try
@@ -75,10 +75,10 @@ public partial class ProjectDetailViewModel : ObservableObject
                 });
             }
             var required = Dependencies.Count(d => d.Kind == "required");
-            DependenciesHeader = $"Dependencies ({Dependencies.Count}{(required > 0 ? $" · {required} required" : "")}) — for {v.Version.VersionNumber}";
+            DependenciesHeader = $"Dependencies ({Dependencies.Count}{(required > 0 ? $" · {required} required" : "")}) - for {v.Version.VersionNumber}";
         }
         catch (OperationCanceledException) { }
-        catch (Exception ex) { DependenciesHeader = $"Dependencies unavailable: {ex.Message}"; }
+        catch (Exception ex) { DependenciesHeader = L.F("Dependencies unavailable: {0}", ex.Message); }
         finally
         {
             if (_depsCts == cts) LoadingDependencies = false;
@@ -131,11 +131,11 @@ public partial class ProjectDetailViewModel : ObservableObject
     public bool IsMod => _owner.Type == Content.ContentType.Mod;
     public string ActiveLabel => _owner.Type switch
     {
-        Content.ContentType.Mod => "Enabled",
-        Content.ContentType.ResourcePack => "Active in game",
-        _ => "Use this shader",
+        Content.ContentType.Mod => L.T("Enabled"),
+        Content.ContentType.ResourcePack => L.T("Active in game"),
+        _ => L.T("Use this shader"),
     };
-    public string SourceText => IsLocalOnly ? "Local file" : Source == ContentSource.Modrinth ? "Modrinth" : "CurseForge";
+    public string SourceText => IsLocalOnly ? L.T("Local file") : Source == ContentSource.Modrinth ? "Modrinth" : "CurseForge";
     public string CompatText => $"Only {_owner.Instance.Config.MinecraftVersion}{(IsMod ? " · " + _owner.Instance.LoaderText : "")}";
 
     public ProjectDetailViewModel(ContentTabViewModel owner, ProjectSummary p)
@@ -171,7 +171,7 @@ public partial class ProjectDetailViewModel : ObservableObject
     }
 
     public System.Windows.Media.ImageSource? LocalIcon => Installed?.Icon;
-    public string GalleryTabText => Details == null || Details.Gallery.Count == 0 ? "Gallery" : $"Gallery ({Details.Gallery.Count})";
+    public string GalleryTabText => Details == null || Details.Gallery.Count == 0 ? L.T("Gallery") : L.F("Gallery ({0})", Details.Gallery.Count);
 
     partial void OnDetailsChanged(ProjectDetails? value) => OnPropertyChanged(nameof(GalleryTabText));
 
@@ -212,7 +212,7 @@ public partial class ProjectDetailViewModel : ObservableObject
             MarkInstalled();
             SelectedVersion = Versions.FirstOrDefault(v => v.IsInstalled) ?? Versions.FirstOrDefault();
         }
-        catch (Exception ex) { Dialogs.Toast($"Could not load versions: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Could not load versions: {0}", ex.Message), true); }
         finally { LoadingVersions = false; }
     }
 
@@ -247,10 +247,10 @@ public partial class ProjectDetailViewModel : ObservableObject
         try
         {
             var html = await ContentService.GetChangelogAsync(v.Version, cts.Token);
-            if (!cts.IsCancellationRequested) ChangelogHtml = string.IsNullOrWhiteSpace(html) ? "<p class='empty'>No changelog provided.</p>" : html;
+            if (!cts.IsCancellationRequested) ChangelogHtml = string.IsNullOrWhiteSpace(html) ? L.T("<p class='empty'>No changelog provided.</p>") : html;
         }
         catch (OperationCanceledException) { }
-        catch (Exception ex) { ChangelogHtml = $"<p class='empty'>Could not load changelog: {System.Net.WebUtility.HtmlEncode(ex.Message)}</p>"; }
+        catch (Exception ex) { ChangelogHtml = L.F("<p class='empty'>Could not load changelog: {0}</p>", System.Net.WebUtility.HtmlEncode(ex.Message)); }
         finally { if (_changelogCts == cts) LoadingChangelog = false; }
     }
 
@@ -258,10 +258,10 @@ public partial class ProjectDetailViewModel : ObservableObject
     {
         get
         {
-            if (IsInstalling) return "Installing…";
-            if (SelectedVersion == null) return "Select a version";
-            if (SelectedVersion.IsInstalled) return "Installed";
-            return Installed != null ? "Switch to this version" : "Install";
+            if (IsInstalling) return L.T("Installing…");
+            if (SelectedVersion == null) return L.T("Select a version");
+            if (SelectedVersion.IsInstalled) return L.T("Installed");
+            return Installed != null ? L.T("Switch to this version") : L.T("Install");
         }
     }
 
@@ -283,7 +283,7 @@ public partial class ProjectDetailViewModel : ObservableObject
         {
             var v = SelectedVersion.Version;
             await ContentService.InstallAsync(_owner.Instance, _owner.Type, v, Title, IconUrl, Installed, progress, CancellationToken.None);
-            Dialogs.Toast($"{(Installed != null ? "Switched" : "Installed")} {Title} {v.VersionNumber}");
+            Dialogs.Toast(L.F("{0} {1} {2}", Installed != null ? L.T("Switched") : L.T("Installed"), Title, v.VersionNumber));
             await _owner.RefreshCommand.ExecuteAsync(null);
             Installed = _owner.FindInstalled(Source, ProjectId!);
             MarkInstalled();
@@ -309,7 +309,7 @@ public partial class ProjectDetailViewModel : ObservableObject
     private void OpenWeb() => Dialogs.OpenUrl(Details?.WebUrl);
 
     [RelayCommand]
-    private void OpenImage(GalleryImage img) => Dialogs.ShowImage(null, img.Url, img.Title);
+    private void OpenImage(GalleryImage img) => Dialogs.ShowGallery(Details?.Gallery.Select(g => new GalleryEntry(null, g.Url, g.Title)).ToList() ?? [new GalleryEntry(null, img.Url, img.Title)], Details?.Gallery.IndexOf(img) ?? 0);
 
     [RelayCommand]
     private void Back() => _owner.CloseDetailCommand.Execute(null);

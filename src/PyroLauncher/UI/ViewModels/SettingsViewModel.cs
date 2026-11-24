@@ -1,3 +1,4 @@
+using System.IO;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
@@ -28,9 +29,9 @@ public partial class SettingsViewModel : ObservableObject
 
     public List<LaunchBehaviorOption> LaunchOptions { get; } =
     [
-        new(LaunchBehavior.KeepOpen, "Keep the launcher open"),
-        new(LaunchBehavior.Minimize, "Minimize the launcher"),
-        new(LaunchBehavior.Close, "Hide the launcher until the game closes"),
+        new(LaunchBehavior.KeepOpen, L.T("Keep the launcher open")),
+        new(LaunchBehavior.Minimize, L.T("Minimize the launcher")),
+        new(LaunchBehavior.Close, L.T("Hide the launcher until the game closes")),
     ];
 
     public SettingsViewModel()
@@ -53,7 +54,7 @@ public partial class SettingsViewModel : ObservableObject
         get
         {
             var info = GC.GetGCMemoryInfo();
-            return $"System memory: {info.TotalAvailableMemoryBytes / 1048576:N0} MB";
+            return L.F("System memory: {0:N0} MB", info.TotalAvailableMemoryBytes / 1048576);
         }
     }
 
@@ -71,6 +72,27 @@ public partial class SettingsViewModel : ObservableObject
     public List<InstanceMenuStyle> MenuStyles { get; } = [InstanceMenuStyle.TopNavigation, InstanceMenuStyle.Grid];
     public ContentListStyle ContentListStyle { get => S.ContentListStyle; set { S.ContentListStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
     public InstanceMenuStyle InstanceMenuStyle { get => S.InstanceMenuStyle; set { S.InstanceMenuStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
+    public ContentListStyle DiscoverStyle { get => S.DiscoverStyle; set { S.DiscoverStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
+
+    public List<Choice<string>> LanguageOptions { get; } =
+        [new("auto", L.T("Automatic (system)")), .. Loc.Languages.Select(l => new Choice<string>(l.Code, l.Name))];
+
+    public Choice<string> Language
+    {
+        get => LanguageOptions.FirstOrDefault(o => o.Value == S.Language) ?? LanguageOptions[0];
+        set
+        {
+            if (value == null || value.Value == S.Language) return;
+            S.Language = value.Value;
+            SettingsService.Save();
+            Loc.Instance.SetLanguage(value.Value);
+            MainViewModel.Instance.OnLanguageChanged();
+        }
+    }
+
+    // ---------------- About
+    public string AppVersion => Http.AppVersion;
+    public string RuntimeText => $".NET {Environment.Version} · {System.Runtime.InteropServices.RuntimeInformation.OSDescription}";
 
     public int ConcurrentDownloads { get => S.ConcurrentDownloads; set { S.ConcurrentDownloads = Math.Clamp(value, 1, 64); Changed(); } }
     public LaunchBehaviorOption OnLaunch
@@ -95,8 +117,16 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void BrowseJava()
     {
-        var dlg = new OpenFileDialog { Title = "Select javaw.exe", Filter = "Java (javaw.exe;java.exe)|javaw.exe;java.exe" };
+        var dlg = new OpenFileDialog { Title = L.T("Select javaw.exe"), Filter = "Java (javaw.exe;java.exe)|javaw.exe;java.exe" };
         if (dlg.ShowDialog() == true) JavaPath = dlg.FileName;
+    }
+
+    /// <summary>Opens the runtime's install folder (the one containing binjavaw.exe).</summary>
+    [RelayCommand]
+    private void OpenJavaFolder(JavaRuntime rt)
+    {
+        var dir = File.Exists(rt.Path) ? Path.GetDirectoryName(Path.GetDirectoryName(rt.Path)) : rt.Path;
+        Dialogs.OpenPath(dir ?? rt.Path);
     }
 
     [RelayCommand]
@@ -121,9 +151,9 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             await JavaManager.EnsureAsync(m, progress, CancellationToken.None);
-            Dialogs.Toast($"Java {m} is ready");
+            Dialogs.Toast(L.F("Java {0} is ready", m));
         }
-        catch (Exception ex) { Dialogs.Toast($"Java {m} install failed: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Java {0} install failed: {1}", m, ex.Message), true); }
         finally
         {
             InstallingJava = false;
@@ -135,7 +165,7 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task RemoveJava(JavaRuntime rt)
     {
-        if (!await Dialogs.ConfirmAsync("Remove Java", $"Remove Java {rt.Major}? It will be downloaded again when an instance needs it.", "Remove", true)) return;
+        if (!await Dialogs.ConfirmAsync(L.T("Remove Java"), L.F("Remove Java {0}? It will be downloaded again when an instance needs it.", rt.Major), L.T("Remove"), true)) return;
         try { JavaManager.Remove(rt.Major); }
         catch (Exception ex) { Dialogs.Toast(ex.Message, true); }
         RefreshJava();

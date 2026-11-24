@@ -14,7 +14,7 @@ namespace PyroLauncher.UI.ViewModels;
 public partial class CapeItem : ObservableObject
 {
     public CapeInfo? Info { get; init; }
-    public string Name => Info?.Alias ?? "No cape";
+    public string Name => Info?.Alias ?? L.T("No cape");
     [ObservableProperty] private ImageSource? _preview;
     [ObservableProperty] private bool _isActive;
 }
@@ -37,7 +37,7 @@ public partial class ProfileViewModel : ObservableObject
 
     public bool IsMicrosoft => Account?.Type == AccountType.Microsoft;
     public bool HasPending => PendingSkinPath != null;
-    public string VariantText => Slim ? "Slim (Alex)" : "Classic (Steve)";
+    public string VariantText => Slim ? L.T("Slim (Alex)") : L.T("Classic (Steve)");
 
     private MinecraftProfile? _profile;
     private CancellationTokenSource? _cts;
@@ -156,23 +156,23 @@ public partial class ProfileViewModel : ObservableObject
             _profile = await ProfileApi.SetCapeAsync(Account, item.Info?.Id, CancellationToken.None);
             foreach (var c in Capes) c.IsActive = c == item;
             CapeTexture = item.Info != null ? await LoadBitmapAsync(item.Info.Url, CancellationToken.None) : null;
-            Dialogs.Toast(item.Info == null ? "Cape hidden" : $"Now wearing {item.Name}");
+            Dialogs.Toast(item.Info == null ? L.T("Cape hidden") : L.F("Now wearing {0}", item.Name));
         }
-        catch (Exception ex) { Dialogs.Toast($"Could not change cape: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Could not change cape: {0}", ex.Message), true); }
         finally { IsBusy = false; }
     }
 
     [RelayCommand]
     private void ChooseSkin()
     {
-        var dlg = new OpenFileDialog { Title = "Choose a skin", Filter = "Minecraft skin (*.png)|*.png" };
+        var dlg = new OpenFileDialog { Title = L.T("Choose a skin"), Filter = "Minecraft skin (*.png)|*.png" };
         if (dlg.ShowDialog() != true) return;
         try
         {
             var bmp = DecodePng(File.ReadAllBytes(dlg.FileName))!;
             if (bmp.PixelWidth != 64 || (bmp.PixelHeight != 64 && bmp.PixelHeight != 32))
             {
-                Dialogs.Toast("Skins must be 64×64 or 64×32 PNG images.", true);
+                Dialogs.Toast(L.T("Skins must be 64×64 or 64×32 PNG images."), true);
                 return;
             }
             UploadSlim = Controls.SkinViewer.DetectSlim(bmp);
@@ -180,7 +180,7 @@ public partial class ProfileViewModel : ObservableObject
             Skin = bmp;
             Slim = UploadSlim;
         }
-        catch (Exception ex) { Dialogs.Toast($"Could not read image: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Could not read image: {0}", ex.Message), true); }
     }
 
     [RelayCommand]
@@ -203,9 +203,9 @@ public partial class ProfileViewModel : ObservableObject
             await ApplyProfileAsync(_profile, CancellationToken.None);
             _currentSkin = Skin;
             _currentSlim = Slim;
-            Dialogs.Toast("Skin uploaded — it shows in game after you rejoin.");
+            Dialogs.Toast(L.T("Skin uploaded - it shows in game after you rejoin."));
         }
-        catch (Exception ex) { Dialogs.Toast($"Upload failed: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Upload failed: {0}", ex.Message), true); }
         finally { IsBusy = false; }
     }
 
@@ -213,7 +213,7 @@ public partial class ProfileViewModel : ObservableObject
     private async Task ResetSkin()
     {
         if (Account == null || !IsMicrosoft) return;
-        if (!await Dialogs.ConfirmAsync("Reset skin", "Reset this account's skin to the default Minecraft skin?", "Reset")) return;
+        if (!await Dialogs.ConfirmAsync(L.T("Reset skin"), L.T("Reset this account's skin to the default Minecraft skin?"), L.T("Reset"))) return;
         IsBusy = true;
         try
         {
@@ -222,7 +222,7 @@ public partial class ProfileViewModel : ObservableObject
             _currentSkin = Skin;
             _currentSlim = Slim;
         }
-        catch (Exception ex) { Dialogs.Toast($"Reset failed: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Reset failed: {0}", ex.Message), true); }
         finally { IsBusy = false; }
     }
 

@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -78,12 +79,12 @@ public static class LoaderService
     public static async Task<string> EnsureInstalledAsync(Instance inst, IProgress<TaskProgress>? progress, Action<string>? log, CancellationToken ct)
     {
         var cfg = inst.Config;
-        progress?.Report(new TaskProgress($"Preparing Minecraft {cfg.MinecraftVersion}…"));
+        progress?.Report(new TaskProgress(L.F("Preparing Minecraft {0}…", cfg.MinecraftVersion)));
         await MojangMeta.EnsureVersionJsonAsync(cfg.MinecraftVersion, ct);
         if (cfg.Loader == ModLoader.Vanilla) return cfg.MinecraftVersion;
 
         if (string.IsNullOrEmpty(cfg.LoaderVersion))
-            throw new InvalidOperationException($"No {cfg.Loader} version selected for this instance.");
+            throw new InvalidOperationException(L.F("No {0} version selected for this instance.", cfg.Loader));
 
         var key = $"{cfg.Loader}:{cfg.LoaderVersion}";
         if (cfg.InstalledKey == key && cfg.InstalledVersionId != null && IsInstalled(cfg.InstalledVersionId))
@@ -119,10 +120,10 @@ public static class LoaderService
 
     private static async Task<string> InstallFabricAsync(string mc, string loader, IProgress<TaskProgress>? progress, CancellationToken ct)
     {
-        progress?.Report(new TaskProgress($"Installing Fabric {loader}…"));
+        progress?.Report(new TaskProgress(L.F("Installing Fabric {0}…", loader)));
         var profile = await Http.GetJsonAsync(
             $"https://meta.fabricmc.net/v2/versions/loader/{Uri.EscapeDataString(mc)}/{Uri.EscapeDataString(loader)}/profile/json", ct)
-            ?? throw new InvalidOperationException("Fabric meta returned no profile.");
+            ?? throw new InvalidOperationException(L.T("Fabric meta returned no profile."));
         var id = profile.Str("id") ?? $"fabric-loader-{loader}-{mc}";
         JsonUtil.WriteNode(MojangMeta.VersionJsonPath(id), profile);
         MarkInstalled(id);
@@ -134,7 +135,7 @@ public static class LoaderService
     {
         // The installer needs vanilla present and a launcher_profiles.json in the target dir.
         var vanilla = VersionResolver.Resolve(mc);
-        progress?.Report(new TaskProgress($"Preparing Minecraft {mc} for {label}…"));
+        progress?.Report(new TaskProgress(L.F("Preparing Minecraft {0} for {1}…", mc, label)));
         var java = await JavaManager.EnsureAsync(vanilla.JavaMajor, progress, ct);
         if (vanilla.ClientDownload != null)
         {
@@ -143,13 +144,13 @@ public static class LoaderService
         }
 
         var installer = Path.Combine(AppPaths.Cache, "installers", Path.GetFileName(new Uri(installerUrl).LocalPath));
-        progress?.Report(new TaskProgress($"Downloading {label} installer…"));
+        progress?.Report(new TaskProgress(L.F("Downloading {0} installer…", label)));
         if (!File.Exists(installer)) await Downloader.DownloadOneAsync(new DownloadItem(installerUrl, installer), ct);
 
         JsonNode profile;
         using (var zip = ZipFile.OpenRead(installer))
         {
-            var entry = zip.GetEntry("install_profile.json") ?? throw new InvalidDataException("Installer has no install_profile.json");
+            var entry = zip.GetEntry("install_profile.json") ?? throw new InvalidDataException(L.T("Installer has no install_profile.json"));
             using var s = entry.Open();
             profile = JsonNode.Parse(s)!;
         }
@@ -157,13 +158,13 @@ public static class LoaderService
         if (profile.Obj("versionInfo") is { } versionInfo)
             return await InstallLegacyForgeAsync(mc, installer, profile, versionInfo, ct);
 
-        var id = profile.Str("version") ?? throw new InvalidDataException("install_profile.json has no version id");
+        var id = profile.Str("version") ?? throw new InvalidDataException(L.T("install_profile.json has no version id"));
         if (IsInstalled(id)) return id;
 
         var profiles = Path.Combine(AppPaths.Meta, "launcher_profiles.json");
         if (!File.Exists(profiles)) await File.WriteAllTextAsync(profiles, "{\"profiles\":{},\"selectedProfile\":null}", ct);
 
-        progress?.Report(new TaskProgress($"Running {label} installer (this can take a few minutes)…"));
+        progress?.Report(new TaskProgress(L.F("Running {0} installer (this can take a few minutes)…", label)));
         var psi = new ProcessStartInfo(JavaManager.ConsoleJava(java))
         {
             WorkingDirectory = Path.GetDirectoryName(installer)!,
@@ -197,7 +198,7 @@ public static class LoaderService
         {
             string msg;
             lock (tail) msg = string.Join("\n", tail);
-            throw new InvalidOperationException($"{label} installer failed (exit code {proc.ExitCode}).\n{msg}");
+            throw new InvalidOperationException(L.F("{0} installer failed (exit code {1}).\n{2}", label, proc.ExitCode, msg));
         }
         MarkInstalled(id);
         return id;
@@ -206,7 +207,7 @@ public static class LoaderService
     /// <summary>Old (≤1.12) Forge installers: version JSON is embedded, universal jar is extracted manually.</summary>
     private static Task<string> InstallLegacyForgeAsync(string mc, string installer, JsonNode profile, JsonObject versionInfo, CancellationToken ct)
     {
-        var id = versionInfo.Str("id") ?? throw new InvalidDataException("Legacy installer versionInfo has no id");
+        var id = versionInfo.Str("id") ?? throw new InvalidDataException(L.T("Legacy installer versionInfo has no id"));
         var json = (JsonObject)versionInfo.DeepClone();
         if (json.Str("inheritsFrom") == null) json["inheritsFrom"] = mc;
         json.Remove("jar");

@@ -1,5 +1,6 @@
 <UserControl x:Class="PyroLauncher.UI.Views.InstanceSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:PyroLauncher.UI.Controls">
     <Grid>
@@ -10,14 +11,14 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,16,0">
             <StackPanel MaxWidth="820" HorizontalAlignment="Left" Width="820">
                 <!-- General -->
-                <TextBlock Text="General" Style="{StaticResource H2}" Margin="0,0,0,4"/>
+                <TextBlock Text="{l:T 'General'}" Style="{StaticResource H2}" Margin="0,0,0,4"/>
                 <Border Style="{StaticResource SettingRow}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="240"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Name" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Text="{l:T 'Name'}" VerticalAlignment="Center" FontWeight="SemiBold"/>
                         <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
                     </Grid>
                 </Border>
@@ -27,7 +28,7 @@
                             <ColumnDefinition Width="240"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Category" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Text="{l:T 'Category'}" VerticalAlignment="Center" FontWeight="SemiBold"/>
                         <ComboBox Grid.Column="1" ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}"/>
                     </Grid>
                 </Border>
@@ -39,7 +40,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Text="{Binding LoaderLabel}" FontWeight="SemiBold"/>
-                            <TextBlock Text="Installed on next launch" Style="{StaticResource Faint}" Margin="0,2,0,0"/>
+                            <TextBlock Text="{l:T 'Installed on next launch'}" Style="{StaticResource Faint}" Margin="0,2,0,0"/>
                         </StackPanel>
                         <ComboBox Grid.Column="1" ItemsSource="{Binding LoaderVersions}" SelectedItem="{Binding LoaderVersion}" VerticalAlignment="Center"/>
                     </Grid>
@@ -50,7 +51,7 @@
                             <ColumnDefinition Width="240"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Icon" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock Text="{l:T 'Icon'}" VerticalAlignment="Center" FontWeight="SemiBold"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Border Width="40" Height="40" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0">
                                 <Grid>
@@ -58,29 +59,29 @@
                                     <Image Source="{Binding Instance.Icon}" Stretch="UniformToFill"/>
                                 </Grid>
                             </Border>
-                            <Button Content="Change…" Command="{Binding ChangeIconCommand}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <Button Content="Remove" Command="{Binding RemoveIconCommand}" Style="{StaticResource GhostButton}" VerticalAlignment="Center"/>
+                            <Button Content="{l:T 'Change…'}" Command="{Binding ChangeIconCommand}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <Button Content="{l:T 'Remove'}" Command="{Binding RemoveIconCommand}" Style="{StaticResource GhostButton}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- Game overrides -->
-                <TextBlock Text="Game settings" Style="{StaticResource H2}" Margin="0,28,0,2"/>
-                <TextBlock Text="Turn a setting on to override the global default from Settings → Minecraft for this instance only." Style="{StaticResource Muted}" Margin="0,0,0,4"/>
+                <TextBlock Text="{l:T 'Game settings'}" Style="{StaticResource H2}" Margin="0,28,0,2"/>
+                <TextBlock Text="{l:T 'Turn a setting on to override the global default from Settings → Minecraft for this instance only.'}" Style="{StaticResource Muted}" Margin="0,0,0,4"/>
 
                 <!-- Java -->
                 <Border Style="{StaticResource SettingRow}">
                     <StackPanel>
                         <DockPanel>
-                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseJava}" Content="Custom"/>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseJava}" Content="{l:T 'Custom'}"/>
                             <StackPanel>
-                                <TextBlock Text="Java executable" FontWeight="SemiBold"/>
+                                <TextBlock Text="{l:T 'Java executable'}" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding DefaultJava}" Style="{StaticResource Faint}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </DockPanel>
                         <DockPanel Margin="0,10,0,0" Visibility="{Binding UseJava, Converter={StaticResource VisibleIf}}">
-                            <Button DockPanel.Dock="Right" Content="Browse…" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
-                            <TextBox Text="{Binding JavaPath, UpdateSourceTrigger=PropertyChanged}" Tag="C:\Path\to\javaw.exe"/>
+                            <Button DockPanel.Dock="Right" Content="{l:T 'Browse…'}" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
+                            <TextBox Text="{Binding JavaPath, UpdateSourceTrigger=PropertyChanged}" Tag="{l:T 'C:\\Path\\to\\javaw.exe'}"/>
                         </DockPanel>
                     </StackPanel>
                 </Border>
@@ -89,18 +90,18 @@
                 <Border Style="{StaticResource SettingRow}">
                     <StackPanel>
                         <DockPanel>
-                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseMemory}" Content="Custom"/>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseMemory}" Content="{l:T 'Custom'}"/>
                             <StackPanel>
-                                <TextBlock Text="Memory (RAM)" FontWeight="SemiBold"/>
+                                <TextBlock Text="{l:T 'Memory (RAM)'}" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding DefaultMemory}" Style="{StaticResource Faint}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </DockPanel>
                         <StackPanel Margin="0,12,0,0" Visibility="{Binding UseMemory, Converter={StaticResource VisibleIf}}">
-                            <TextBlock Text="MAXIMUM" Style="{StaticResource Overline}" Margin="0,0,0,6"/>
+                            <TextBlock Text="{l:T 'MAXIMUM'}" Style="{StaticResource Overline}" Margin="0,0,0,6"/>
                             <c:MemoryPicker Value="{Binding MaxMemory}"/>
-                            <TextBlock Text="MINIMUM" Style="{StaticResource Overline}" Margin="0,16,0,6"/>
+                            <TextBlock Text="{l:T 'MINIMUM'}" Style="{StaticResource Overline}" Margin="0,16,0,6"/>
                             <c:MemoryPicker Value="{Binding MinMemory}"/>
-                            <TextBlock Text="⚠  The minimum is higher than the maximum. The launcher will use the maximum for both when starting the game." Foreground="{StaticResource LogWarn}" TextWrapping="Wrap" Margin="0,8,0,0"
+                            <TextBlock Text="{l:T '⚠  The minimum is higher than the maximum. The launcher will use the maximum for both when starting the game.'}" Foreground="{StaticResource LogWarn}" TextWrapping="Wrap" Margin="0,8,0,0"
                                        Visibility="{Binding MinAboveMax, Converter={StaticResource VisibleIf}}"/>
                         </StackPanel>
                     </StackPanel>
@@ -110,9 +111,9 @@
                 <Border Style="{StaticResource SettingRow}">
                     <StackPanel>
                         <DockPanel>
-                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseJvmArgs}" Content="Custom"/>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseJvmArgs}" Content="{l:T 'Custom'}"/>
                             <StackPanel Margin="0,0,16,0">
-                                <TextBlock Text="JVM arguments" FontWeight="SemiBold"/>
+                                <TextBlock Text="{l:T 'JVM arguments'}" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding DefaultJvm}" Style="{StaticResource Faint}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
                             </StackPanel>
                         </DockPanel>
@@ -126,9 +127,9 @@
                 <Border Style="{StaticResource SettingRow}">
                     <StackPanel>
                         <DockPanel>
-                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseResolution}" Content="Custom"/>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseResolution}" Content="{l:T 'Custom'}"/>
                             <StackPanel>
-                                <TextBlock Text="Window size" FontWeight="SemiBold"/>
+                                <TextBlock Text="{l:T 'Window size'}" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding DefaultResolution}" Style="{StaticResource Faint}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </DockPanel>
@@ -144,22 +145,64 @@
                 <Border Style="{StaticResource SettingRow}">
                     <StackPanel>
                         <DockPanel>
-                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseFullscreen}" Content="Custom"/>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding UseFullscreen}" Content="{l:T 'Custom'}"/>
                             <StackPanel>
-                                <TextBlock Text="Start in fullscreen" FontWeight="SemiBold"/>
+                                <TextBlock Text="{l:T 'Start in fullscreen'}" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding DefaultFullscreen}" Style="{StaticResource Faint}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </DockPanel>
-                        <CheckBox Margin="0,10,0,0" Content="Fullscreen" IsChecked="{Binding Fullscreen}" Visibility="{Binding UseFullscreen, Converter={StaticResource VisibleIf}}"/>
+                        <CheckBox Margin="0,10,0,0" Content="{l:T 'Fullscreen'}" IsChecked="{Binding Fullscreen}" Visibility="{Binding UseFullscreen, Converter={StaticResource VisibleIf}}"/>
                     </StackPanel>
                 </Border>
 
+                <!-- Presets -->
+                <TextBlock Text="{l:T 'Presets'}" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                <Border Style="{StaticResource SettingRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="240"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="{l:T 'Apply a preset'}" FontWeight="SemiBold"/>
+                            <TextBlock Text="{l:T 'Find the preset\'s mods, resource packs and shaders for this version and choose what to install.'}" Style="{StaticResource Faint}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <DockPanel Grid.Column="1" VerticalAlignment="Center">
+                            <Button DockPanel.Dock="Right" Content="{l:T 'Manage presets'}" Command="{Binding ManagePresetsCommand}" Margin="8,0,0,0" Style="{StaticResource GhostButton}"/>
+                            <Button DockPanel.Dock="Right" Command="{Binding ApplyPresetCommand}" Margin="8,0,0,0" IsEnabled="{Binding HasPresets}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE896;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{l:T 'Apply…'}"/>
+                                </StackPanel>
+                            </Button>
+                            <ComboBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}" DisplayMemberPath="Name" IsEnabled="{Binding HasPresets}"/>
+                        </DockPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Share -->
+                <TextBlock Text="{l:T 'Share'}" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                <Border Style="{StaticResource SettingRow}">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Command="{Binding ExportCommand}" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xEDE1;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{l:T 'Export modpack…'}"/>
+                            </StackPanel>
+                        </Button>
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="{l:T 'Export as modpack'}" FontWeight="SemiBold"/>
+                            <TextBlock Text="{l:T 'Save this instance as a Modrinth, CurseForge or PyroLauncher modpack and pick which files to include.'}" Style="{StaticResource Faint}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
                 <!-- Danger -->
-                <TextBlock Text="Manage" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                <TextBlock Text="{l:T 'Manage'}" Style="{StaticResource H2}" Margin="0,28,0,4"/>
                 <Border Style="{StaticResource SettingRow}" BorderThickness="0">
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Open instance folder" Command="{Binding OpenFolderCommand}" Margin="0,0,10,0"/>
-                        <Button Content="Delete instance…" Command="{Binding DeleteCommand}"/>
+                        <Button Content="{l:T 'Open instance folder'}" Command="{Binding OpenFolderCommand}" Margin="0,0,10,0"/>
+                        <Button Content="{l:T 'Delete instance…'}" Command="{Binding DeleteCommand}"/>
                     </StackPanel>
                 </Border>
                 <Border Height="24"/>
@@ -169,8 +212,8 @@
         <!-- Save bar -->
         <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,12,0,16">
             <DockPanel>
-                <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="Save changes" Command="{Binding SaveCommand}" IsEnabled="{Binding IsDirty}"/>
-                <TextBlock Text="You have unsaved changes." Style="{StaticResource Muted}" VerticalAlignment="Center"
+                <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Content="{l:T 'Save changes'}" Command="{Binding SaveCommand}" IsEnabled="{Binding IsDirty}"/>
+                <TextBlock Text="{l:T 'You have unsaved changes.'}" Style="{StaticResource Muted}" VerticalAlignment="Center"
                            Visibility="{Binding IsDirty, Converter={StaticResource VisibleIf}}"/>
             </DockPanel>
         </Border>

@@ -18,6 +18,7 @@ public partial class MainWindow : Window
         // A borderless maximized window extends past the screen edges by the resize border; pad it back in.
         Root.Margin = WindowState == WindowState.Maximized ? new Thickness(7) : new Thickness(0);
         MaxButton.Content = WindowState == WindowState.Maximized ? "" : "";
+        MaxButton.ToolTip = WindowState == WindowState.Maximized ? UI.L.T("Restore") : UI.L.T("Maximize");
     }
 
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

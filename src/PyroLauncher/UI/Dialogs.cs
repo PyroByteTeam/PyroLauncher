@@ -69,7 +69,14 @@ public static class Dialogs
     }
 
     public static void ShowImage(string? path, string? url, string? title = null) =>
-        Show(new ImageViewerViewModel(path, url, title));
+        Show(new ImageViewerViewModel([new GalleryEntry(path, url, title)], 0));
+
+    /// <summary>Image viewer with previous / next controls (arrow keys work too).</summary>
+    public static void ShowGallery(IReadOnlyList<GalleryEntry> images, int index)
+    {
+        if (images.Count == 0) return;
+        Show(new ImageViewerViewModel(images, Math.Clamp(index, 0, images.Count - 1)));
+    }
 
     public static void Toast(string message, bool error = false)
     {
@@ -153,19 +160,39 @@ public partial class ChoiceDialogViewModel(string title, string message, IEnumer
     [RelayCommand] private void Cancel() { Dialogs.Close(this); Result.TrySetResult(null); }
 }
 
+public record GalleryEntry(string? Path, string? Url, string? Title);
+
 public partial class ImageViewerViewModel : ObservableObject
 {
-    public string? Path { get; }
-    public string? Url { get; }
-    public string? Title { get; }
-    public string? LocalUri => Path;
+    public IReadOnlyList<GalleryEntry> Images { get; }
+    [ObservableProperty] private int _index;
 
-    public ImageViewerViewModel(string? path, string? url, string? title)
+    private GalleryEntry Current => Images[Index];
+    public string? Path => Current.Path;
+    public string? Url => Current.Url;
+    public string? LocalUri => Current.Path;
+    public string? Title => Current.Title ?? (Current.Path != null ? System.IO.Path.GetFileName(Current.Path) : null);
+    public bool HasMany => Images.Count > 1;
+    public string PositionText => $"{Index + 1} / {Images.Count}";
+
+    public ImageViewerViewModel(IReadOnlyList<GalleryEntry> images, int index)
     {
-        Path = path;
-        Url = url;
-        Title = title ?? (path != null ? System.IO.Path.GetFileName(path) : null);
+        Images = images;
+        _index = index;
     }
+
+    partial void OnIndexChanged(int value)
+    {
+        OnPropertyChanged(nameof(Path));
+        OnPropertyChanged(nameof(Url));
+        OnPropertyChanged(nameof(LocalUri));
+        OnPropertyChanged(nameof(Title));
+        OnPropertyChanged(nameof(PositionText));
+    }
+
+    // Wraps around at both ends.
+    [RelayCommand] private void Previous() { if (HasMany) Index = (Index - 1 + Images.Count) % Images.Count; }
+    [RelayCommand] private void Next() { if (HasMany) Index = (Index + 1) % Images.Count; }
 
     [RelayCommand] private void Close() => Dialogs.Close(this);
     [RelayCommand] private void OpenExternal() { if (Path != null) Dialogs.OpenPath(Path); else Dialogs.OpenUrl(Url); }

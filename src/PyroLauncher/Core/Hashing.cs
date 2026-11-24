@@ -17,6 +17,12 @@ public static class Hashing
         return Convert.ToHexStringLower(SHA256.HashData(fs));
     }
 
+    public static string Sha512File(string path)
+    {
+        using var fs = File.OpenRead(path);
+        return Convert.ToHexStringLower(SHA512.HashData(fs));
+    }
+
     /// <summary>CurseForge file fingerprint: MurmurHash2 (seed 1) over the file with whitespace bytes removed.</summary>
     public static uint CurseForgeFingerprint(string path)
     {
