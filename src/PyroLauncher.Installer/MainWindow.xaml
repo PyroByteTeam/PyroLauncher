@@ -1,7 +1,7 @@
 <Window x:Class="PyroLauncher.Installer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="PyroLauncher Setup" Icon="/pyro.ico" Width="620" Height="440" ResizeMode="NoResize"
+        Title="PyroLauncher Setup" Icon="/pyro.ico" Width="620" Height="520" ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen" Background="{StaticResource Bg0}" Foreground="{StaticResource Fg}"
         FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13" UseLayoutRounding="True" TextOptions.TextFormattingMode="Display">
     <WindowChrome.WindowChrome>
@@ -57,11 +57,16 @@
                         <Button x:Name="BackButton" DockPanel.Dock="Left" Style="{StaticResource Ghost}" Content="Back" Click="Back_Click"/>
                         <Button DockPanel.Dock="Right" Style="{StaticResource Primary}" Content="Uninstall" Click="Uninstall_Click" MinWidth="130"/>
                     </DockPanel>
-                    <StackPanel Margin="0,26,0,0">
-                        <CheckBox x:Name="RemoveData" Content="Also delete my instances, worlds, accounts and settings"/>
-                        <TextBlock x:Name="DataPath" Foreground="{StaticResource Fg3}" FontSize="12" Margin="27,6,0,0" TextWrapping="Wrap"/>
-                        <TextBlock Foreground="{StaticResource Fg2}" FontSize="12" Margin="27,10,0,0" TextWrapping="Wrap"
-                                   Text="Leave this unticked to keep everything so a later reinstall picks up where you left off. Deleting it cannot be undone."/>
+                    <StackPanel Margin="0,20,0,0">
+                        <TextBlock Foreground="{StaticResource Fg2}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12">
+                            <Run Text="The program is always removed. Tick what else to delete from"/>
+                            <Run x:Name="DataPath" Foreground="{StaticResource Fg}"/><Run Text=" — anything left unticked is kept, so a reinstall picks up where you left off."/>
+                        </TextBlock>
+                        <CheckBox x:Name="SelectAll" Content="Delete everything" FontWeight="SemiBold" IsThreeState="True"
+                                  Click="SelectAll_Click"/>
+                        <StackPanel x:Name="CategoryList" Margin="27,10,0,0"/>
+                        <TextBlock Foreground="{StaticResource Fg3}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
+                                   Text="Deleted data cannot be recovered."/>
                     </StackPanel>
                 </DockPanel>
 
