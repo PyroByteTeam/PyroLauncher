@@ -4,7 +4,8 @@
 
 # PyroLauncher
 
-A Minecraft launcher for people who play with mods.
+A custom launcher for people who play with mods (PyroLauncher is not an official Minecraft product and is not approved by or associated with
+Mojang or Microsoft)
 
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-1f1f1f?style=flat-square)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-1f1f1f?style=flat-square)](https://dotnet.microsoft.com/)
