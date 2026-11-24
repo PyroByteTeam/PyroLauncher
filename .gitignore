@@ -4,4 +4,5 @@ obj/
 *.user
 .testhome/
 artifacts/
+docs/
 src/PyroLauncher.Installer/payload.zip
