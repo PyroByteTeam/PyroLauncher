@@ -116,7 +116,24 @@ public static class InstallerCore
 
     // ------------------------------------------------------------------ uninstall
 
-    public static async Task UninstallAsync(bool removeUserData, IProgress<(string msg, double pct)> progress)
+    /// <summary>A group of user data that can optionally be removed on uninstall. Paths are relative to <see cref="UserDataDir"/>.</summary>
+    public record DataCategory(string Key, string Title, string Description, string[] Paths);
+
+    /// <summary>Everything the uninstaller can remove. Add an entry here to offer another option.</summary>
+    public static readonly DataCategory[] DataCategories =
+    [
+        new("instances", "Instances",
+            "Worlds, mods, resource packs, shader packs, screenshots and play time of every instance.",
+            ["instances"]),
+        new("settings", "Settings and accounts",
+            "Launcher settings, categories, layout choices and saved Microsoft accounts.",
+            ["settings.json", "settings.json.tmp", "accounts.dat"]),
+        new("downloads", "Downloaded files",
+            "Shared game libraries, Java runtimes, caches and logs. They are downloaded again when needed.",
+            ["meta", "java", "cache", "logs"]),
+    ];
+
+    public static async Task UninstallAsync(IReadOnlyCollection<string> removeData, IProgress<(string msg, double pct)> progress)
     {
         var info = GetInstalled();
         await Task.Run(() =>
@@ -136,10 +153,24 @@ public static class InstallerCore
                 foreach (var d in Directory.GetDirectories(info.Path)) TryDeleteDir(d);
             }
 
-            if (removeUserData)
+            if (removeData.Count > 0 && DataCategories.All(c => removeData.Contains(c.Key)))
             {
-                progress.Report(("Removing instances and settings…", 0.75));
+                // Everything selected: remove the whole data folder, including anything not covered by a category.
+                progress.Report(("Removing all launcher data…", 0.75));
                 TryDeleteDir(UserDataDir);
+            }
+            else
+            {
+                foreach (var cat in DataCategories.Where(c => removeData.Contains(c.Key)))
+                {
+                    progress.Report(($"Removing {cat.Title.ToLowerInvariant()}…", 0.75));
+                    foreach (var rel in cat.Paths)
+                    {
+                        var p = Path.Combine(UserDataDir, rel);
+                        if (Directory.Exists(p)) TryDeleteDir(p);
+                        else TryDelete(p);
+                    }
+                }
             }
 
             Registry.CurrentUser.DeleteSubKeyTree(UninstallKey, false);

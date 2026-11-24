@@ -102,6 +102,11 @@
                                 <Setter TargetName="box" Property="Background" Value="White"/>
                                 <Setter TargetName="chk" Property="Visibility" Value="Visible"/>
                             </Trigger>
+                            <Trigger Property="IsChecked" Value="{x:Null}">
+                                <Setter TargetName="box" Property="Background" Value="White"/>
+                                <Setter TargetName="chk" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="chk" Property="Text" Value="&#xE738;"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>

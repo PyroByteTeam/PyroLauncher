@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Win32;
 
 namespace PyroLauncher.Installer;
@@ -22,6 +23,7 @@ public partial class MainWindow : Window
         UninstallInfo.Text = _installed == null
             ? "PyroLauncher doesn't appear to be installed."
             : $"Version {_installed.Version.ToString(3)} in {_installed.Path}";
+        BuildDataOptions();
         SetupMain();
         if (uninstallMode) ShowPage(UninstallPage);
     }
@@ -121,10 +123,56 @@ public partial class MainWindow : Window
         }
     }
 
+    // ------------------------------------------------------------------ data options
+
+    private readonly List<(InstallerCore.DataCategory cat, CheckBox box)> _dataBoxes = [];
+
+    private void BuildDataOptions()
+    {
+        foreach (var cat in InstallerCore.DataCategories)
+        {
+            var panel = new StackPanel { Margin = new Thickness(0, 0, 0, 10) };
+            var box = new CheckBox { Content = cat.Title, IsChecked = false };
+            box.Click += (_, _) => SyncSelectAll();
+            panel.Children.Add(box);
+            panel.Children.Add(new TextBlock
+            {
+                Text = cat.Description,
+                FontSize = 12,
+                Margin = new Thickness(27, 3, 0, 0),
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = (System.Windows.Media.Brush)FindResource("Fg3"),
+            });
+            CategoryList.Children.Add(panel);
+            _dataBoxes.Add((cat, box));
+        }
+        SyncSelectAll();
+    }
+
+    /// <summary>"Delete everything" is ticked when all are, dashed when some are, empty when none are.</summary>
+    private void SyncSelectAll()
+    {
+        var n = _dataBoxes.Count(b => b.box.IsChecked == true);
+        SelectAll.IsChecked = n == 0 ? false : n == _dataBoxes.Count ? true : null;
+    }
+
+    private void SelectAll_Click(object sender, RoutedEventArgs e)
+    {
+        // Clicking cycles through the three states; treat "partial" as "tick everything".
+        var all = _dataBoxes.Any(b => b.box.IsChecked != true);
+        foreach (var (_, box) in _dataBoxes) box.IsChecked = all;
+        SyncSelectAll();
+    }
+
+    private List<InstallerCore.DataCategory> SelectedData =>
+        _dataBoxes.Where(b => b.box.IsChecked == true).Select(b => b.cat).ToList();
+
     private async void Uninstall_Click(object sender, RoutedEventArgs e)
     {
-        if (RemoveData.IsChecked == true &&
-            MessageBox.Show(this, "This permanently deletes all instances, worlds, screenshots and accounts in\n" + InstallerCore.UserDataDir + "\n\nContinue?",
+        var selected = SelectedData;
+        if (selected.Count > 0 &&
+            MessageBox.Show(this, "This permanently deletes:\n\n" + string.Join("\n", selected.Select(c => "• " + c.Title)) +
+                                  "\n\nfrom " + InstallerCore.UserDataDir + "\n\nContinue?",
                 "PyroLauncher Setup", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
             return;
 
@@ -134,9 +182,14 @@ public partial class MainWindow : Window
         ShowPage(ProgressPage);
         try
         {
-            await InstallerCore.UninstallAsync(RemoveData.IsChecked == true, MakeProgress());
+            await InstallerCore.UninstallAsync(selected.Select(c => c.Key).ToList(), MakeProgress());
             ProgressHeading.Text = "PyroLauncher was removed";
-            ProgressText.Text = RemoveData.IsChecked == true ? "All launcher files and data were deleted." : $"Your data is still in {InstallerCore.UserDataDir}.";
+            var kept = InstallerCore.DataCategories.Where(c => !selected.Contains(c)).Select(c => c.Title.ToLowerInvariant()).ToList();
+            ProgressText.Text = kept.Count == 0
+                ? "The launcher and all of its data were deleted."
+                : selected.Count == 0
+                    ? $"Your data is still in {InstallerCore.UserDataDir}."
+                    : $"Kept: {string.Join(", ", kept)} (in {InstallerCore.UserDataDir}).";
         }
         catch (Exception ex)
         {
