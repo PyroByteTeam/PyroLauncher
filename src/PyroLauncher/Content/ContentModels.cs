@@ -50,7 +50,7 @@ public enum SearchSort { Relevance, Downloads, Newest, Updated }
 /// <summary>Extra search filters. Category is a Modrinth category slug; Environment is "client"/"server"/null.</summary>
 public record SearchFilters(SearchSort Sort = SearchSort.Relevance, string? Category = null, string? Environment = null);
 
-public class ProjectSummary
+public partial class ProjectSummary : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
 {
     public ContentSource Source { get; set; }
     public string Id { get; set; } = "";
@@ -62,6 +62,8 @@ public class ProjectSummary
     public long Downloads { get; set; }
     public string? WebUrl { get; set; }
 
+    [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty] private bool _isSelected;
+    public string Initials => new string(Title.Where(char.IsLetterOrDigit).Take(2).ToArray()) is { Length: > 0 } s ? s : "?";
     public string SourceText => Source == ContentSource.Modrinth ? "Modrinth" : "CurseForge";
     public string DownloadsText => Downloads switch
     {
@@ -86,7 +88,8 @@ public class ProjectDetails : ProjectSummary
     public string LoadersText => Loaders.Count == 0 ? "—" : string.Join(", ", Loaders);
 }
 
-public record Dependency(string ProjectId, string? VersionId, bool Required);
+/// <summary>Kind: required, optional, incompatible or embedded.</summary>
+public record Dependency(string ProjectId, string? VersionId, bool Required, string Kind = "required");
 
 public class ProjectVersion
 {

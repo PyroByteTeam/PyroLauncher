@@ -58,6 +58,9 @@ public static class InstanceManager
     public static void Delete(Instance inst)
     {
         Directory.Delete(inst.Dir, true);
+        // Keep the time played in the lifetime total even after the instance is gone.
+        SettingsService.Current.DeletedPlaytimeSeconds += inst.Config.PlayTimeSeconds;
+        SettingsService.Save();
         Instances.Remove(inst);
         NotifyChanged();
     }

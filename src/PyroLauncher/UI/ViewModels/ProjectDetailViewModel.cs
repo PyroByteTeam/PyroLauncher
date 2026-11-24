@@ -12,8 +12,95 @@ public partial class VersionItem(ProjectVersion v) : ObservableObject
     [ObservableProperty] private bool _isInstalled;
 }
 
+public partial class DependencyItem : ObservableObject
+{
+    public ContentSource Source { get; init; }
+    public string ProjectId { get; init; } = "";
+    public string Title { get; init; } = "";
+    public string? IconUrl { get; init; }
+    public string Kind { get; init; } = "required";
+    [ObservableProperty] private bool _isInstalled;
+    public string KindText => Kind switch
+    {
+        "optional" => "Optional",
+        "incompatible" => "Incompatible",
+        "embedded" => "Bundled",
+        _ => "Required",
+    };
+    public bool CanInstall => !IsInstalled && Kind is "required" or "optional";
+    partial void OnIsInstalledChanged(bool value) => OnPropertyChanged(nameof(CanInstall));
+}
+
 public partial class ProjectDetailViewModel : ObservableObject
 {
+    // ---------------- dependencies of the selected version
+    public ObservableCollection<DependencyItem> Dependencies { get; } = [];
+    [ObservableProperty] private bool _dependenciesExpanded;
+    [ObservableProperty] private bool _loadingDependencies;
+    [ObservableProperty] private string _dependenciesHeader = "Dependencies";
+    public bool HasDependencies => Dependencies.Count > 0;
+    private CancellationTokenSource? _depsCts;
+
+    private async Task LoadDependenciesAsync(VersionItem? v)
+    {
+        _depsCts?.Cancel();
+        Dependencies.Clear();
+        OnPropertyChanged(nameof(HasDependencies));
+        if (v == null || v.Version.Dependencies.Count == 0) { DependenciesHeader = "No dependencies"; return; }
+        var cts = _depsCts = new CancellationTokenSource();
+        LoadingDependencies = true;
+        try
+        {
+            var deps = v.Version.Dependencies.Where(d => d.ProjectId.Length > 0 && d.ProjectId != "0").ToList();
+            Dictionary<string, (string title, string? icon)> briefs = [];
+            if (v.Version.Source == ContentSource.Modrinth)
+                briefs = await ModrinthApi.GetProjectsBriefAsync(deps.Select(d => d.ProjectId), cts.Token);
+            else if (CurseForgeApi.HasKey)
+                briefs = (await CurseForgeApi.GetModsBriefAsync(deps.Select(d => long.Parse(d.ProjectId)), cts.Token))
+                    .ToDictionary(k => k.Key, k => (k.Value.title, k.Value.icon));
+            if (cts.IsCancellationRequested) return;
+
+            var order = new[] { "required", "optional", "embedded", "incompatible" };
+            foreach (var d in deps.OrderBy(d => Array.IndexOf(order, d.Kind)))
+            {
+                briefs.TryGetValue(d.ProjectId, out var b);
+                Dependencies.Add(new DependencyItem
+                {
+                    Source = v.Version.Source,
+                    ProjectId = d.ProjectId,
+                    Title = string.IsNullOrEmpty(b.title) ? d.ProjectId : b.title,
+                    IconUrl = b.icon,
+                    Kind = d.Kind,
+                    IsInstalled = _owner.FindInstalled(v.Version.Source, d.ProjectId) != null,
+                });
+            }
+            var required = Dependencies.Count(d => d.Kind == "required");
+            DependenciesHeader = $"Dependencies ({Dependencies.Count}{(required > 0 ? $" · {required} required" : "")}) — for {v.Version.VersionNumber}";
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex) { DependenciesHeader = $"Dependencies unavailable: {ex.Message}"; }
+        finally
+        {
+            if (_depsCts == cts) LoadingDependencies = false;
+            OnPropertyChanged(nameof(HasDependencies));
+        }
+    }
+
+    private ProjectSummary SummaryOf(DependencyItem d) => new()
+    {
+        Source = d.Source, Id = d.ProjectId, Title = d.Title, IconUrl = d.IconUrl,
+    };
+
+    [RelayCommand]
+    private void OpenDependency(DependencyItem d) => _owner.OpenProjectCommand.Execute(SummaryOf(d));
+
+    [RelayCommand]
+    private async Task InstallDependency(DependencyItem d)
+    {
+        await _owner.QuickInstallCommand.ExecuteAsync(SummaryOf(d));
+        d.IsInstalled = _owner.FindInstalled(d.Source, d.ProjectId) != null;
+    }
+
     private readonly ContentTabViewModel _owner;
     private CancellationTokenSource? _changelogCts;
 
@@ -42,6 +129,12 @@ public partial class ProjectDetailViewModel : ObservableObject
     /// <summary>True for a local file we could not match to Modrinth/CurseForge.</summary>
     public bool IsLocalOnly => ProjectId == null;
     public bool IsMod => _owner.Type == Content.ContentType.Mod;
+    public string ActiveLabel => _owner.Type switch
+    {
+        Content.ContentType.Mod => "Enabled",
+        Content.ContentType.ResourcePack => "Active in game",
+        _ => "Use this shader",
+    };
     public string SourceText => IsLocalOnly ? "Local file" : Source == ContentSource.Modrinth ? "Modrinth" : "CurseForge";
     public string CompatText => $"Only {_owner.Instance.Config.MinecraftVersion}{(IsMod ? " · " + _owner.Instance.LoaderText : "")}";
 
@@ -136,6 +229,7 @@ public partial class ProjectDetailViewModel : ObservableObject
         OnPropertyChanged(nameof(InstallText));
         OnPropertyChanged(nameof(CanInstall));
         _ = LoadChangelogAsync(value);
+        _ = LoadDependenciesAsync(value);
     }
 
     partial void OnInstalledChanged(LocalItem? value)

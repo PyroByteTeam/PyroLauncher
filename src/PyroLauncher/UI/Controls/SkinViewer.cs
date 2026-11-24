@@ -28,16 +28,49 @@ public class SkinViewer : Grid
     private readonly AxisAngleRotation3D _yaw = new(new Vector3D(0, 1, 0), 28);
     private readonly AxisAngleRotation3D _pitch = new(new Vector3D(1, 0, 0), 8);
     private Point? _drag;
+    private readonly PerspectiveCamera _camera;
+    private const double CameraDistance = 72;
+
+    /// <summary>
+    /// WPF's FieldOfView is horizontal, so on wide-but-short areas the model got cropped. Pick the FOV so the whole
+    /// player (≈36 units tall incl. hat, ≈24 wide when rotated) always fits, whatever the aspect ratio.
+    /// </summary>
+    private void FitCamera()
+    {
+        if (ActualWidth <= 0 || ActualHeight <= 0) return;
+        double aspect = ActualWidth / ActualHeight;
+        const double halfHeight = 21, halfWidth = 15;
+        double vertical = Math.Atan(halfHeight / CameraDistance);                  // half-angle needed vertically
+        double horizFromVertical = Math.Atan(Math.Tan(vertical) * aspect);         // as a horizontal half-angle
+        double horizontal = Math.Atan(halfWidth / CameraDistance);
+        _camera.FieldOfView = 2 * Math.Max(horizFromVertical, horizontal) * 180 / Math.PI;
+    }
+
+    /// <summary>Slim (Alex) skins leave the outer 2 columns of the right arm's back face transparent.</summary>
+    public static bool DetectSlim(BitmapSource? skin)
+    {
+        if (skin == null || skin.PixelWidth != 64 || skin.PixelHeight != 64) return false;
+        try
+        {
+            var bgra = skin.Format == PixelFormats.Bgra32 ? skin : new FormatConvertedBitmap(skin, PixelFormats.Bgra32, null, 0);
+            var px = new byte[4];
+            bool Transparent(int x, int y)
+            {
+                bgra.CopyPixels(new Int32Rect(x, y, 1, 1), px, 4, 0);
+                return px[3] == 0;
+            }
+            return Transparent(54, 20) && Transparent(55, 20) && Transparent(54, 31) && Transparent(55, 31);
+        }
+        catch { return false; }
+    }
 
     public SkinViewer()
     {
         Background = Brushes.Transparent;
         ClipToBounds = true;
-        var viewport = new Viewport3D
-        {
-            Camera = new PerspectiveCamera(new Point3D(0, 16, 72), new Vector3D(0, 0, -1), new Vector3D(0, 1, 0), 34),
-            IsHitTestVisible = false,
-        };
+        _camera = new PerspectiveCamera(new Point3D(0, 16, CameraDistance), new Vector3D(0, 0, -1), new Vector3D(0, 1, 0), 34);
+        var viewport = new Viewport3D { Camera = _camera, IsHitTestVisible = false };
+        SizeChanged += (_, _) => FitCamera();
         var lights = new Model3DGroup();
         lights.Children.Add(new AmbientLight(Color.FromRgb(0xC8, 0xC8, 0xC8)));
         lights.Children.Add(new DirectionalLight(Color.FromRgb(0x50, 0x50, 0x50), new Vector3D(-0.4, -0.6, -1)));

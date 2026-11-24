@@ -31,6 +31,7 @@
             <DataTemplate DataType="{x:Type vm:ScreenshotsViewModel}"><v:ScreenshotsView/></DataTemplate>
             <DataTemplate DataType="{x:Type vm:ServersViewModel}"><v:ServersView/></DataTemplate>
             <DataTemplate DataType="{x:Type vm:LogsViewModel}"><v:LogsView/></DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ConfigsViewModel}"><v:ConfigsView/></DataTemplate>
             <DataTemplate DataType="{x:Type vm:InstanceSettingsViewModel}"><v:InstanceSettingsView/></DataTemplate>
             <DataTemplate DataType="{x:Type vm:NewInstanceViewModel}"><v:NewInstanceView/></DataTemplate>
             <DataTemplate DataType="{x:Type vm:AccountsViewModel}"><v:AccountsView/></DataTemplate>

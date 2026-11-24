@@ -217,6 +217,12 @@ public static class DownloadManager
     {
         var c = HostCounters.GetOrAdd(host, _ => new HostCounter());
         Interlocked.Increment(ref c.Active);
+    }
+
+    /// <summary>Counts any request the launcher makes (API calls, images, downloads) so every contacted domain is listed.</summary>
+    public static void HostSeen(string host)
+    {
+        var c = HostCounters.GetOrAdd(host, _ => new HostCounter());
         Interlocked.Increment(ref c.Requests);
     }
 

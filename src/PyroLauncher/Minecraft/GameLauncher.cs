@@ -98,7 +98,7 @@ public static class GameLauncher
             ["auth_access_token"] = account.AccessToken,
             ["auth_session"] = $"token:{account.AccessToken}:{account.Uuid}",
             ["auth_xuid"] = account.Xuid ?? "0",
-            ["clientid"] = SettingsService.Current.MicrosoftClientId is { Length: > 0 } cid ? cid : "0",
+            ["clientid"] = Accounts.MicrosoftAuth.ClientId,
             ["user_type"] = account.Type == AccountType.Microsoft ? "msa" : "legacy",
             ["user_properties"] = "{}",
             ["version_type"] = "PyroLauncher",
@@ -123,8 +123,11 @@ public static class GameLauncher
         var args = new List<string>();
 
         // Memory + user JVM args
-        args.Add($"-Xms{s.MinMemoryMb ?? 512}M");
-        args.Add($"-Xmx{s.MaxMemoryMb ?? 4096}M");
+        // Java refuses to start when the initial heap is larger than the maximum, so cap it.
+        var maxMb = s.MaxMemoryMb ?? 4096;
+        var minMb = Math.Min(s.MinMemoryMb ?? 512, maxMb);
+        args.Add($"-Xms{minMb}M");
+        args.Add($"-Xmx{maxMb}M");
         args.AddRange(SplitArgs(s.JvmArgs ?? ""));
 
         if (v.JvmArgs.Count > 0)

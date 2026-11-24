@@ -148,7 +148,8 @@ public static class CurseForgeApi
             GameVersions = gv.Where(x => x.Length > 0 && char.IsDigit(x[0])).ToList(),
             Loaders = gv.Where(x => LoaderNames.Contains(x, StringComparer.OrdinalIgnoreCase)).ToList(),
             Dependencies = f.Arr("dependencies")
-                .Select(dep => new Dependency(dep.Long("modId").ToString(), null, dep.Int("relationType") == 3))
+                .Select(dep => new Dependency(dep.Long("modId").ToString(), null, dep.Int("relationType") == 3,
+                    dep.Int("relationType") switch { 1 or 6 => "embedded", 2 or 4 => "optional", 5 => "incompatible", _ => "required" }))
                 .ToList(),
         };
     }

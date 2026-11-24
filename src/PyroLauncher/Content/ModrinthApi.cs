@@ -151,7 +151,7 @@ public static class ModrinthApi
             Loaders = v.Strings("loaders").Select(Pretty).ToList(),
             Dependencies = v.Arr("dependencies")
                 .Where(dep => dep.Str("project_id") != null)
-                .Select(dep => new Dependency(dep.Str("project_id")!, dep.Str("version_id"), dep.Str("dependency_type") == "required"))
+                .Select(dep => new Dependency(dep.Str("project_id")!, dep.Str("version_id"), dep.Str("dependency_type") == "required", dep.Str("dependency_type") ?? "required"))
                 .ToList(),
         };
     }

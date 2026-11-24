@@ -50,7 +50,11 @@ public partial class ProfileViewModel : ObservableObject
     }
 
     partial void OnAccountChanged(Account? value) => OnPropertyChanged(nameof(IsMicrosoft));
-    partial void OnSlimChanged(bool value) => OnPropertyChanged(nameof(VariantText));
+    partial void OnSlimChanged(bool value)
+    {
+        OnPropertyChanged(nameof(VariantText));
+        if (HasPending && UploadSlim != value) UploadSlim = value;
+    }
     partial void OnPendingSkinPathChanged(string? value) => OnPropertyChanged(nameof(HasPending));
     partial void OnUploadSlimChanged(bool value) { if (HasPending) Slim = value; }
 
@@ -80,7 +84,7 @@ public partial class ProfileViewModel : ObservableObject
             {
                 // Offline accounts have no official skin; preview whatever skin the name has publicly (falls back to Steve).
                 Skin = await LoadBitmapAsync($"https://mc-heads.net/skin/{Uri.EscapeDataString(Account.Username)}", cts.Token);
-                Slim = false;
+                Slim = Controls.SkinViewer.DetectSlim(Skin);
             }
             _currentSkin = Skin;
             _currentSlim = Slim;
@@ -171,6 +175,7 @@ public partial class ProfileViewModel : ObservableObject
                 Dialogs.Toast("Skins must be 64×64 or 64×32 PNG images.", true);
                 return;
             }
+            UploadSlim = Controls.SkinViewer.DetectSlim(bmp);
             PendingSkinPath = dlg.FileName;
             Skin = bmp;
             Slim = UploadSlim;

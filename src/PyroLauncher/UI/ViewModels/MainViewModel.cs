@@ -53,6 +53,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void GoHome()
     {
+        _lastInstance?.Detach();
         _lastInstance = null;
         if (Nav != "home") Nav = "home";
         CurrentPage = Home;
@@ -70,6 +71,7 @@ public partial class MainViewModel : ObservableObject
             if (tab != null) cur.Tab = tab;
             return;
         }
+        _lastInstance?.Detach();
         var vm = new InstanceViewModel(inst);
         if (tab != null) vm.Tab = tab;
         _lastInstance = vm;

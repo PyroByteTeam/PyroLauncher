@@ -21,6 +21,8 @@ public class InstanceConfig
     public DateTime? LastPlayed { get; set; }
     public DateTime Created { get; set; } = DateTime.Now;
     public GameSettings Overrides { get; set; } = new();
+    /// <summary>Content tabs ("Mod", "ResourcePack", "ShaderPack") where online suggestions were left on.</summary>
+    public List<string> SuggestionsOn { get; set; } = [];
 
     /// <summary>Key ("loader:version") the cached <see cref="InstalledVersionId"/> was produced for.</summary>
     public string? InstalledKey { get; set; }

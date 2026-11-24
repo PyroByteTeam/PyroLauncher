@@ -42,6 +42,9 @@ public partial class InstanceSettingsViewModel : ObservableObject
     public string DefaultResolution => $"Default: {G.WindowWidth} × {G.WindowHeight}";
     public string DefaultFullscreen => $"Default: {(G.Fullscreen == true ? "on" : "off")}";
     public string LoaderLabel => $"{Instance.LoaderText} version";
+    public bool MinAboveMax => UseMemory && MinMemory > MaxMemory;
+    partial void OnMinMemoryChanged(int? value) => OnPropertyChanged(nameof(MinAboveMax));
+    partial void OnMaxMemoryChanged(int? value) => OnPropertyChanged(nameof(MinAboveMax));
 
     public InstanceSettingsViewModel(Instance inst)
     {

@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>PyroLauncher.Setup</AssemblyName>
     <RootNamespace>PyroLauncher.Installer</RootNamespace>
-    <Version>1.1.0</Version>
+    <Version>1.3.0</Version>
     <Product>PyroLauncher Setup</Product>
     <ApplicationIcon>pyro.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Resource Include="pyro.ico" />
+    <Resource Include="logo.png" />
     <!-- Produced by build-installer.ps1: the published launcher, zipped, plus version.txt inside. -->
     <EmbeddedResource Include="payload.zip" Condition="Exists('payload.zip')" LogicalName="payload.zip" />
   </ItemGroup>

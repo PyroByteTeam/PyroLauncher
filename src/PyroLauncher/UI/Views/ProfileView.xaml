@@ -84,7 +84,8 @@
                     <TextBlock Text="{Binding MsError}" TextWrapping="Wrap" Margin="2,8,0,0" Style="{StaticResource Muted}"
                                Visibility="{Binding MsError, Converter={StaticResource VisibleIf}}"/>
 
-                    <TextBlock Text="ADD OFFLINE ACCOUNT" Style="{StaticResource Overline}" Margin="2,18,0,8"/>
+                    <StackPanel Visibility="{Binding DeveloperMode, Converter={StaticResource VisibleIf}}">
+                    <TextBlock Text="ADD OFFLINE ACCOUNT (DEVELOPER MODE)" Style="{StaticResource Overline}" Margin="2,18,0,8"/>
                     <DockPanel>
                         <Button DockPanel.Dock="Right" Content="Add" Command="{Binding AddOfflineCommand}" Margin="8,0,0,0"/>
                         <TextBox Text="{Binding OfflineName, UpdateSourceTrigger=PropertyChanged}" Tag="Player name">
@@ -95,6 +96,7 @@
                     </DockPanel>
                     <TextBlock Text="{Binding OfflineError}" Style="{StaticResource Muted}" Margin="2,6,0,0" TextWrapping="Wrap"
                                Visibility="{Binding OfflineError, Converter={StaticResource VisibleIf}}"/>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
 
@@ -118,7 +120,14 @@
                             Visibility="{Binding HasPending, Converter={StaticResource VisibleIf}}" Background="White" BorderBrush="White">
                         <TextBlock Text="Preview — not uploaded" Style="{StaticResource BadgeText}" Foreground="Black" FontWeight="SemiBold"/>
                     </Border>
-                    <TextBlock Text="Drag to rotate" Style="{StaticResource Faint}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,18" IsHitTestVisible="False"/>
+                    <TextBlock Text="Drag to rotate" Style="{StaticResource Faint}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0,0,22" IsHitTestVisible="False"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,14"
+                                ToolTip="Arm style used for the preview. Uploaded skins use the variant chosen on the right.">
+                        <RadioButton Style="{StaticResource SegmentButton}" Content="Classic" GroupName="previewArms" Padding="10,5" Margin="0,0,6,0"
+                                     IsChecked="{Binding Slim, Converter={StaticResource Not}}"/>
+                        <RadioButton Style="{StaticResource SegmentButton}" Content="Slim" GroupName="previewArms" Padding="10,5" Margin="0"
+                                     IsChecked="{Binding Slim}"/>
+                    </StackPanel>
                     <ProgressBar IsIndeterminate="True" VerticalAlignment="Top" Margin="0" Visibility="{Binding IsLoading, Converter={StaticResource VisibleIf}}"/>
                     <TextBlock Text="{Binding Error}" Style="{StaticResource Muted}" TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="20,0,20,44"
                                HorizontalAlignment="Center" TextAlignment="Center" Visibility="{Binding Error, Converter={StaticResource VisibleIf}}"/>
