@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -27,6 +28,12 @@ public class InstanceConfig
     /// <summary>Key ("loader:version") the cached <see cref="InstalledVersionId"/> was produced for.</summary>
     public string? InstalledKey { get; set; }
     public string? InstalledVersionId { get; set; }
+
+    /// <summary>"mc|loader|loaderVersion" of the last complete install (game files + Java). Differs from the current key → Install button.</summary>
+    public string? PreparedKey { get; set; }
+
+    /// <summary>Set for instances created from a Modrinth / CurseForge modpack.</summary>
+    public ModpackSource? Modpack { get; set; }
 }
 
 public partial class Instance : ObservableObject
@@ -58,6 +65,21 @@ public partial class Instance : ObservableObject
         LoadIcon();
     }
 
+    public string CurrentKey => $"{Config.MinecraftVersion}|{Config.Loader}|{Config.LoaderVersion}";
+    /// <summary>False for fresh instances and after the game or loader version changed - the UI then offers Install instead of Play.</summary>
+    public bool IsInstalled => Config.PreparedKey == CurrentKey;
+    public bool IsModpack => Config.Modpack != null;
+
+    public void MarkInstalled()
+    {
+        if (Config.PreparedKey == CurrentKey) return;
+        Config.PreparedKey = CurrentKey;
+        Save();
+        var d = Application.Current?.Dispatcher;
+        if (d == null || d.CheckAccess()) OnPropertyChanged(nameof(IsInstalled));
+        else d.BeginInvoke(() => OnPropertyChanged(nameof(IsInstalled)));
+    }
+
     public string Name => Config.Name;
     public string Initial => string.IsNullOrEmpty(Config.Name) ? "?" : Config.Name[..1].ToUpperInvariant();
     public string? Category => Config.Category;
@@ -70,15 +92,15 @@ public partial class Instance : ObservableObject
     };
 
     public string VersionText => Config.Loader == ModLoader.Vanilla
-        ? $"{Config.MinecraftVersion} · Vanilla"
-        : $"{Config.MinecraftVersion} · {LoaderText} {ShortLoaderVersion}";
+        ? L.F("{0} · Vanilla", Config.MinecraftVersion)
+        : L.F("{0} · {1} {2}", Config.MinecraftVersion, LoaderText, ShortLoaderVersion);
 
     public string ShortLoaderVersion
     {
         get
         {
             var v = Config.LoaderVersion ?? "";
-            // Forge versions are stored as "1.20.1-47.2.0" – strip the MC prefix for display.
+            // Forge versions are stored as "1.20.1-47.2.0" - strip the MC prefix for display.
             if (Config.Loader == ModLoader.Forge && v.StartsWith(Config.MinecraftVersion + "-"))
                 v = v[(Config.MinecraftVersion.Length + 1)..];
             return v;
@@ -93,8 +115,8 @@ public partial class Instance : ObservableObject
 
     public double HoursPlayed => TotalPlaySeconds / 3600.0;
     public string PlayTimeText => TotalPlaySeconds < 3600
-        ? $"{TotalPlaySeconds / 60} min played"
-        : $"{HoursPlayed:0.#} h played";
+        ? L.F("{0} min played", TotalPlaySeconds / 60)
+        : L.F("{0:0.#} h played", HoursPlayed);
     public string PlayTimeClock => FormatClock(TotalPlaySeconds);
 
     public static string FormatClock(long s) => $"{s / 3600}h {s / 60 % 60:00}m {s % 60:00}s";
@@ -110,13 +132,13 @@ public partial class Instance : ObservableObject
     {
         get
         {
-            if (Config.LastPlayed is not { } lp) return "Never played";
+            if (Config.LastPlayed is not { } lp) return L.T("Never played");
             var span = DateTime.Now - lp;
-            if (span.TotalMinutes < 1) return "Played just now";
-            if (span.TotalHours < 1) return $"Played {(int)span.TotalMinutes} min ago";
-            if (span.TotalDays < 1) return $"Played {(int)span.TotalHours} h ago";
-            if (span.TotalDays < 30) return $"Played {(int)span.TotalDays} d ago";
-            return $"Played {lp:d MMM yyyy}";
+            if (span.TotalMinutes < 1) return L.T("Played just now");
+            if (span.TotalHours < 1) return L.F("Played {0} min ago", (int)span.TotalMinutes);
+            if (span.TotalDays < 1) return L.F("Played {0} h ago", (int)span.TotalHours);
+            if (span.TotalDays < 30) return L.F("Played {0} d ago", (int)span.TotalDays);
+            return L.F("Played {0}", lp.ToString("d MMM yyyy", L.Culture));
         }
     }
 
@@ -135,6 +157,8 @@ public partial class Instance : ObservableObject
         OnPropertyChanged(nameof(VersionText));
         OnPropertyChanged(nameof(LoaderText));
         OnPropertyChanged(nameof(ShortLoaderVersion));
+        OnPropertyChanged(nameof(IsInstalled));
+        OnPropertyChanged(nameof(IsModpack));
         TickPlaytime();
         OnPropertyChanged(nameof(LastPlayedText));
     }
@@ -148,7 +172,7 @@ public partial class Instance : ObservableObject
             bmp.BeginInit();
             bmp.CacheOption = BitmapCacheOption.OnLoad;
             bmp.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
-            bmp.DecodePixelWidth = 128;
+            bmp.DecodePixelWidth = 256;
             bmp.UriSource = new Uri(IconPath);
             bmp.EndInit();
             bmp.Freeze();
@@ -188,4 +212,17 @@ public partial class Instance : ObservableObject
         while (_pendingLog.TryDequeue(out var l)) LogLines.Add(l);
         while (LogLines.Count > 10000) LogLines.RemoveAt(0);
     }
+}
+
+/// <summary>Where a modpack instance came from, so the pack page can show it and update it.</summary>
+public class ModpackSource
+{
+    public Content.ContentSource Source { get; set; }
+    public string ProjectId { get; set; } = "";
+    public string? VersionId { get; set; }
+    public string? VersionNumber { get; set; }
+    public string Title { get; set; } = "";
+    public string? IconUrl { get; set; }
+    /// <summary>Files (relative to the game dir) the pack installed - replaced or removed on update; anything else the user added is kept.</summary>
+    public List<string> Files { get; set; } = [];
 }

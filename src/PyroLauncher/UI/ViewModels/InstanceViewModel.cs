@@ -18,7 +18,7 @@ public partial class SectionCard : ObservableObject
 {
     public SectionDef Def { get; init; } = null!;
     public string Key => Def.Key;
-    public string Title => Def.Title;
+    public string Title => L.T(Def.Title);
     public string Glyph => Def.Glyph;
     public bool IsContent { get; init; }
     public bool IsScreenshots => Key == "screenshots";
@@ -73,6 +73,11 @@ public partial class InstanceViewModel : ObservableObject
         new("settings", "Settings", ""),
     ];
 
+    public static readonly SectionDef ModpackSection = new("modpack", "Modpack", "");
+
+    /// <summary>Sections of this instance: modpack instances get a Modpack page first.</summary>
+    public IReadOnlyList<SectionDef> InstanceSections => Instance.IsModpack ? [ModpackSection, .. Sections] : Sections;
+
     public Instance Instance { get; }
     private readonly Dictionary<string, object> _tabs = [];
     private readonly List<Action> _unsub = [];
@@ -84,13 +89,13 @@ public partial class InstanceViewModel : ObservableObject
     public bool IsGridMenu => SettingsService.Current.InstanceMenuStyle == InstanceMenuStyle.Grid;
     public bool IsOverview => Tab == "overview";
     public bool ShowTabs => !IsGridMenu;
-    public string SectionTitle => Sections.FirstOrDefault(s => s.Key == Tab)?.Title ?? "";
+    public string SectionTitle => L.T(InstanceSections.FirstOrDefault(s => s.Key == Tab)?.Title ?? "");
     public bool ConsoleEnabled => SettingsService.Current.OpenConsoleOnLaunch;
 
     public InstanceViewModel(Instance inst)
     {
         Instance = inst;
-        _tab = IsGridMenu ? "overview" : "mods";
+        _tab = IsGridMenu ? "overview" : inst.IsModpack ? "modpack" : "mods";
         Instance.PropertyChanged += OnInstanceChanged;
         SettingsService.AppearanceChanged += OnAppearanceChanged;
         BuildCards();
@@ -114,20 +119,22 @@ public partial class InstanceViewModel : ObservableObject
         OnPropertyChanged(nameof(ConsoleEnabled));
         foreach (var t in _tabs.Values.OfType<ContentTabViewModel>()) t.OnAppearanceChanged();
         if (IsGridMenu && Tab != "overview" && !_tabs.ContainsKey(Tab)) Tab = "overview";
-        if (!IsGridMenu && Tab == "overview") Tab = "mods";
+        if (!IsGridMenu && Tab == "overview") Tab = Instance.IsModpack ? "modpack" : "mods";
     }
 
     private void OnInstanceChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(Instance.IsRunning) or nameof(Instance.IsBusy))
+        if (e.PropertyName is nameof(Instance.IsRunning) or nameof(Instance.IsBusy) or nameof(Instance.IsInstalled))
         {
             OnPropertyChanged(nameof(LaunchText));
             OnPropertyChanged(nameof(LaunchGlyph));
+            OnPropertyChanged(nameof(LaunchTip));
         }
     }
 
-    public string LaunchText => Instance.IsBusy ? "Cancel" : Instance.IsRunning ? "Stop" : "Play";
-    public string LaunchGlyph => Instance.IsBusy || Instance.IsRunning ? "" : "";
+    public string LaunchText => Instance.IsBusy ? L.T("Cancel") : Instance.IsRunning ? L.T("Stop") : Instance.IsInstalled ? L.T("Play") : L.T("Install");
+    public string LaunchGlyph => Instance.IsBusy || Instance.IsRunning ? "" : Instance.IsInstalled ? "" : "";
+    public string? LaunchTip => Instance.IsInstalled || Instance.IsBusy || Instance.IsRunning ? null : L.T("Downloads the game, mod loader and Java so the instance is ready to play");
 
     partial void OnTabChanged(string value)
     {
@@ -147,6 +154,7 @@ public partial class InstanceViewModel : ObservableObject
         }
         vm = key switch
         {
+            "modpack" => new ModpackPageViewModel(Instance),
             "mods" => new ContentTabViewModel(Instance, ContentType.Mod),
             "resourcepacks" => new ContentTabViewModel(Instance, ContentType.ResourcePack),
             "shaders" => new ContentTabViewModel(Instance, ContentType.ShaderPack),
@@ -166,7 +174,8 @@ public partial class InstanceViewModel : ObservableObject
     private void BuildCards()
     {
         var order = SettingsService.Current.SectionOrder;
-        var defs = Sections.OrderBy(s => order.IndexOf(s.Key) is var i && i >= 0 ? i : 100 + Array.IndexOf(Sections, s));
+        var sections = InstanceSections.ToList();
+        var defs = sections.OrderBy(s => order.IndexOf(s.Key) is var i && i >= 0 ? i : 100 + sections.IndexOf(s));
         foreach (var d in defs)
         {
             var card = new SectionCard { Def = d, IsContent = d.Key is "mods" or "resourcepacks" or "shaders" };
@@ -198,9 +207,9 @@ public partial class InstanceViewModel : ObservableObject
         var n = list.Items.Count;
         card.Description = card.Key switch
         {
-            "mods" => Instance.Config.Loader == ModLoader.Vanilla ? "Vanilla instance — no mod loader" : $"{list.EnabledCount} of {n} mods enabled",
-            "resourcepacks" => n == 0 ? "No resource packs installed" : $"{list.EnabledCount} of {n} resource packs active",
-            _ => list.ActiveShader != null ? $"Using {list.ActiveShader}" : n == 0 ? "No shader packs installed" : $"No shader pack selected · {n} installed",
+            "mods" => Instance.Config.Loader == ModLoader.Vanilla ? L.T("Vanilla instance - no mod loader") : L.F("{0} of {1} mods enabled", list.EnabledCount, n),
+            "resourcepacks" => n == 0 ? L.T("No resource packs installed") : L.F("{0} of {1} resource packs active", list.EnabledCount, n),
+            _ => list.ActiveShader != null ? L.F("Using {0}", list.ActiveShader) : n == 0 ? L.T("No shader packs installed") : L.F("No shader pack selected · {0} installed", n),
         };
         card.Icons = list.Items.Take(50).ToList();
     }
@@ -216,7 +225,7 @@ public partial class InstanceViewModel : ObservableObject
                     var files = Directory.Exists(dir)
                         ? new DirectoryInfo(dir).GetFiles("*.png").OrderByDescending(f => f.LastWriteTime).ToList()
                         : [];
-                    card.Description = files.Count == 0 ? "No screenshots yet — press F2 in game" : $"{files.Count} screenshot{(files.Count == 1 ? "" : "s")}";
+                    card.Description = files.Count == 0 ? L.T("No screenshots yet - press F2 in game") : L.F("Screenshots: {0}", files.Count);
                     var thumbs = new List<ImageSource>();
                     foreach (var f in files.Take(4))
                         if (await ThumbnailCache.GetAsync(f.FullName, 320) is { } t) thumbs.Add(t);
@@ -225,16 +234,19 @@ public partial class InstanceViewModel : ObservableObject
                 case "servers":
                     int servers = 0;
                     try { servers = ServersDat.Load(Instance.GameDir).Count; } catch { }
-                    card.Description = servers == 0 ? "No saved servers" : $"{servers} saved server{(servers == 1 ? "" : "s")}";
+                    card.Description = servers == 0 ? L.T("No saved servers") : L.F("Saved servers: {0}", servers);
                     break;
                 case "logs":
-                    card.Description = Instance.IsRunning ? "Game is running — live output" : Instance.LogLines.Count > 0 ? $"{Instance.LogLines.Count:N0} lines from the last session" : "Game output appears here after launch";
+                    card.Description = Instance.IsRunning ? L.T("Game is running - live output") : Instance.LogLines.Count > 0 ? L.F("{0:N0} lines from the last session", Instance.LogLines.Count) : L.T("Game output appears here after launch");
                     break;
                 case "configs":
-                    card.Description = "Edit mod config files — coming soon";
+                    card.Description = L.T("Edit mod config files - coming soon");
                     break;
                 case "settings":
-                    card.Description = "Name, category, loader version, memory and Java";
+                    card.Description = L.T("Name, category, loader version, memory, Java and export");
+                    break;
+                case "modpack":
+                    card.Description = Instance.Config.Modpack is { } mp ? L.F("{0} · version {1}", mp.Title, mp.VersionNumber ?? "?") : "";
                     break;
             }
         }
@@ -267,8 +279,7 @@ public partial class InstanceViewModel : ObservableObject
     [RelayCommand]
     private async Task Launch()
     {
-        if (Instance.IsBusy || Instance.IsRunning) LaunchService.Stop(Instance);
-        else await LaunchService.LaunchAsync(Instance);
+        await LaunchService.PrimaryActionAsync(Instance);
     }
 
     [RelayCommand]
@@ -301,7 +312,7 @@ public partial class LogsViewModel(Instance inst) : ObservableObject
     {
         var dir = Path.Combine(Instance.GameDir, "crash-reports");
         if (Directory.Exists(dir)) Dialogs.OpenPath(dir);
-        else Dialogs.Toast("No crash reports yet.");
+        else Dialogs.Toast(L.T("No crash reports yet."));
     }
 }
 

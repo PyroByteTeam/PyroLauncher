@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Net.Http;
 using System.Text.Json.Nodes;
 using PyroLauncher.Core;
@@ -108,10 +109,10 @@ public static class MicrosoftAuth
             var code = JsonNode.Parse(string.IsNullOrEmpty(e.Body) ? "{}" : e.Body).Long("XErr");
             throw code switch
             {
-                2148916233 => new InvalidOperationException("This Microsoft account has no Xbox profile. Create one at xbox.com first."),
-                2148916235 => new InvalidOperationException("Xbox Live is not available in your country."),
-                2148916236 or 2148916237 => new InvalidOperationException("This account needs adult verification on xbox.com."),
-                2148916238 => new InvalidOperationException("This is a child account; it must be added to a Family by an adult."),
+                2148916233 => new InvalidOperationException(L.T("This Microsoft account has no Xbox profile. Create one at xbox.com first.")),
+                2148916235 => new InvalidOperationException(L.T("Xbox Live is not available in your country.")),
+                2148916236 or 2148916237 => new InvalidOperationException(L.T("This account needs adult verification on xbox.com.")),
+                2148916238 => new InvalidOperationException(L.T("This is a child account; it must be added to a Family by an adult.")),
                 _ => e,
             };
         }
@@ -136,7 +137,7 @@ public static class MicrosoftAuth
         }
         catch (HttpError e) when (e.Status == System.Net.HttpStatusCode.NotFound)
         {
-            throw new InvalidOperationException("This Microsoft account does not own Minecraft: Java Edition.");
+            throw new InvalidOperationException(L.T("This Microsoft account does not own Minecraft: Java Edition."));
         }
 
         return new Account

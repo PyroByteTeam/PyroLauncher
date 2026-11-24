@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.IO;
 using PyroLauncher.Core;
 using PyroLauncher.Instances;
@@ -21,7 +22,7 @@ public static class ContentService
             tasks.Add(ModrinthApi.SearchAsync(query, type, mc, loader, page * 20, ct, filters));
         if (filter != SourceFilter.Modrinth)
         {
-            if (!CurseForgeApi.HasKey) warning = "CurseForge results are off — add a CurseForge API key in Settings.";
+            if (!CurseForgeApi.HasKey) warning = "CurseForge results are off - add a CurseForge API key in Settings.";
             else if (filters.Environment != null) warning = "CurseForge can't filter by client/server side, so only Modrinth results are shown.";
             else
             {
@@ -92,7 +93,7 @@ public static class ContentService
         var folder = Path.Combine(inst.GameDir, type.Folder());
         Directory.CreateDirectory(folder);
         var dest = Path.Combine(folder, version.FileName);
-        progress?.Report(new TaskProgress($"Downloading {version.FileName}…"));
+        progress?.Report(new TaskProgress(L.F("Downloading {0}…", version.FileName)));
 
         bool wasDisabled = replace != null && !replace.IsEnabled;
         await Downloader.DownloadOneAsync(new DownloadItem(version.Url, dest, version.Sha1), ct);
@@ -143,7 +144,7 @@ public static class ContentService
                     v = (await GetVersionsAsync(version.Source, dep.ProjectId, ContentType.Mod, inst, true, ct)).FirstOrDefault();
                 if (v == null) continue;
                 var details = await GetDetailsAsync(version.Source, dep.ProjectId, ct);
-                progress?.Report(new TaskProgress($"Installing dependency {details.Title}…"));
+                progress?.Report(new TaskProgress(L.F("Installing dependency {0}…", details.Title)));
                 await InstallAsync(inst, ContentType.Mod, v, details.Title, details.IconUrl, null, progress, ct, depth + 1);
             }
             catch (Exception ex)

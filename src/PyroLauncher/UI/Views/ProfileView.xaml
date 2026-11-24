@@ -1,5 +1,6 @@
 <UserControl x:Class="PyroLauncher.UI.Views.ProfileView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:c="clr-namespace:PyroLauncher.UI.Controls"
              x:Name="Self">
@@ -9,8 +10,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Margin="0,0,0,20">
-            <TextBlock Text="Profile" Style="{StaticResource H1}"/>
-            <TextBlock Text="Switch accounts, preview your skin and change capes." Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+            <TextBlock Text="{l:T 'Profile'}" Style="{StaticResource H1}"/>
+            <TextBlock Text="{l:T 'Switch accounts, preview your skin and change capes.'}" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
         </StackPanel>
 
         <Grid Grid.Row="1">
@@ -25,14 +26,14 @@
             <!-- ================= Accounts ================= -->
             <ScrollViewer VerticalScrollBarVisibility="Auto" DataContext="{Binding AccountsVm}">
                 <StackPanel x:Name="AccountsPanel">
-                    <TextBlock Text="ACCOUNTS" Style="{StaticResource Overline}" Margin="2,0,0,10"/>
+                    <TextBlock Text="{l:T 'ACCOUNTS'}" Style="{StaticResource Overline}" Margin="2,0,0,10"/>
                     <ItemsControl ItemsSource="{Binding Accounts}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button x:Name="row" Command="{Binding DataContext.SelectCommand, ElementName=AccountsPanel}" CommandParameter="{Binding}"
                                         Margin="0,0,0,8" Padding="10,9" HorizontalContentAlignment="Stretch">
                                     <DockPanel>
-                                        <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Width="28" Height="28" Content="&#xE74D;" FontSize="11" ToolTip="Remove"
+                                        <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Width="28" Height="28" Content="&#xE74D;" FontSize="11" ToolTip="{l:T 'Remove'}"
                                                 Command="{Binding DataContext.RemoveCommand, ElementName=AccountsPanel}" CommandParameter="{Binding}"/>
                                         <Border Width="34" Height="34" CornerRadius="7" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
                                             <Image c:RemoteImage.DecodeWidth="64" c:RemoteImage.Url="{Binding AvatarUrl}" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
@@ -52,15 +53,15 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <TextBlock Text="No accounts yet — add one below." Style="{StaticResource Muted}" Margin="2,0,0,8"
+                    <TextBlock Text="{l:T 'No accounts yet - add one below.'}" Style="{StaticResource Muted}" Margin="2,0,0,8"
                                Visibility="{Binding HasAccounts, Converter={StaticResource VisibleIf}, ConverterParameter=invert}"/>
 
-                    <TextBlock Text="ADD MICROSOFT ACCOUNT" Style="{StaticResource Overline}" Margin="2,14,0,8"/>
+                    <TextBlock Text="{l:T 'ADD MICROSOFT ACCOUNT'}" Style="{StaticResource Overline}" Margin="2,14,0,8"/>
                     <Button Command="{Binding SignInMicrosoftCommand}" HorizontalAlignment="Stretch"
                             Visibility="{Binding IsSigningIn, Converter={StaticResource VisibleIf}, ConverterParameter=invert}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE77B;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Sign in with Microsoft"/>
+                            <TextBlock Text="{l:T 'Sign in with Microsoft'}"/>
                         </StackPanel>
                     </Button>
                     <Border Style="{StaticResource Card}" Padding="14,12" Visibility="{Binding IsSigningIn, Converter={StaticResource VisibleIf}}">
@@ -68,27 +69,27 @@
                             <TextBlock Text="{Binding MsStatus}" Style="{StaticResource Muted}" TextWrapping="Wrap"/>
                             <StackPanel Visibility="{Binding DeviceCode, Converter={StaticResource VisibleIf}}" Margin="0,10,0,0">
                                 <TextBlock Style="{StaticResource Faint}" TextWrapping="Wrap">
-                                    <Run Text="Enter this code at"/> <Hyperlink Command="{Binding OpenVerificationCommand}" Foreground="White"><Run Text="{Binding DeviceCode.VerificationUri, Mode=OneWay}"/></Hyperlink>
+                                    <Run Text="{l:T 'Enter this code at'}"/> <Hyperlink Command="{Binding OpenVerificationCommand}" Foreground="White"><Run Text="{Binding DeviceCode.VerificationUri, Mode=OneWay}"/></Hyperlink>
                                 </TextBlock>
                                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                     <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="8" Padding="12,6">
                                         <TextBlock Text="{Binding DeviceCode.UserCode}" FontFamily="{StaticResource MonoFont}" FontSize="18" FontWeight="Bold"/>
                                     </Border>
-                                    <Button Style="{StaticResource IconButton}" Content="&#xE8C8;" ToolTip="Copy code" Command="{Binding CopyCodeCommand}" Margin="6,0,0,0"/>
+                                    <Button Style="{StaticResource IconButton}" Content="&#xE8C8;" ToolTip="{l:T 'Copy code'}" Command="{Binding CopyCodeCommand}" Margin="6,0,0,0"/>
                                 </StackPanel>
                             </StackPanel>
                             <ProgressBar IsIndeterminate="True" Margin="0,12,0,0"/>
-                            <Button Content="Cancel" Command="{Binding CancelSignInCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"/>
+                            <Button Content="{l:T 'Cancel'}" Command="{Binding CancelSignInCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"/>
                         </StackPanel>
                     </Border>
                     <TextBlock Text="{Binding MsError}" TextWrapping="Wrap" Margin="2,8,0,0" Style="{StaticResource Muted}"
                                Visibility="{Binding MsError, Converter={StaticResource VisibleIf}}"/>
 
                     <StackPanel Visibility="{Binding DeveloperMode, Converter={StaticResource VisibleIf}}">
-                    <TextBlock Text="ADD OFFLINE ACCOUNT (DEVELOPER MODE)" Style="{StaticResource Overline}" Margin="2,18,0,8"/>
+                    <TextBlock Text="{l:T 'ADD OFFLINE ACCOUNT (DEVELOPER MODE)'}" Style="{StaticResource Overline}" Margin="2,18,0,8"/>
                     <DockPanel>
-                        <Button DockPanel.Dock="Right" Content="Add" Command="{Binding AddOfflineCommand}" Margin="8,0,0,0"/>
-                        <TextBox Text="{Binding OfflineName, UpdateSourceTrigger=PropertyChanged}" Tag="Player name">
+                        <Button DockPanel.Dock="Right" Content="{l:T 'Add'}" Command="{Binding AddOfflineCommand}" Margin="8,0,0,0"/>
+                        <TextBox Text="{Binding OfflineName, UpdateSourceTrigger=PropertyChanged}" Tag="{l:T 'Player name'}">
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Enter" Command="{Binding AddOfflineCommand}"/>
                             </TextBox.InputBindings>
@@ -118,14 +119,14 @@
                     </StackPanel>
                     <Border Style="{StaticResource Badge}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,18,18,0"
                             Visibility="{Binding HasPending, Converter={StaticResource VisibleIf}}" Background="White" BorderBrush="White">
-                        <TextBlock Text="Preview — not uploaded" Style="{StaticResource BadgeText}" Foreground="Black" FontWeight="SemiBold"/>
+                        <TextBlock Text="{l:T 'Preview - not uploaded'}" Style="{StaticResource BadgeText}" Foreground="Black" FontWeight="SemiBold"/>
                     </Border>
-                    <TextBlock Text="Drag to rotate" Style="{StaticResource Faint}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0,0,22" IsHitTestVisible="False"/>
+                    <TextBlock Text="{l:T 'Drag to rotate'}" Style="{StaticResource Faint}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0,0,22" IsHitTestVisible="False"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,14"
-                                ToolTip="Arm style used for the preview. Uploaded skins use the variant chosen on the right.">
-                        <RadioButton Style="{StaticResource SegmentButton}" Content="Classic" GroupName="previewArms" Padding="10,5" Margin="0,0,6,0"
+                                ToolTip="{l:T 'Arm style used for the preview. Uploaded skins use the variant chosen on the right.'}">
+                        <RadioButton Style="{StaticResource SegmentButton}" Content="{l:T 'Classic'}" GroupName="previewArms" Padding="10,5" Margin="0,0,6,0"
                                      IsChecked="{Binding Slim, Converter={StaticResource Not}}"/>
-                        <RadioButton Style="{StaticResource SegmentButton}" Content="Slim" GroupName="previewArms" Padding="10,5" Margin="0"
+                        <RadioButton Style="{StaticResource SegmentButton}" Content="{l:T 'Slim'}" GroupName="previewArms" Padding="10,5" Margin="0"
                                      IsChecked="{Binding Slim}"/>
                     </StackPanel>
                     <ProgressBar IsIndeterminate="True" VerticalAlignment="Top" Margin="0" Visibility="{Binding IsLoading, Converter={StaticResource VisibleIf}}"/>
@@ -137,35 +138,35 @@
             <!-- ================= Wardrobe ================= -->
             <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto">
                 <StackPanel IsEnabled="{Binding IsBusy, Converter={StaticResource Not}}">
-                    <TextBlock Text="SKIN" Style="{StaticResource Overline}" Margin="2,0,0,10"/>
+                    <TextBlock Text="{l:T 'SKIN'}" Style="{StaticResource Overline}" Margin="2,0,0,10"/>
                     <StackPanel Visibility="{Binding IsMicrosoft, Converter={StaticResource VisibleIf}}">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <RadioButton Style="{StaticResource SegmentButton}" Content="Classic" GroupName="variant"
+                            <RadioButton Style="{StaticResource SegmentButton}" Content="{l:T 'Classic'}" GroupName="variant"
                                          IsChecked="{Binding UploadSlim, Converter={StaticResource Not}}"/>
-                            <RadioButton Style="{StaticResource SegmentButton}" Content="Slim" GroupName="variant" IsChecked="{Binding UploadSlim}"/>
+                            <RadioButton Style="{StaticResource SegmentButton}" Content="{l:T 'Slim'}" GroupName="variant" IsChecked="{Binding UploadSlim}"/>
                         </StackPanel>
                         <Button Command="{Binding ChooseSkinCommand}" HorizontalAlignment="Stretch" Margin="0,0,0,8">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE898;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Choose skin file…"/>
+                                <TextBlock Text="{l:T 'Choose skin file…'}"/>
                             </StackPanel>
                         </Button>
                         <StackPanel Visibility="{Binding HasPending, Converter={StaticResource VisibleIf}}">
                             <TextBlock Text="{Binding PendingSkinPath}" Style="{StaticResource Faint}" TextTrimming="CharacterEllipsis" Margin="2,0,0,8"/>
                             <DockPanel>
-                                <Button DockPanel.Dock="Right" Content="Cancel" Command="{Binding CancelSkinCommand}" Margin="8,0,0,0"/>
-                                <Button Content="Upload to Minecraft" Style="{StaticResource PrimaryButton}" Command="{Binding UploadSkinCommand}"/>
+                                <Button DockPanel.Dock="Right" Content="{l:T 'Cancel'}" Command="{Binding CancelSkinCommand}" Margin="8,0,0,0"/>
+                                <Button Content="{l:T 'Upload to Minecraft'}" Style="{StaticResource PrimaryButton}" Command="{Binding UploadSkinCommand}"/>
                             </DockPanel>
                         </StackPanel>
-                        <Button Content="Reset to default skin" Style="{StaticResource GhostButton}" Command="{Binding ResetSkinCommand}" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                        <Button Content="{l:T 'Reset to default skin'}" Style="{StaticResource GhostButton}" Command="{Binding ResetSkinCommand}" HorizontalAlignment="Left" Margin="0,6,0,0"/>
                     </StackPanel>
-                    <TextBlock Text="Skins and capes can only be changed for Microsoft accounts. Offline accounts show the public skin for that name, if any."
+                    <TextBlock Text="{l:T 'Skins and capes can only be changed for Microsoft accounts. Offline accounts show the public skin for that name, if any.'}"
                                Style="{StaticResource Muted}" TextWrapping="Wrap"
                                Visibility="{Binding IsMicrosoft, Converter={StaticResource VisibleIf}, ConverterParameter=invert}"/>
 
-                    <TextBlock Text="CAPES" Style="{StaticResource Overline}" Margin="2,24,0,10" Visibility="{Binding IsMicrosoft, Converter={StaticResource VisibleIf}}"/>
+                    <TextBlock Text="{l:T 'CAPES'}" Style="{StaticResource Overline}" Margin="2,24,0,10" Visibility="{Binding IsMicrosoft, Converter={StaticResource VisibleIf}}"/>
                     <Border Visibility="{Binding IsMicrosoft, Converter={StaticResource VisibleIf}}">
-                        <TextBlock Text="This account doesn't own any capes." Style="{StaticResource Muted}" TextWrapping="Wrap"
+                        <TextBlock Text="{l:T 'This account doesn\'t own any capes.'}" Style="{StaticResource Muted}" TextWrapping="Wrap"
                                    Visibility="{Binding Capes.Count, Converter={StaticResource VisibleIf}, ConverterParameter=invert}" Margin="2,-4,0,0"/>
                     </Border>
                     <ItemsControl ItemsSource="{Binding Capes}">
@@ -196,7 +197,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     <ProgressBar IsIndeterminate="True" Margin="0,10,0,0" Visibility="{Binding IsBusy, Converter={StaticResource VisibleIf}}"/>
-                    <Button Content="Reload profile" Style="{StaticResource GhostButton}" Command="{Binding ReloadCommand}" HorizontalAlignment="Left" Margin="0,16,0,0"/>
+                    <Button Content="{l:T 'Reload profile'}" Style="{StaticResource GhostButton}" Command="{Binding ReloadCommand}" HorizontalAlignment="Left" Margin="0,16,0,0"/>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

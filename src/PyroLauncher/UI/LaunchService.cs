@@ -18,7 +18,7 @@ public static class LaunchService
         var account = AccountManager.Selected;
         if (account == null)
         {
-            Dialogs.Toast("Add an account before playing.", true);
+            Dialogs.Toast(L.T("Add an account before playing."), true);
             MainViewModel.Instance.Nav = "profile";
             return;
         }
@@ -36,7 +36,7 @@ public static class LaunchService
 
         if (SettingsService.Current.OpenConsoleOnLaunch) ConsoleWindow.ShowFor(inst, activate: false);
 
-        var job = DownloadManager.Begin($"{inst.Name} — game files", cts);
+        var job = DownloadManager.Begin($"{inst.Name} - game files", cts);
         try
         {
             System.Diagnostics.Process proc;
@@ -79,7 +79,7 @@ public static class LaunchService
                 bool killed = Killed.Remove(inst);
                 if (code != 0 && !killed)
                 {
-                    Dialogs.Toast($"{inst.Name} crashed (exit code {code}). See the logs for details.", true);
+                    Dialogs.Toast(L.F("{0} crashed (exit code {1}). See the logs for details.", inst.Name, code), true);
                     if (SettingsService.Current.OpenConsoleOnLaunch) ConsoleWindow.ShowFor(inst);
                     else MainViewModel.Instance.OpenInstance(inst, "logs");
                 }
@@ -95,7 +95,7 @@ public static class LaunchService
             Log.Error($"Launch of {inst.Name} failed", ex);
             inst.AppendLog("[PyroLauncher] Launch failed: " + ex);
             inst.Status = null;
-            Dialogs.Toast($"Launch failed: {ex.Message}", true);
+            Dialogs.Toast(L.F("Launch failed: {0}", ex.Message), true);
         }
         finally
         {
@@ -103,6 +103,55 @@ public static class LaunchService
             inst.Progress = -1;
             inst.LaunchCts = null;
         }
+    }
+
+    /// <summary>Downloads the game, loader and Java without launching. Used by the Install button.</summary>
+    public static async Task InstallAsync(Instance inst)
+    {
+        if (inst.IsRunning || inst.IsBusy) return;
+        inst.IsBusy = true;
+        inst.Progress = -1;
+        var cts = new CancellationTokenSource();
+        inst.LaunchCts = cts;
+        var progress = new Progress<TaskProgress>(p =>
+        {
+            inst.Status = p.Message;
+            inst.Progress = p.Fraction;
+        });
+        var job = DownloadManager.Begin(L.F("{0} - installing", inst.Name), cts);
+        try
+        {
+            inst.AppendLog($"[PyroLauncher] Installing {inst.Name} ({inst.VersionText})");
+            await GameLauncher.InstallAsync(inst, progress, cts.Token);
+            inst.AppendLog("[PyroLauncher] Install finished");
+            Dialogs.Toast(L.F("{0} is installed and ready to play", inst.Name));
+        }
+        catch (OperationCanceledException)
+        {
+            inst.AppendLog("[PyroLauncher] Install cancelled");
+        }
+        catch (Exception ex)
+        {
+            job.Fail();
+            Log.Error($"Install of {inst.Name} failed", ex);
+            inst.AppendLog("[PyroLauncher] Install failed: " + ex);
+            Dialogs.Toast(L.F("Install failed: {0}", ex.Message), true);
+        }
+        finally
+        {
+            job.Dispose();
+            inst.IsBusy = false;
+            inst.Status = null;
+            inst.Progress = -1;
+            inst.LaunchCts = null;
+        }
+    }
+
+    /// <summary>Play when installed, otherwise Install; Stop/Cancel while running or busy.</summary>
+    public static Task PrimaryActionAsync(Instance inst)
+    {
+        if (inst.IsBusy || inst.IsRunning) { Stop(inst); return Task.CompletedTask; }
+        return inst.IsInstalled ? LaunchAsync(inst) : InstallAsync(inst);
     }
 
     public static void Stop(Instance inst)

@@ -54,6 +54,9 @@ public class LauncherSettings
     public List<string> Categories { get; set; } = [];
     public string? SelectedAccountId { get; set; }
 
+    /// <summary>UI language: "auto", "en" or "ru".</summary>
+    public string Language { get; set; } = "auto";
+
     /// <summary>Unlocks offline accounts and other developer options.</summary>
     public bool DeveloperMode { get; set; }
 
@@ -63,6 +66,15 @@ public class LauncherSettings
     public bool OpenConsoleOnLaunch { get; set; } = true;
     public ContentListStyle ContentListStyle { get; set; } = ContentListStyle.List;
     public InstanceMenuStyle InstanceMenuStyle { get; set; } = InstanceMenuStyle.TopNavigation;
+    public ContentListStyle DiscoverStyle { get; set; } = ContentListStyle.Grid;
+
+    /// <summary>Content presets (Settings → Presets).</summary>
+    public List<Content.ContentPreset> Presets { get; set; } = [];
+
+    // ---- Modpack export
+    public string? ExportFolder { get; set; }
+    public string ExportFormat { get; set; } = "Modrinth";
+    public string? ExportAuthor { get; set; }
     /// <summary>Order of the section cards in the grid instance menu.</summary>
     public List<string> SectionOrder { get; set; } = [];
 
@@ -82,6 +94,7 @@ public static class SettingsService
     {
         Current = JsonUtil.Load<LauncherSettings>(AppPaths.SettingsFile) ?? new LauncherSettings();
         Current.Game ??= GameSettings.Defaults();
+        Current.Presets ??= [];
         Downloader.Concurrency = Current.ConcurrentDownloads;
     }
 

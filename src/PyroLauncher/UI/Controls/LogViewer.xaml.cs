@@ -82,7 +82,7 @@ public partial class LogViewer : UserControl
     private static void SetClipboard(string text)
     {
         if (string.IsNullOrEmpty(text)) return;
-        try { Clipboard.SetText(text); Dialogs.Toast("Copied to clipboard"); }
+        try { Clipboard.SetText(text); Dialogs.Toast(L.T("Copied to clipboard")); }
         catch (Exception ex) { Dialogs.Toast(ex.Message, true); }
     }
 

@@ -16,8 +16,8 @@
             <DockPanel>
                 <Button DockPanel.Dock="Right" Style="{StaticResource TitleButton}" Content="&#xE8BB;" Click="Close_Click" x:Name="CloseX"/>
                 <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
-                    <Border Width="22" Height="22" CornerRadius="6" Background="White">
-                        <Image Source="/logo.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Border Width="22" Height="22" CornerRadius="6" RenderOptions.BitmapScalingMode="HighQuality">
+                        <Border.Background><ImageBrush ImageSource="/logo.png" Stretch="UniformToFill"/></Border.Background>
                     </Border>
                     <TextBlock Text="PyroLauncher Setup" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource Fg2}"/>
                 </StackPanel>
@@ -43,7 +43,7 @@
                         </DockPanel>
                         <CheckBox x:Name="DesktopShortcut" Content="Create a desktop shortcut" IsChecked="True" Margin="0,16,0,0"/>
                         <TextBlock Foreground="{StaticResource Fg3}" FontSize="12" Margin="0,16,0,0" TextWrapping="Wrap"
-                                   Text="Installs for the current user only — no administrator rights needed. Your instances and settings live in %APPDATA%\PyroLauncher and are kept across updates."/>
+                                   Text="Installs for the current user only - no administrator rights needed. Your instances and settings live in %APPDATA%\PyroLauncher and are kept across updates."/>
                     </StackPanel>
                 </DockPanel>
 
@@ -60,7 +60,7 @@
                     <StackPanel Margin="0,20,0,0">
                         <TextBlock Foreground="{StaticResource Fg2}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12">
                             <Run Text="The program is always removed. Tick what else to delete from"/>
-                            <Run x:Name="DataPath" Foreground="{StaticResource Fg}"/><Run Text=" — anything left unticked is kept, so a reinstall picks up where you left off."/>
+                            <Run x:Name="DataPath" Foreground="{StaticResource Fg}"/><Run Text=" - anything left unticked is kept, so a reinstall picks up where you left off."/>
                         </TextBlock>
                         <CheckBox x:Name="SelectAll" Content="Delete everything" FontWeight="SemiBold" IsThreeState="True"
                                   Click="SelectAll_Click"/>

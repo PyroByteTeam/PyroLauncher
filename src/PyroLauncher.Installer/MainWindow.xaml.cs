@@ -46,7 +46,7 @@ public partial class MainWindow : Window
         if (_installed == null)
         {
             Heading.Text = "Install PyroLauncher";
-            SubHeading.Text = $"Version {payload} — a Minecraft launcher for modded instances.";
+            SubHeading.Text = $"Version {payload} - a Minecraft launcher for modded instances.";
             PrimaryButton.Content = "Install";
             return;
         }

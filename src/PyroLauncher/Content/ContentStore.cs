@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -157,7 +158,7 @@ public partial class ContentList : ObservableObject
         try
         {
             if (Instance.IsRunning)
-                UI.Dialogs.Toast("The game is running — the change applies the next time it starts.");
+                UI.Dialogs.Toast(L.T("The game is running - the change applies the next time it starts."));
 
             if (Type == ContentType.ResourcePack)
             {
@@ -175,14 +176,14 @@ public partial class ContentList : ObservableObject
                 GameOptions.WriteShader(Instance.GameDir, on ? Path.GetFileName(item.FilePath) : null, loader);
                 foreach (var other in Items.Where(i => i != item)) other.SetActiveSilently(false);
                 if (on && loader == ShaderLoader.None)
-                    UI.Dialogs.Toast("No shader mod found — install Iris (Fabric/NeoForge), Oculus (Forge) or OptiFine to use shader packs.", true);
+                    UI.Dialogs.Toast(L.T("No shader mod found - install Iris (Fabric/NeoForge), Oculus (Forge) or OptiFine to use shader packs."), true);
             }
             Application.Current?.Dispatcher.BeginInvoke(UpdateCounts);
             return true;
         }
         catch (Exception ex)
         {
-            UI.Dialogs.Toast($"Could not update game options: {ex.Message}", true);
+            UI.Dialogs.Toast(L.F("Could not update game options: {0}", ex.Message), true);
             return false;
         }
     }

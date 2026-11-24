@@ -23,6 +23,7 @@ public partial class App : Application
         };
 
         SettingsService.Load();
+        UI.Loc.Instance.SetLanguage(SettingsService.Current.Language);
         DownloadManager.Init();
         AccountManager.Load();
         InstanceManager.LoadAll();
@@ -36,7 +37,7 @@ public partial class App : Application
     private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         Log.Error("Unhandled UI exception", e.Exception);
-        Dialogs.Toast($"Unexpected error: {e.Exception.Message}", true);
+        Dialogs.Toast(L.F("Unexpected error: {0}", e.Exception.Message), true);
         e.Handled = true;
     }
 }

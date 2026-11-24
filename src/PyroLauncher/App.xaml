@@ -39,6 +39,13 @@
             <DataTemplate DataType="{x:Type ui:PromptDialogViewModel}"><v:PromptDialogView/></DataTemplate>
             <DataTemplate DataType="{x:Type ui:ChoiceDialogViewModel}"><v:ChoiceDialogView/></DataTemplate>
             <DataTemplate DataType="{x:Type ui:ImageViewerViewModel}"><v:ImageViewerView/></DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ManualDownloadsViewModel}"><v:ManualDownloadsView/></DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DiscoverViewModel}"><v:DiscoverView/></DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ServerPacksViewModel}"><v:ServerPacksView/></DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ExportViewModel}"><v:ExportView/></DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PresetsViewModel}"><v:PresetsView/></DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ApplyPresetViewModel}"><v:ApplyPresetView/></DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ModpackPageViewModel}"><v:ModpackPageView/></DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

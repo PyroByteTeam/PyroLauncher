@@ -1,5 +1,6 @@
 <UserControl x:Class="PyroLauncher.UI.Views.DownloadsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="Self">
     <Grid Margin="36,0,36,0">
@@ -9,14 +10,15 @@
         </Grid.RowDefinitions>
         <DockPanel Margin="0,0,0,20">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom">
-                <Button Content="Pause all" Command="{Binding PauseAllCommand}" Margin="0,0,8,0"/>
-                <Button Content="Resume all" Command="{Binding ResumeAllCommand}" Margin="0,0,8,0"/>
-                <Button Content="Clear finished" Command="{Binding ClearFinishedCommand}"/>
+                <Button Content="{l:T 'Pause all'}" Command="{Binding PauseAllCommand}" Margin="0,0,8,0"/>
+                <Button Content="{l:T 'Resume all'}" Command="{Binding ResumeAllCommand}" Margin="0,0,8,0"/>
+                <Button Content="{l:T 'Cancel all'}" Command="{Binding CancelAllCommand}" Margin="0,0,8,0"/>
+                <Button Content="{l:T 'Clear finished'}" Command="{Binding ClearFinishedCommand}"/>
             </StackPanel>
             <StackPanel>
-                <TextBlock Text="Downloads" Style="{StaticResource H1}"/>
+                <TextBlock Text="{l:T 'Downloads'}" Style="{StaticResource H1}"/>
                 <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0">
-                    <Run Text="{Binding Summary.ActiveCount, Mode=OneWay}"/><Run Text=" active"/>
+                    <Run Text="{Binding Summary.ActiveCount, Mode=OneWay}"/><Run Text="{l:T ' active'}"/>
                     <Run Text="{Binding Summary.Text, Mode=OneWay}"/>
                 </TextBlock>
             </StackPanel>
@@ -26,13 +28,13 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="24"/>
-                <ColumnDefinition Width="340"/>
+                <ColumnDefinition Width="360"/>
             </Grid.ColumnDefinitions>
 
             <!-- Jobs -->
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="TASKS" Style="{StaticResource Overline}" Margin="2,0,0,10"/>
-                <TextBlock DockPanel.Dock="Top" Text="Nothing has been downloaded yet in this session." Style="{StaticResource Muted}"
+                <TextBlock DockPanel.Dock="Top" Text="{l:T 'TASKS'}" Style="{StaticResource Overline}" Margin="2,0,0,10"/>
+                <TextBlock DockPanel.Dock="Top" Text="{l:T 'Nothing has been downloaded yet in this session.'}" Style="{StaticResource Muted}"
                            Visibility="{Binding Jobs.Count, Converter={StaticResource VisibleIf}, ConverterParameter=invert}"/>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,20">
                     <ItemsControl ItemsSource="{Binding Jobs}">
@@ -42,13 +44,13 @@
                                     <StackPanel>
                                         <DockPanel>
                                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Visibility="{Binding IsActive, Converter={StaticResource VisibleIf}}">
-                                                <Button Content="Pause" Margin="0,0,6,0" Padding="12,5"
+                                                <Button Content="{l:T 'Pause'}" Margin="0,0,6,0" Padding="12,5"
                                                         Command="{Binding DataContext.PauseCommand, ElementName=Self}" CommandParameter="{Binding}"
                                                         Visibility="{Binding IsPaused, Converter={StaticResource VisibleIf}, ConverterParameter=invert}"/>
-                                                <Button Content="Resume" Margin="0,0,6,0" Padding="12,5" Style="{StaticResource PrimaryButton}"
+                                                <Button Content="{l:T 'Resume'}" Margin="0,0,6,0" Padding="12,5" Style="{StaticResource PrimaryButton}"
                                                         Command="{Binding DataContext.ResumeCommand, ElementName=Self}" CommandParameter="{Binding}"
                                                         Visibility="{Binding IsPaused, Converter={StaticResource VisibleIf}}"/>
-                                                <Button Content="Cancel" Padding="12,5" Style="{StaticResource GhostButton}"
+                                                <Button Content="{l:T 'Cancel'}" Padding="12,5" Style="{StaticResource GhostButton}"
                                                         Command="{Binding DataContext.CancelCommand, ElementName=Self}" CommandParameter="{Binding}"
                                                         Visibility="{Binding CanCancel, Converter={StaticResource VisibleIf}}"/>
                                             </StackPanel>
@@ -85,23 +87,25 @@
             <!-- Hosts -->
             <DockPanel Grid.Column="2">
                 <DockPanel DockPanel.Dock="Top" Margin="2,0,0,10">
-                    <Button DockPanel.Dock="Right" Content="Copy all" Style="{StaticResource GhostButton}" Padding="8,2" FontSize="12" Command="{Binding CopyAllHostsCommand}"/>
-                    <TextBlock Text="CONNECTED SERVERS" Style="{StaticResource Overline}" VerticalAlignment="Center"/>
+                    <Button DockPanel.Dock="Right" Content="{l:T 'Copy all'}" Style="{StaticResource GhostButton}" Padding="8,2" FontSize="12" Command="{Binding CopyAllHostsCommand}"/>
+                    <Button DockPanel.Dock="Right" Content="{l:T 'Clear'}" Style="{StaticResource GhostButton}" Padding="8,2" FontSize="12" Margin="0,0,4,0"
+                            Command="{Binding ClearHostsCommand}" ToolTip="{l:T 'Clear the list of contacted domains'}"/>
+                    <TextBlock Text="{l:T 'CONNECTED SERVERS'}" Style="{StaticResource Overline}" VerticalAlignment="Center"/>
                 </DockPanel>
                 <Border Style="{StaticResource Card}" Padding="0,6" VerticalAlignment="Top">
                     <StackPanel>
                         <Grid Margin="16,6,16,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="64"/>
+                                <ColumnDefinition Width="76"/>
                                 <ColumnDefinition Width="30"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Domain" Style="{StaticResource Faint}"/>
-                            <TextBlock Grid.Column="1" Text="Active" Style="{StaticResource Faint}" HorizontalAlignment="Right"/>
-                            <TextBlock Grid.Column="2" Text="Received" Style="{StaticResource Faint}" HorizontalAlignment="Right"/>
+                            <TextBlock Text="{l:T 'Domain'}" Style="{StaticResource Faint}"/>
+                            <TextBlock Grid.Column="1" Text="{l:T 'Active'}" Style="{StaticResource Faint}" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="2" Text="{l:T 'Received'}" Style="{StaticResource Faint}" HorizontalAlignment="Right"/>
                         </Grid>
-                        <TextBlock Text="No connections yet." Style="{StaticResource Muted}" Margin="16,0,16,8"
+                        <TextBlock Text="{l:T 'No connections yet.'}" Style="{StaticResource Muted}" Margin="16,0,16,8"
                                    Visibility="{Binding Hosts.Count, Converter={StaticResource VisibleIf}, ConverterParameter=invert}"/>
                         <ItemsControl ItemsSource="{Binding Hosts}">
                             <ItemsControl.ItemTemplate>
@@ -109,8 +113,8 @@
                                     <Grid Margin="16,5" ToolTip="{Binding Requests, StringFormat={}{0} requests}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="50"/>
-                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="64"/>
+                                            <ColumnDefinition Width="76"/>
                                             <ColumnDefinition Width="30"/>
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Orientation="Horizontal">
@@ -120,7 +124,7 @@
                                         <TextBlock Grid.Column="1" Text="{Binding Active}" HorizontalAlignment="Right" FontFamily="{StaticResource MonoFont}" FontSize="12"/>
                                         <TextBlock Grid.Column="2" Text="{Binding BytesText}" HorizontalAlignment="Right" Style="{StaticResource Muted}"/>
                                         <Button Grid.Column="3" Style="{StaticResource IconButton}" Width="24" Height="24" FontSize="11" Content="&#xE8C8;" HorizontalAlignment="Right"
-                                                ToolTip="Copy domain (e.g. to add it to a VPN or firewall rule)" Command="{Binding DataContext.CopyHostCommand, ElementName=Self}" CommandParameter="{Binding}"/>
+                                                ToolTip="{l:T 'Copy domain (e.g. to add it to a VPN or firewall rule)'}" Command="{Binding DataContext.CopyHostCommand, ElementName=Self}" CommandParameter="{Binding}"/>
                                     </Grid>
                                     <DataTemplate.Triggers>
                                         <DataTrigger Binding="{Binding Active}" Value="0">

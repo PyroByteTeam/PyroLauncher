@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
@@ -23,7 +24,7 @@ public static class Nbt
     {
         using var r = new BinaryReader(s, Encoding.UTF8, true);
         var type = r.ReadByte();
-        if (type != 10) throw new InvalidDataException("Root tag is not a compound");
+        if (type != 10) throw new InvalidDataException(L.T("Root tag is not a compound"));
         ReadString(r);
         return (NbtCompound)ReadPayload(r, 10);
     }
@@ -92,7 +93,7 @@ public static class Nbt
                 for (int i = 0; i < len; i++) arr[i] = RL(r);
                 return arr;
             }
-            default: throw new InvalidDataException($"Unknown NBT tag {type}");
+            default: throw new InvalidDataException(L.F("Unknown NBT tag {0}", type));
         }
     }
 
@@ -110,7 +111,7 @@ public static class Nbt
         NbtCompound => 10,
         int[] => 11,
         long[] => 12,
-        _ => throw new InvalidDataException($"Unsupported NBT value {o.GetType()}"),
+        _ => throw new InvalidDataException(L.F("Unsupported NBT value {0}", o.GetType())),
     };
 
     private static void WS(BinaryWriter w, short v) { Span<byte> b = stackalloc byte[2]; BinaryPrimitives.WriteInt16BigEndian(b, v); w.Write(b); }
@@ -246,7 +247,7 @@ public static class ServerPinger
             await stream.ReadExactlyAsync(data, cts.Token);
             var ms = new MemoryStream(data);
             var id = ReadVarInt(ms);
-            if (id != 0) throw new InvalidDataException("Unexpected packet");
+            if (id != 0) throw new InvalidDataException(L.T("Unexpected packet"));
             var strLen = ReadVarInt(ms);
             var json = Encoding.UTF8.GetString(data, (int)ms.Position, strLen);
             var j = JsonNode.Parse(json);
@@ -300,7 +301,7 @@ public static class ServerPinger
             value |= (b & 0x7F) << pos;
             if ((b & 0x80) == 0) return value;
             pos += 7;
-            if (pos >= 32) throw new InvalidDataException("VarInt too big");
+            if (pos >= 32) throw new InvalidDataException(L.T("VarInt too big"));
         }
     }
 
@@ -314,7 +315,7 @@ public static class ServerPinger
             value |= (buf[0] & 0x7F) << pos;
             if ((buf[0] & 0x80) == 0) return value;
             pos += 7;
-            if (pos >= 32) throw new InvalidDataException("VarInt too big");
+            if (pos >= 32) throw new InvalidDataException(L.T("VarInt too big"));
         }
     }
 }

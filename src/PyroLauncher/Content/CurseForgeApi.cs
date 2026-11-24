@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Text.Json.Nodes;
 using PyroLauncher.Core;
 using PyroLauncher.Instances;
@@ -12,9 +13,9 @@ public static class CurseForgeApi
 
     public static bool HasKey => !string.IsNullOrWhiteSpace(SettingsService.Current.CurseForgeApiKey);
 
-    private static void Auth(System.Net.Http.HttpRequestMessage req)
+    internal static void Auth(System.Net.Http.HttpRequestMessage req)
     {
-        if (!HasKey) throw new InvalidOperationException("CurseForge needs an API key. Add one in Settings → Launcher.");
+        if (!HasKey) throw new InvalidOperationException(L.T("CurseForge needs an API key. Add one in Settings → Launcher."));
         req.Headers.Add("x-api-key", SettingsService.Current.CurseForgeApiKey.Trim());
         req.Headers.Accept.ParseAdd("application/json");
     }
@@ -32,9 +33,10 @@ public static class CurseForgeApi
     private static string Norm(string s) => new string(s.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
 
     /// <summary>Maps a Modrinth category slug to a CurseForge category id by normalized name, or null if CF has no equivalent.</summary>
-    public static async Task<int?> MatchCategoryAsync(ContentType type, string slug, CancellationToken ct)
+    public static Task<int?> MatchCategoryAsync(ContentType type, string slug, CancellationToken ct) => MatchCategoryAsync(type.CurseForgeClass(), slug, ct);
+
+    public static async Task<int?> MatchCategoryAsync(int cls, string slug, CancellationToken ct)
     {
-        var cls = type.CurseForgeClass();
         if (!CategoryCache.TryGetValue(cls, out var map))
         {
             var res = await Http.GetJsonAsync($"{Base}/categories?gameId={MinecraftGameId}&classId={cls}", ct, Auth);
@@ -57,7 +59,7 @@ public static class CurseForgeApi
             _ => 2,
         };
         var url = $"{Base}/mods/search?gameId={MinecraftGameId}&classId={type.CurseForgeClass()}" +
-                  $"&searchFilter={Uri.EscapeDataString(query)}&gameVersion={Uri.EscapeDataString(mc)}" +
+                  $"&searchFilter={Uri.EscapeDataString(query)}" + (string.IsNullOrEmpty(mc) ? "" : $"&gameVersion={Uri.EscapeDataString(mc)}") +
                   $"&sortField={sortField}&sortOrder=desc&pageSize=20&index={offset}";
         if (categoryId != null) url += $"&categoryId={categoryId}";
         if (type == ContentType.Mod && LoaderType(loader) is > 0 and var lt) url += $"&modLoaderType={lt}";
@@ -145,6 +147,7 @@ public static class CurseForgeApi
             FileName = f.Str("fileName") ?? "",
             Url = f.Str("downloadUrl"),
             Sha1 = f.Arr("hashes").FirstOrDefault(h => h.Int("algo") == 1).Str("value"),
+            ServerPackFileId = f.Long("serverPackFileId"),
             GameVersions = gv.Where(x => x.Length > 0 && char.IsDigit(x[0])).ToList(),
             Loaders = gv.Where(x => LoaderNames.Contains(x, StringComparer.OrdinalIgnoreCase)).ToList(),
             Dependencies = f.Arr("dependencies")

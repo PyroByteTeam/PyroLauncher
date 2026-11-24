@@ -45,7 +45,7 @@ public partial class AccountsViewModel : ObservableObject
     [RelayCommand]
     private async Task Remove(Account acc)
     {
-        if (await Dialogs.ConfirmAsync("Remove account", $"Remove {acc.Username} from the launcher?", "Remove", true))
+        if (await Dialogs.ConfirmAsync(L.T("Remove account"), L.F("Remove {0} from the launcher?", acc.Username), L.T("Remove"), true))
             AccountManager.Remove(acc);
     }
 
@@ -55,13 +55,13 @@ public partial class AccountsViewModel : ObservableObject
         var name = OfflineName.Trim();
         if (!Regex.IsMatch(name, "^[A-Za-z0-9_]{3,16}$"))
         {
-            OfflineError = "Use 3–16 characters: letters, digits and underscore.";
+            OfflineError = L.T("Use 3-16 characters: letters, digits and underscore.");
             return;
         }
         OfflineError = null;
         AccountManager.AddOffline(name);
         OfflineName = "";
-        Dialogs.Toast($"Added offline account {name}");
+        Dialogs.Toast(L.F("Added offline account {0}", name));
     }
 
     [RelayCommand]
@@ -70,16 +70,16 @@ public partial class AccountsViewModel : ObservableObject
         MsError = null;
         _cts = new CancellationTokenSource();
         IsSigningIn = true;
-        MsStatus = "Requesting sign-in code…";
+        MsStatus = L.T("Requesting sign-in code…");
         try
         {
             DeviceCode = await MicrosoftAuth.StartDeviceCodeAsync(_cts.Token);
-            MsStatus = "Waiting for you to finish signing in in your browser…";
+            MsStatus = L.T("Waiting for you to finish signing in in your browser…");
             try { Clipboard.SetText(DeviceCode.UserCode); } catch { }
             Dialogs.OpenUrl(DeviceCode.VerificationUri);
             var acc = await MicrosoftAuth.PollAndLoginAsync(DeviceCode, _cts.Token);
             AccountManager.AddOrUpdate(acc);
-            Dialogs.Toast($"Signed in as {acc.Username}");
+            Dialogs.Toast(L.F("Signed in as {0}", acc.Username));
         }
         catch (OperationCanceledException ex) when (_cts.IsCancellationRequested == false)
         {
@@ -106,7 +106,7 @@ public partial class AccountsViewModel : ObservableObject
     private void CopyCode()
     {
         if (DeviceCode == null) return;
-        try { Clipboard.SetText(DeviceCode.UserCode); Dialogs.Toast("Code copied"); } catch { }
+        try { Clipboard.SetText(DeviceCode.UserCode); Dialogs.Toast(L.T("Code copied")); } catch { }
     }
 
     [RelayCommand]

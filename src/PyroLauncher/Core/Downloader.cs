@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.IO;
 
 namespace PyroLauncher.Core;
@@ -25,18 +26,19 @@ public static class Downloader
 
     public static async Task DownloadAllAsync(IEnumerable<DownloadItem> items, IProgress<TaskProgress>? progress, string label, CancellationToken ct)
     {
+        using var linked = LinkJob(ref ct);
         var list = items
             .Where(i => !string.IsNullOrEmpty(i.Url))
             .DistinctBy(i => i.Path.ToLowerInvariant())
             .ToList();
-        progress?.Report(new TaskProgress($"Checking {label}…"));
+        progress?.Report(new TaskProgress(L.F("Checking {0}…", label)));
         var needed = await Task.Run(() => list.Where(NeedsDownload).ToList(), ct);
         if (needed.Count == 0) return;
 
         int done = 0;
         var job = DownloadManager.Current;
         job?.AddFiles(needed.Count);
-        progress?.Report(new TaskProgress($"Downloading {label} (0/{needed.Count})", 0));
+        progress?.Report(new TaskProgress(L.F("Downloading {0} (0/{1})", label, needed.Count), 0));
         using var sem = new SemaphoreSlim(Math.Max(1, Concurrency));
         var errors = new List<Exception>();
         var tasks = needed.Select(async item =>
@@ -50,21 +52,31 @@ public static class Downloader
                 sem.Release();
                 job?.FileDone();
                 var d = Interlocked.Increment(ref done);
-                progress?.Report(new TaskProgress($"Downloading {label} ({d}/{needed.Count})", (double)d / needed.Count));
+                progress?.Report(new TaskProgress(L.F("Downloading {0} ({1}/{2})", label, d, needed.Count), (double)d / needed.Count));
             }
         });
         await Task.WhenAll(tasks);
         if (errors.Count > 0)
-            throw new IOException($"{errors.Count} file(s) failed to download. First error: {errors[0].Message}", errors[0]);
+            throw new IOException(L.F("{0} file(s) failed to download. First error: {1}", errors.Count, errors[0].Message), errors[0]);
     }
 
     /// <summary>Downloads a single file, counted as one file in the current download job.</summary>
     public static async Task DownloadOneAsync(DownloadItem item, CancellationToken ct)
     {
+        using var linked = LinkJob(ref ct);
         var job = DownloadManager.Current;
         job?.AddFiles(1);
         try { await DownloadCoreAsync(item, ct); }
         finally { job?.FileDone(); }
+    }
+
+    /// <summary>Makes downloads stop when their job is cancelled from the Downloads page.</summary>
+    private static CancellationTokenSource? LinkJob(ref CancellationToken ct)
+    {
+        if (DownloadManager.Current is not { } job) return null;
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(ct, job.Token);
+        ct = cts.Token;
+        return cts;
     }
 
     private static async Task DownloadCoreAsync(DownloadItem item, CancellationToken ct)
@@ -82,7 +94,7 @@ public static class Downloader
                     if (item.Sha1 != null && !Hashing.Sha1File(item.Path).Equals(item.Sha1, StringComparison.OrdinalIgnoreCase))
                     {
                         File.Delete(item.Path);
-                        throw new IOException($"Checksum mismatch for {System.IO.Path.GetFileName(item.Path)}");
+                        throw new IOException(L.F("Checksum mismatch for {0}", System.IO.Path.GetFileName(item.Path)));
                     }
                     return;
                 }

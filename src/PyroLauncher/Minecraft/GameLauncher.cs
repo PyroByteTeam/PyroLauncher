@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -10,17 +11,14 @@ namespace PyroLauncher.Minecraft;
 
 public static class GameLauncher
 {
-    /// <summary>Installs everything needed and starts the game. Returns the running process.</summary>
-    public static async Task<Process> LaunchAsync(Instance inst, Account account, IProgress<TaskProgress> progress, CancellationToken ct)
+    public record Prepared(ResolvedVersion Version, PreparedGame Game, string Java, GameSettings Settings);
+
+    /// <summary>Downloads and installs everything the instance needs (loader, libraries, assets, Java) without starting the game.</summary>
+    public static async Task<Prepared> InstallAsync(Instance inst, IProgress<TaskProgress> progress, CancellationToken ct)
     {
         var cfg = inst.Config;
         Directory.CreateDirectory(inst.GameDir);
         void L(string s) => inst.AppendLog(s);
-
-        L($"[PyroLauncher] Launching {cfg.Name} ({inst.VersionText}) as {account.Username}");
-
-        progress.Report(new TaskProgress("Checking account…"));
-        await AccountManager.EnsureValidAsync(account, ct);
 
         var versionId = await LoaderService.EnsureInstalledAsync(inst, progress, L, ct);
         var version = VersionResolver.Resolve(versionId);
@@ -34,11 +32,25 @@ public static class GameLauncher
         L($"[PyroLauncher] Java: {java}");
 
         var game = await GameInstaller.PrepareAsync(version, inst.GameDir, progress, ct);
+        inst.MarkInstalled();
+        return new Prepared(version, game, java, settings);
+    }
 
-        progress.Report(new TaskProgress("Extracting natives…"));
+    /// <summary>Installs everything needed and starts the game. Returns the running process.</summary>
+    public static async Task<Process> LaunchAsync(Instance inst, Account account, IProgress<TaskProgress> progress, CancellationToken ct)
+    {
+        void L(string s) => inst.AppendLog(s);
+        L($"[PyroLauncher] Launching {inst.Config.Name} ({inst.VersionText}) as {account.Username}");
+
+        progress.Report(new TaskProgress(UI.L.T("Checking account…")));
+        await AccountManager.EnsureValidAsync(account, ct);
+
+        var (version, game, java, settings) = await InstallAsync(inst, progress, ct);
+
+        progress.Report(new TaskProgress(UI.L.T("Extracting natives…")));
         GameInstaller.ExtractNatives(game, inst.NativesDir);
 
-        progress.Report(new TaskProgress("Starting game…"));
+        progress.Report(new TaskProgress(UI.L.T("Starting game…")));
         var args = BuildArguments(inst, version, game, account, settings);
 
         var psi = new ProcessStartInfo(java)

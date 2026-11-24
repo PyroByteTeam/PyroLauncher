@@ -1,0 +1,151 @@
+<UserControl x:Class="PyroLauncher.UI.Views.ExportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:l="clr-namespace:PyroLauncher.UI"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:PyroLauncher.UI.ViewModels"
+             x:Name="Self">
+    <UserControl.Resources>
+        <Style x:Key="TreeItem" TargetType="TreeViewItem">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+            <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource VisibleIf}}"/>
+            <Setter Property="Foreground" Value="{StaticResource Fg}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TreeViewItem">
+                        <StackPanel>
+                            <Border x:Name="row" Background="Transparent" CornerRadius="6" Padding="2,3">
+                                <DockPanel>
+                                    <ToggleButton x:Name="exp" IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" Width="20" Focusable="False" Cursor="Hand">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent">
+                                                    <TextBlock x:Name="g" Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="9" Foreground="{StaticResource Fg3}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsChecked" Value="True"><Setter TargetName="g" Property="Text" Value="&#xE70D;"/></Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                    <ContentPresenter ContentSource="Header"/>
+                                </DockPanel>
+                            </Border>
+                            <ItemsPresenter x:Name="items" Margin="20,0,0,0" Visibility="Collapsed"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="True"><Setter TargetName="items" Property="Visibility" Value="Visible"/></Trigger>
+                            <Trigger Property="HasItems" Value="False"><Setter TargetName="exp" Property="Visibility" Value="Hidden"/></Trigger>
+                            <Trigger SourceName="row" Property="IsMouseOver" Value="True"><Setter TargetName="row" Property="Background" Value="{StaticResource Bg3}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Style="{StaticResource DialogCard}" Width="860" Height="620">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE8BB;" FontSize="11" Command="{Binding CancelCommand}" VerticalAlignment="Top" ToolTip="{l:T 'Close'}"/>
+                <StackPanel>
+                    <TextBlock Text="{l:T 'Export modpack'}" Style="{StaticResource H2}"/>
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,0"><Run Text="{l:T 'Share'}"/> <Run Text="{Binding Instance.Name, Mode=OneWay}" FontWeight="SemiBold"/> <Run Text="{l:T 'as a modpack file.'}"/></TextBlock>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Footer -->
+            <DockPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
+                <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Command="{Binding ExportCommand}" MinWidth="130" IsEnabled="{Binding IsBusy, Converter={StaticResource Not}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xEDE1;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{l:T 'Export'}"/>
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Right" Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}" Margin="0,0,8,0" IsCancel="True"/>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                    <TextBlock Text="{Binding Status}" Style="{StaticResource Faint}" TextTrimming="CharacterEllipsis" Visibility="{Binding IsBusy, Converter={StaticResource VisibleIf}}"/>
+                    <ProgressBar Margin="0,4,0,0" Visibility="{Binding IsBusy, Converter={StaticResource VisibleIf}}"
+                                 Value="{Binding Progress, Converter={StaticResource Percent}, Mode=OneWay}"
+                                 IsIndeterminate="{Binding Progress, Converter={StaticResource Indeterminate}, Mode=OneWay}"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: pack details -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,20,0" Padding="0,0,6,0">
+                    <StackPanel>
+                        <TextBlock Text="{l:T 'FORMAT'}" Style="{StaticResource Overline}" Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding Formats}" SelectedItem="{Binding Format}"/>
+                        <TextBlock Text="{Binding FormatHint}" Style="{StaticResource Faint}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+
+                        <TextBlock Text="{l:T 'NAME'}" Style="{StaticResource Overline}" Margin="0,14,0,5"/>
+                        <TextBox Text="{Binding PackName, UpdateSourceTrigger=PropertyChanged}" Tag="{l:T 'Modpack name'}"/>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'VERSION'}" Style="{StaticResource Overline}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding PackVersion, UpdateSourceTrigger=PropertyChanged}" Tag="1.0.0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="{l:T 'AUTHOR'}" Style="{StaticResource Overline}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding Author, UpdateSourceTrigger=PropertyChanged}" Tag="{l:T 'Optional'}"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="{l:T 'DESCRIPTION'}" Style="{StaticResource Overline}" Margin="0,12,0,5"/>
+                        <TextBox Text="{Binding Summary, UpdateSourceTrigger=PropertyChanged}" Tag="{l:T 'Optional'}" TextWrapping="Wrap" AcceptsReturn="True" Height="60" VerticalContentAlignment="Top"/>
+
+                        <TextBlock Text="{l:T 'SAVE TO'}" Style="{StaticResource Overline}" Margin="0,14,0,5"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="{l:T 'Browse…'}" Command="{Binding BrowseCommand}" Margin="8,0,0,0"/>
+                            <TextBox Text="{Binding OutputFolder, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding OutputFolder}"/>
+                        </DockPanel>
+                        <TextBlock Text="{l:T 'The folder is remembered for next time.'}" Style="{StaticResource Faint}" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Right: files -->
+                <DockPanel Grid.Column="1">
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="8,0,0,0">
+                            <Button Style="{StaticResource GhostButton}" Content="{l:T 'All'}" Padding="8,5" Command="{Binding SelectAllCommand}" ToolTip="{l:T 'Include every file'}"/>
+                            <Button Style="{StaticResource GhostButton}" Content="{l:T 'None'}" Padding="8,5" Command="{Binding SelectNoneCommand}" ToolTip="{l:T 'Exclude every file'}"/>
+                            <Button Style="{StaticResource GhostButton}" Content="{l:T 'Defaults'}" Padding="8,5" Command="{Binding ResetDefaultsCommand}"
+                                    ToolTip="{l:T 'Leave out worlds, screenshots, logs and caches'}"/>
+                        </StackPanel>
+                        <Grid>
+                            <TextBox Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}" Tag="{l:T 'Search files and folders'}" Padding="32,7,10,7"/>
+                            <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" Foreground="{StaticResource Fg3}" FontSize="12"
+                                       VerticalAlignment="Center" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                        </Grid>
+                    </DockPanel>
+                    <TextBlock DockPanel.Dock="Bottom" Text="{Binding SelectionText}" Style="{StaticResource Faint}" Margin="2,8,0,0"/>
+                    <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="8" Padding="6">
+                        <TreeView ItemsSource="{Binding Roots}" Background="Transparent" BorderThickness="0" ItemContainerStyle="{StaticResource TreeItem}"
+                                  VirtualizingPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate DataType="{x:Type vm:ExportNode}" ItemsSource="{Binding Children}" ItemContainerStyle="{StaticResource TreeItem}">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" Style="{StaticResource Faint}" Margin="10,0,6,0" VerticalAlignment="Center"/>
+                                        <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="12" Foreground="{StaticResource Fg2}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding RelPath}"/>
+                                    </DockPanel>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+                    </Border>
+                </DockPanel>
+            </Grid>
+        </DockPanel>
+    </Border>
+</UserControl>

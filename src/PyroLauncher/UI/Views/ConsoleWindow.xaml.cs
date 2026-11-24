@@ -15,11 +15,12 @@ public partial class ConsoleWindow : Window
         _inst = inst;
         InitializeComponent();
         DataContext = inst;
-        Title = $"{inst.Name} — Console";
+        Title = $"{inst.Name} - Console";
         StateChanged += (_, _) =>
         {
             Root.Margin = WindowState == WindowState.Maximized ? new Thickness(7) : new Thickness(0);
             MaxButton.Content = WindowState == WindowState.Maximized ? "" : "";
+            MaxButton.ToolTip = WindowState == WindowState.Maximized ? L.T("Restore") : L.T("Maximize");
         };
         Closed += (_, _) => Open.Remove(_inst);
     }

@@ -54,7 +54,7 @@ public partial class ScreenshotsViewModel : ObservableObject
             item.Thumb = await ThumbnailCache.GetAsync(item.Path, 400);
     }
 
-    [RelayCommand] private void Open(ScreenshotItem item) => Dialogs.ShowImage(item.Path, null);
+    [RelayCommand] private void Open(ScreenshotItem item) => Dialogs.ShowGallery(Items.Select(i => new GalleryEntry(i.Path, null, null)).ToList(), Items.IndexOf(item));
     [RelayCommand] private void OpenFolder() { Directory.CreateDirectory(Dir); Dialogs.OpenPath(Dir); }
     [RelayCommand] private void Reveal(ScreenshotItem item) => Dialogs.RevealInExplorer(item.Path);
 
@@ -69,7 +69,7 @@ public partial class ScreenshotsViewModel : ObservableObject
             bmp.UriSource = new Uri(item.Path);
             bmp.EndInit();
             Clipboard.SetImage(bmp);
-            Dialogs.Toast("Screenshot copied to clipboard");
+            Dialogs.Toast(L.T("Screenshot copied to clipboard"));
         }
         catch (Exception ex) { Dialogs.Toast(ex.Message, true); }
     }
@@ -77,7 +77,7 @@ public partial class ScreenshotsViewModel : ObservableObject
     [RelayCommand]
     private async Task Delete(ScreenshotItem item)
     {
-        if (!await Dialogs.ConfirmAsync("Delete screenshot", $"Delete {item.Name}.png?", "Delete", true)) return;
+        if (!await Dialogs.ConfirmAsync(L.T("Delete screenshot"), L.F("Delete {0}.png?", item.Name), L.T("Delete"), true)) return;
         try
         {
             File.Delete(item.Path);
@@ -94,7 +94,7 @@ public partial class ServerItem : ObservableObject
     public string Name => Entry.Name;
     public string Address => Entry.Address;
     [ObservableProperty] private ImageSource? _icon;
-    [ObservableProperty] private string _status = "Pinging…";
+    [ObservableProperty] private string _status = L.T("Pinging…");
     [ObservableProperty] private string _motd = "";
     [ObservableProperty] private bool _isOnline;
     [ObservableProperty] private string _ping = "";
@@ -136,7 +136,7 @@ public partial class ServersViewModel : ObservableObject
             foreach (var s in ServersDat.Load(Instance.GameDir))
                 Items.Add(new ServerItem { Entry = s, Icon = ServerItem.DecodeIcon(s.IconBase64) });
         }
-        catch (Exception ex) { Dialogs.Toast($"Could not read servers.dat: {ex.Message}", true); }
+        catch (Exception ex) { Dialogs.Toast(L.F("Could not read servers.dat: {0}", ex.Message), true); }
         IsEmpty = Items.Count == 0;
         foreach (var item in Items) _ = PingAsync(item, _cts.Token);
     }
@@ -148,8 +148,8 @@ public partial class ServersViewModel : ObservableObject
             var st = await ServerPinger.PingAsync(item.Address, ct);
             if (ct.IsCancellationRequested) return;
             item.IsOnline = st.Online;
-            item.Status = st.Online ? $"{st.Players}/{st.MaxPlayers} players" : "Offline";
-            item.Ping = st.Online ? $"{st.PingMs} ms" : "";
+            item.Status = st.Online ? L.F("{0}/{1} players", st.Players, st.MaxPlayers) : L.T("Offline");
+            item.Ping = st.Online ? L.F("{0} ms", st.PingMs) : "";
             item.Motd = st.Online ? st.Motd : "";
             if (item.Icon == null && st.FaviconBase64 != null) item.Icon = ServerItem.DecodeIcon(st.FaviconBase64);
         }
@@ -164,7 +164,7 @@ public partial class ServersViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(NewAddress)) return;
         var list = Items.Select(i => i.Entry).ToList();
-        list.Add(new ServerEntry { Name = string.IsNullOrWhiteSpace(NewName) ? "Minecraft Server" : NewName.Trim(), Address = NewAddress.Trim() });
+        list.Add(new ServerEntry { Name = string.IsNullOrWhiteSpace(NewName) ? L.T("Minecraft Server") : NewName.Trim(), Address = NewAddress.Trim() });
         if (Save(list))
         {
             IsAdding = false;
@@ -175,7 +175,7 @@ public partial class ServersViewModel : ObservableObject
     [RelayCommand]
     private async Task Remove(ServerItem item)
     {
-        if (!await Dialogs.ConfirmAsync("Remove server", $"Remove \"{item.Name}\" from the server list?", "Remove", true)) return;
+        if (!await Dialogs.ConfirmAsync(L.T("Remove server"), L.F("Remove \"{0}\" from the server list?", item.Name), L.T("Remove"), true)) return;
         var list = Items.Where(i => i != item).Select(i => i.Entry).ToList();
         if (Save(list)) Refresh();
     }
@@ -183,17 +183,17 @@ public partial class ServersViewModel : ObservableObject
     [RelayCommand]
     private void CopyAddress(ServerItem item)
     {
-        try { Clipboard.SetText(item.Address); Dialogs.Toast("Address copied"); } catch { }
+        try { Clipboard.SetText(item.Address); Dialogs.Toast(L.T("Address copied")); } catch { }
     }
 
     private bool Save(List<ServerEntry> list)
     {
         if (Instance.IsRunning)
         {
-            Dialogs.Toast("Close the game first — Minecraft overwrites servers.dat when it exits.", true);
+            Dialogs.Toast(L.T("Close the game first - Minecraft overwrites servers.dat when it exits."), true);
             return false;
         }
         try { ServersDat.Save(Instance.GameDir, list); return true; }
-        catch (Exception ex) { Dialogs.Toast($"Could not save servers.dat: {ex.Message}", true); return false; }
+        catch (Exception ex) { Dialogs.Toast(L.F("Could not save servers.dat: {0}", ex.Message), true); return false; }
     }
 }

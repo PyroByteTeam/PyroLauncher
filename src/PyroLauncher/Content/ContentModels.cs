@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using PyroLauncher.Instances;
 
 namespace PyroLauncher.Content;
@@ -17,9 +18,9 @@ public static class ContentTypeExt
 
     public static string Display(this ContentType t) => t switch
     {
-        ContentType.Mod => "Mods",
-        ContentType.ResourcePack => "Resource Packs",
-        _ => "Shader Packs",
+        ContentType.Mod => L.T("Mods"),
+        ContentType.ResourcePack => L.T("Resource Packs"),
+        _ => L.T("Shader Packs"),
     };
 
     public static string ModrinthType(this ContentType t) => t switch
@@ -67,8 +68,8 @@ public partial class ProjectSummary : CommunityToolkit.Mvvm.ComponentModel.Obser
     public string SourceText => Source == ContentSource.Modrinth ? "Modrinth" : "CurseForge";
     public string DownloadsText => Downloads switch
     {
-        >= 1_000_000 => $"{Downloads / 1_000_000.0:0.#}M",
-        >= 1_000 => $"{Downloads / 1_000.0:0.#}K",
+        >= 1_000_000 => L.F("{0:0.#}M", Downloads / 1_000_000.0),
+        >= 1_000 => L.F("{0:0.#}K", Downloads / 1_000.0),
         _ => Downloads.ToString(),
     };
 }
@@ -79,13 +80,14 @@ public class ProjectDetails : ProjectSummary
 {
     public string BodyHtml { get; set; } = "";
     public List<GalleryImage> Gallery { get; set; } = [];
-    public string Side { get; set; } = "Unknown";
+    public string Side { get; set; } = L.T("Unknown");
     public List<string> Loaders { get; set; } = [];
-    public string License { get; set; } = "Unknown";
+    public string License { get; set; } = L.T("Unknown");
     public string? LicenseUrl { get; set; }
     public List<string> Categories { get; set; } = [];
 
-    public string LoadersText => Loaders.Count == 0 ? "—" : string.Join(", ", Loaders);
+    public string LoadersText => Loaders.Count == 0 ? "-" : string.Join(", ", Loaders);
+    public string CategoriesText => Categories.Count == 0 ? "-" : string.Join(", ", Categories.Select(ModrinthApi.Pretty));
 }
 
 /// <summary>Kind: required, optional, incompatible or embedded.</summary>
@@ -107,8 +109,12 @@ public class ProjectVersion
     public List<string> GameVersions { get; set; } = [];
     public List<string> Loaders { get; set; } = [];
     public List<Dependency> Dependencies { get; set; } = [];
+    /// <summary>Non-primary files of the version (Modrinth), e.g. a separate server pack.</summary>
+    public List<GalleryImage> ExtraFiles { get; set; } = [];
+    /// <summary>CurseForge: id of the server pack file that belongs to this modpack file (0 = none).</summary>
+    public long ServerPackFileId { get; set; }
 
-    public string DateText => Date == default ? "" : Date.ToString("d MMM yyyy");
+    public string DateText => Date == default ? "" : Date.ToString("d MMM yyyy", UI.L.Culture);
     public string GameVersionsText => GameVersions.Count <= 4 ? string.Join(", ", GameVersions) : $"{string.Join(", ", GameVersions.Take(3))} +{GameVersions.Count - 3}";
     public string LoadersText => string.Join(", ", Loaders);
 }

@@ -11,18 +11,21 @@ public partial class InstanceView : UserControl
 {
     private Point _down;
     private bool _pressed;
+    private bool _onGrip;
 
     public InstanceView() => InitializeComponent();
 
     private void Card_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        _pressed = !IsInButton(e.OriginalSource as DependencyObject);
+        var src = e.OriginalSource as DependencyObject;
+        _pressed = !IsInButton(src);
+        _onGrip = IsInGrip(src);
         _down = e.GetPosition(this);
     }
 
     private void Card_MouseMove(object sender, MouseEventArgs e)
     {
-        if (!_pressed || e.LeftButton != MouseButtonState.Pressed) return;
+        if (!_pressed || !_onGrip || e.LeftButton != MouseButtonState.Pressed) return;
         var d = e.GetPosition(this) - _down;
         if (Math.Abs(d.X) < 6 && Math.Abs(d.Y) < 6) return;
         _pressed = false;
@@ -32,6 +35,25 @@ public partial class InstanceView : UserControl
             DragDrop.DoDragDrop(fe, new DataObject(typeof(SectionCard), card), DragDropEffects.Move);
             fe.Opacity = 1;
         }
+    }
+
+    // Cards open on click anywhere; only the grip in the corner starts a drag.
+    private void Card_MouseUp(object sender, MouseButtonEventArgs e)
+    {
+        if (_pressed && !_onGrip && sender is FrameworkElement { DataContext: SectionCard card } && DataContext is InstanceViewModel vm)
+            vm.OpenSectionCommand.Execute(card.Key);
+        _pressed = false;
+    }
+
+    private static bool IsInGrip(DependencyObject? d)
+    {
+        while (d != null)
+        {
+            if (d is FrameworkElement { Name: "grip" }) return true;
+            if (d is FrameworkElement { Name: "card" }) return false;
+            d = d is Visual ? VisualTreeHelper.GetParent(d) : LogicalTreeHelper.GetParent(d);
+        }
+        return false;
     }
 
     private void Card_DragOver(object sender, DragEventArgs e)

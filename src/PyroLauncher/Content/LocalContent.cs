@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -88,7 +89,7 @@ public partial class LocalItem : ObservableObject
             }
             catch (Exception ex)
             {
-                UI.Dialogs.Toast($"Could not toggle {Name}: {ex.Message}", true);
+                UI.Dialogs.Toast(L.F("Could not toggle {0}: {1}", Name, ex.Message), true);
             }
             OnPropertyChanged();
             OnPropertyChanged(nameof(FileName));

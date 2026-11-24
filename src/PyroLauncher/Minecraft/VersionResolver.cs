@@ -1,3 +1,4 @@
+using PyroLauncher.UI;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json.Nodes;
@@ -35,7 +36,7 @@ public static class VersionResolver
         var seen = new HashSet<string>();
         while (cur != null)
         {
-            if (!seen.Add(cur)) throw new InvalidOperationException($"Circular inheritsFrom at {cur}");
+            if (!seen.Add(cur)) throw new InvalidOperationException(L.F("Circular inheritsFrom at {0}", cur));
             var path = MojangMeta.VersionJsonPath(cur);
             if (!File.Exists(path)) throw new FileNotFoundException($"Version JSON missing: {cur}");
             var node = JsonUtil.ParseFile(path)!;
