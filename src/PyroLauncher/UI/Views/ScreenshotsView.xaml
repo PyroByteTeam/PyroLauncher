@@ -1,0 +1,69 @@
+<UserControl x:Class="PyroLauncher.UI.Views.ScreenshotsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Self">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <DockPanel Margin="0,0,0,14">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Style="{StaticResource IconButton}" Content="&#xE838;" ToolTip="Open screenshots folder" Command="{Binding OpenFolderCommand}"/>
+                <Button Style="{StaticResource IconButton}" Content="&#xE72C;" ToolTip="Refresh" Command="{Binding LoadCommand}"/>
+            </StackPanel>
+            <TextBlock Style="{StaticResource Muted}" VerticalAlignment="Center">
+                <Run Text="{Binding Items.Count, Mode=OneWay}"/><Run Text=" screenshots · press F2 in game to take one"/>
+            </TextBlock>
+        </DockPanel>
+
+        <TextBlock Grid.Row="1" Text="No screenshots yet." Style="{StaticResource Muted}" Visibility="{Binding IsEmpty, Converter={StaticResource VisibleIf}}"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,0,20">
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border x:Name="card" Width="272" Margin="0,0,12,12" Style="{StaticResource Card}" Cursor="Hand" CornerRadius="10">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.OpenCommand, ElementName=Self}" CommandParameter="{Binding}"/>
+                            </Border.InputBindings>
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="View" Tag="&#xE8A7;" Command="{Binding PlacementTarget.Tag.OpenCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
+                                    <MenuItem Header="Copy image" Tag="&#xE8C8;" Command="{Binding PlacementTarget.Tag.CopyCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
+                                    <MenuItem Header="Show in Explorer" Tag="&#xE838;" Command="{Binding PlacementTarget.Tag.RevealCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
+                                    <Separator/>
+                                    <MenuItem Header="Delete" Tag="&#xE74D;" Command="{Binding PlacementTarget.Tag.DeleteCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
+                            <Border.Tag>
+                                <Binding Path="DataContext" ElementName="Self"/>
+                            </Border.Tag>
+                            <StackPanel>
+                                <Border Height="153" CornerRadius="9,9,0,0" Background="{StaticResource Bg3}" ClipToBounds="True">
+                                    <Image Source="{Binding Thumb}" Stretch="UniformToFill"/>
+                                </Border>
+                                <DockPanel Margin="12,9">
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Width="26" Height="26" FontSize="11" Content="&#xE74D;" ToolTip="Delete"
+                                            Command="{Binding DataContext.DeleteCommand, ElementName=Self}" CommandParameter="{Binding}"/>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding DateText}" FontSize="12.5"/>
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource Faint}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <Trigger SourceName="card" Property="IsMouseOver" Value="True">
+                                <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource Fg3}"/>
+                            </Trigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

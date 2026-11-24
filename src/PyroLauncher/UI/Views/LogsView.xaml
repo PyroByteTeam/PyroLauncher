@@ -1,0 +1,27 @@
+<UserControl x:Class="PyroLauncher.UI.Views.LogsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:PyroLauncher.UI.Controls">
+    <Grid Margin="0,0,0,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <DockPanel Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <CheckBox Content="Errors &amp; warnings" IsChecked="{Binding ErrorsOnly, ElementName=Viewer}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <Button Content="Open console" Command="{Binding OpenConsoleCommand}" Margin="0,0,8,0"/>
+                <Button Content="Copy" Click="Copy_Click" Margin="0,0,8,0" ToolTip="Copy selected lines (or everything)"/>
+                <Button Content="Clear" Command="{Binding ClearCommand}" Margin="0,0,8,0"/>
+                <Button Content="Crash reports" Command="{Binding OpenCrashReportsCommand}" Margin="0,0,8,0"/>
+                <Button Content="Logs folder" Command="{Binding OpenLogsFolderCommand}"/>
+            </StackPanel>
+            <Grid Margin="0,0,16,0">
+                <TextBox x:Name="FilterBox" Tag="Filter lines…" Padding="32,7,10,7" TextChanged="Filter_Changed"/>
+                <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" Foreground="{StaticResource Fg3}" FontSize="12"
+                           VerticalAlignment="Center" Margin="12,0,0,0" IsHitTestVisible="False"/>
+            </Grid>
+        </DockPanel>
+        <c:LogViewer x:Name="Viewer" Grid.Row="1" Lines="{Binding Instance.LogLines}"/>
+    </Grid>
+</UserControl>

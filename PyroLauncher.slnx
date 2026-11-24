@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PyroLauncher.Installer/PyroLauncher.Installer.csproj" />
+    <Project Path="src/PyroLauncher/PyroLauncher.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+*.user
+.testhome/
+artifacts/
+src/PyroLauncher.Installer/payload.zip
