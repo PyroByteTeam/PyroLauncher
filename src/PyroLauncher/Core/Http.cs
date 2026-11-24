@@ -37,6 +37,7 @@ public static class Http
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         cts.CancelAfter(timeout ?? TimeSpan.FromSeconds(60));
+        if (req.RequestUri != null) DownloadManager.HostSeen(req.RequestUri.Host);
         var resp = await Client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token);
         if (!resp.IsSuccessStatusCode)
         {

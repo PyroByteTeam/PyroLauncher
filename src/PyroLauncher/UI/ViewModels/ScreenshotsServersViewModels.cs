@@ -32,12 +32,17 @@ public partial class ScreenshotsViewModel : ObservableObject
         Load();
     }
 
+    private List<string> _lastFiles = [];
+
     [RelayCommand]
     public void Load()
     {
-        Items.Clear();
-        if (!Directory.Exists(Dir)) { IsEmpty = true; return; }
+        if (!Directory.Exists(Dir)) { Items.Clear(); _lastFiles = []; IsEmpty = true; return; }
         var files = new DirectoryInfo(Dir).GetFiles("*.png").OrderByDescending(f => f.LastWriteTime).ToList();
+        // Reuse existing items (and their thumbnails) when nothing changed.
+        if (files.Select(f => f.FullName).SequenceEqual(_lastFiles)) { IsEmpty = Items.Count == 0; return; }
+        _lastFiles = files.Select(f => f.FullName).ToList();
+        Items.Clear();
         foreach (var f in files) Items.Add(new ScreenshotItem { Path = f.FullName, Date = f.LastWriteTime });
         IsEmpty = Items.Count == 0;
         _ = LoadThumbsAsync(Items.ToList());
@@ -46,24 +51,7 @@ public partial class ScreenshotsViewModel : ObservableObject
     private static async Task LoadThumbsAsync(List<ScreenshotItem> items)
     {
         foreach (var item in items)
-        {
-            var thumb = await Task.Run(() =>
-            {
-                try
-                {
-                    var bmp = new BitmapImage();
-                    bmp.BeginInit();
-                    bmp.CacheOption = BitmapCacheOption.OnLoad;
-                    bmp.DecodePixelWidth = 400;
-                    bmp.UriSource = new Uri(item.Path);
-                    bmp.EndInit();
-                    bmp.Freeze();
-                    return (ImageSource?)bmp;
-                }
-                catch { return null; }
-            });
-            item.Thumb = thumb;
-        }
+            item.Thumb = await ThumbnailCache.GetAsync(item.Path, 400);
     }
 
     [RelayCommand] private void Open(ScreenshotItem item) => Dialogs.ShowImage(item.Path, null);

@@ -17,4 +17,19 @@ public partial class DownloadsViewModel : ObservableObject
     [RelayCommand] private void PauseAll() => DownloadManager.PauseAll();
     [RelayCommand] private void ResumeAll() => DownloadManager.ResumeAll();
     [RelayCommand] private void ClearFinished() => DownloadManager.ClearFinished();
+
+    [RelayCommand]
+    private void CopyHost(HostStat h)
+    {
+        try { System.Windows.Clipboard.SetText(h.Host); Dialogs.Toast($"Copied {h.Host}"); }
+        catch (Exception ex) { Dialogs.Toast(ex.Message, true); }
+    }
+
+    [RelayCommand]
+    private void CopyAllHosts()
+    {
+        if (Hosts.Count == 0) return;
+        try { System.Windows.Clipboard.SetText(string.Join(Environment.NewLine, Hosts.Select(x => x.Host))); Dialogs.Toast($"Copied {Hosts.Count} domains"); }
+        catch (Exception ex) { Dialogs.Toast(ex.Message, true); }
+    }
 }

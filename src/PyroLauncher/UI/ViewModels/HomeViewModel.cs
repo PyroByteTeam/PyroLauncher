@@ -41,7 +41,7 @@ public partial class HomeViewModel : ObservableObject
 
     private void TickPlaytime()
     {
-        long total = 0;
+        long total = SettingsService.Current.DeletedPlaytimeSeconds;
         foreach (var i in InstanceManager.Instances)
         {
             total += i.TotalPlaySeconds;

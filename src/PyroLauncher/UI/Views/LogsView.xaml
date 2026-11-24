@@ -10,7 +10,7 @@
         <DockPanel Margin="0,0,0,12">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <CheckBox Content="Errors &amp; warnings" IsChecked="{Binding ErrorsOnly, ElementName=Viewer}" Margin="0,0,14,0" VerticalAlignment="Center"/>
-                <Button Content="Open console" Command="{Binding OpenConsoleCommand}" Margin="0,0,8,0"/>
+                <Button Content="Open console" Command="{Binding OpenConsoleCommand}" Margin="0,0,8,0" Visibility="{Binding ConsoleEnabled, Converter={StaticResource VisibleIf}}"/>
                 <Button Content="Copy" Click="Copy_Click" Margin="0,0,8,0" ToolTip="Copy selected lines (or everything)"/>
                 <Button Content="Clear" Command="{Binding ClearCommand}" Margin="0,0,8,0"/>
                 <Button Content="Crash reports" Command="{Binding OpenCrashReportsCommand}" Margin="0,0,8,0"/>

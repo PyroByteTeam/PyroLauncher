@@ -17,6 +17,7 @@ namespace PyroLauncher.UI.Controls;
 public static class RemoteImage
 {
     private static readonly ConcurrentDictionary<string, WeakReference<ImageSource>> Memory = new();
+    private static readonly ConcurrentDictionary<string, ImageSource> Strong = new();
     private static readonly SemaphoreSlim Throttle = new(8);
 
     public static readonly DependencyProperty UrlProperty = DependencyProperty.RegisterAttached(
@@ -38,6 +39,7 @@ public static class RemoteImage
         if (string.IsNullOrWhiteSpace(url)) return;
         var width = GetDecodeWidth(img);
         var key = $"{width}|{url}";
+        if (Strong.TryGetValue(key, out var strongHit)) { img.Source = strongHit; return; }
         if (Memory.TryGetValue(key, out var wr) && wr.TryGetTarget(out var cached))
         {
             img.Source = cached;
@@ -45,7 +47,9 @@ public static class RemoteImage
         }
         var src = await LoadAsync(url, width);
         if (src == null) return;
-        Memory[key] = new WeakReference<ImageSource>(src);
+        // Icons are small: keep them for the session so lists and grids reopen without flicker. Big images stay weak.
+        if (width <= 160) Strong[key] = src;
+        else Memory[key] = new WeakReference<ImageSource>(src);
         if (GetUrl(img) == url) img.Source = src;
     }
 

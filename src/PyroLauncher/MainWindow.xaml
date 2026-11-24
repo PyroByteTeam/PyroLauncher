@@ -21,9 +21,8 @@
         <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="False">
                 <Border DockPanel.Dock="Top" Height="64">
-                    <Border Width="38" Height="38" CornerRadius="10" Background="{StaticResource Accent}" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="P" FontFamily="{StaticResource DisplayFont}" FontWeight="Bold" FontSize="20" Foreground="Black"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0"/>
+                    <Border Width="40" Height="40" CornerRadius="10" Background="{StaticResource Accent}" VerticalAlignment="Center" HorizontalAlignment="Center" ClipToBounds="True">
+                        <Image Source="/Assets/logo.png" RenderOptions.BitmapScalingMode="HighQuality" Margin="1"/>
                     </Border>
                 </Border>
 

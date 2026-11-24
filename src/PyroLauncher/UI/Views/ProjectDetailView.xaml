@@ -29,32 +29,28 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Style="{StaticResource IconButton}" Content="&#xE72B;" Command="{Binding BackCommand}" ToolTip="Back" VerticalAlignment="Top" Margin="-8,0,8,0"/>
-            <Border Grid.Column="1" Width="72" Height="72" CornerRadius="14" Background="{StaticResource Bg3}" ClipToBounds="True">
+            <Border Grid.Column="1" Width="56" Height="56" CornerRadius="12" Background="{StaticResource Bg3}" ClipToBounds="True">
                 <Grid>
                     <TextBlock Text="&#xEA86;" FontFamily="{StaticResource IconFont}" FontSize="24" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     <Image c:RemoteImage.DecodeWidth="144" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
                     <Image Source="{Binding LocalIcon}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                 </Grid>
             </Border>
-            <StackPanel Grid.Column="2" Margin="18,0,16,0" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Title}" Style="{StaticResource H1}" FontSize="24" TextTrimming="CharacterEllipsis"/>
-                    <Border Style="{StaticResource Badge}" Margin="12,4,0,0">
+            <StackPanel Grid.Column="2" Margin="14,0,8,0" VerticalAlignment="Center">
+                <DockPanel>
+                    <Border DockPanel.Dock="Right" Style="{StaticResource Badge}" Margin="10,2,0,0">
                         <TextBlock Text="{Binding SourceText}" Style="{StaticResource BadgeText}"/>
                     </Border>
-                </StackPanel>
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource H2}" FontSize="20" TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
                 <TextBlock Text="{Binding Author, StringFormat=by {0}}" Style="{StaticResource Muted}" Margin="0,3,0,0"
                            Visibility="{Binding Author, Converter={StaticResource VisibleIf}}"/>
                 <TextBlock Text="{Binding Summary}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Margin="0,6,0,0"/>
             </StackPanel>
-            <StackPanel Grid.Column="3" VerticalAlignment="Top">
-                <Button Command="{Binding OpenWebCommand}" Visibility="{Binding Details, Converter={StaticResource VisibleIf}}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="&#xE8A7;" FontFamily="{StaticResource IconFont}" Margin="0,1,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Open website"/>
-                    </StackPanel>
-                </Button>
+            <StackPanel Grid.Column="3" VerticalAlignment="Top" Orientation="Horizontal">
+                <Button Style="{StaticResource IconButton}" Content="&#xE8A7;" ToolTip="Open website" Command="{Binding OpenWebCommand}"
+                        Visibility="{Binding Details, Converter={StaticResource VisibleIf}}"/>
+                <Button Style="{StaticResource IconButton}" Content="&#xE8BB;" FontSize="11" ToolTip="Close" Command="{Binding BackCommand}"/>
             </StackPanel>
         </Grid>
 
@@ -75,8 +71,8 @@
             <Border Style="{StaticResource InfoChip}" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line2}"
                     Visibility="{Binding Installed, Converter={StaticResource VisibleIf}}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="&#xE73E;" FontFamily="{StaticResource IconFont}" FontSize="11" Margin="0,1,7,0" VerticalAlignment="Center"/>
-                    <TextBlock><Run Text="Installed  " Foreground="{StaticResource Fg3}"/><Run Text="{Binding Installed.Version, Mode=OneWay}"/></TextBlock>
+                    <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding Installed.IsEnabled}" Content="{Binding ActiveLabel}" Margin="0,-2,14,-2" FontSize="12.5"/>
+                    <TextBlock VerticalAlignment="Center"><Run Text="Installed  " Foreground="{StaticResource Fg3}"/><Run Text="{Binding Installed.Version, Mode=OneWay}"/></TextBlock>
                     <Button Content="Remove" Padding="8,2" FontSize="11.5" Margin="10,-3,-6,-3" Command="{Binding UninstallCommand}"/>
                 </StackPanel>
             </Border>
@@ -120,7 +116,67 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <c:HtmlView Html="{Binding Details.BodyHtml}"/>
+                <DockPanel>
+                    <!-- Dependencies dropdown -->
+                    <Border DockPanel.Dock="Top" Margin="0,0,12,10" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="0,0,0,8">
+                        <StackPanel>
+                            <ToggleButton IsChecked="{Binding DependenciesExpanded}" Cursor="Hand" Focusable="False" HorizontalAlignment="Stretch"
+                                          IsEnabled="{Binding HasDependencies}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <DockPanel Background="Transparent">
+                                            <TextBlock x:Name="chev" DockPanel.Dock="Left" Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="10"
+                                                       VerticalAlignment="Center" Margin="0,1,10,0" Foreground="{StaticResource Fg2}"/>
+                                            <ProgressBar DockPanel.Dock="Right" Width="60" IsIndeterminate="True" VerticalAlignment="Center"
+                                                         Visibility="{Binding LoadingDependencies, Converter={StaticResource VisibleIf}}"/>
+                                            <TextBlock Text="{Binding DependenciesHeader}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{StaticResource Fg}"/>
+                                        </DockPanel>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="chev" Property="Text" Value="&#xE70D;"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="chev" Property="Opacity" Value="0.3"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ItemsControl ItemsSource="{Binding Dependencies}" Margin="0,10,0,0"
+                                          Visibility="{Binding DependenciesExpanded, Converter={StaticResource VisibleIf}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border x:Name="dep" Background="{StaticResource Bg3}" CornerRadius="8" Padding="8,6" Margin="0,0,0,5" Cursor="Hand">
+                                            <Border.InputBindings>
+                                                <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.OpenDependencyCommand, ElementName=Self}" CommandParameter="{Binding}"/>
+                                            </Border.InputBindings>
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Right" Content="Install" Padding="10,3" FontSize="12"
+                                                        Visibility="{Binding CanInstall, Converter={StaticResource VisibleIf}}"
+                                                        Command="{Binding DataContext.InstallDependencyCommand, ElementName=Self}" CommandParameter="{Binding}"/>
+                                                <TextBlock DockPanel.Dock="Right" Text="Installed" Style="{StaticResource Faint}" VerticalAlignment="Center" Margin="0,0,4,0"
+                                                           Visibility="{Binding IsInstalled, Converter={StaticResource VisibleIf}}"/>
+                                                <Border Width="28" Height="28" CornerRadius="6" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
+                                                    <Image c:RemoteImage.DecodeWidth="56" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                                </Border>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding KindText}" Style="{StaticResource Faint}"/>
+                                                </StackPanel>
+                                            </DockPanel>
+                                        </Border>
+                                        <DataTemplate.Triggers>
+                                            <Trigger SourceName="dep" Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="dep" Property="Background" Value="{StaticResource Bg4}"/>
+                                            </Trigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                    <c:HtmlView Html="{Binding Details.BodyHtml}"/>
+                </DockPanel>
             </Border>
 
             <!-- Gallery -->
@@ -182,11 +238,11 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="360"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <DockPanel Margin="0,0,16,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" MinHeight="140"/>
+                    <RowDefinition Height="3*"/>
+                </Grid.RowDefinitions>
+                <DockPanel Margin="0,0,0,12">
                     <CheckBox DockPanel.Dock="Top" IsChecked="{Binding CompatibleOnly}" Content="{Binding CompatText}" Margin="2,0,0,10"/>
                     <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="0,0,0,8" Visibility="{Binding LoadingVersions, Converter={StaticResource VisibleIf}}"/>
                     <TextBlock DockPanel.Dock="Top" Text="No versions match this instance. Untick the filter to see all versions." Style="{StaticResource Muted}" TextWrapping="Wrap"
@@ -211,7 +267,7 @@
                     </ListBox>
                 </DockPanel>
 
-                <Border Grid.Column="1" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10"
+                <Border Grid.Row="1" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10"
                         Visibility="{Binding SelectedVersion, Converter={StaticResource VisibleIf}}">
                     <DockPanel>
                         <Border DockPanel.Dock="Top" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="18,14">

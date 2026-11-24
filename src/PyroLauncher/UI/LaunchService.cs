@@ -79,8 +79,9 @@ public static class LaunchService
                 bool killed = Killed.Remove(inst);
                 if (code != 0 && !killed)
                 {
-                    Dialogs.Toast($"{inst.Name} crashed (exit code {code}). See the console for details.", true);
-                    ConsoleWindow.ShowFor(inst);
+                    Dialogs.Toast($"{inst.Name} crashed (exit code {code}). See the logs for details.", true);
+                    if (SettingsService.Current.OpenConsoleOnLaunch) ConsoleWindow.ShowFor(inst);
+                    else MainViewModel.Instance.OpenInstance(inst, "logs");
                 }
             });
         }

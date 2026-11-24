@@ -59,8 +59,19 @@ public partial class SettingsViewModel : ObservableObject
 
     // ---------------- Launcher
     public string CurseForgeApiKey { get => S.CurseForgeApiKey; set { S.CurseForgeApiKey = value; Changed(); } }
-    public string MicrosoftClientId { get => S.MicrosoftClientId; set { S.MicrosoftClientId = value; Changed(); } }
-    public bool OpenConsoleOnLaunch { get => S.OpenConsoleOnLaunch; set { S.OpenConsoleOnLaunch = value; Changed(); } }
+    public bool OpenConsoleOnLaunch { get => S.OpenConsoleOnLaunch; set { S.OpenConsoleOnLaunch = value; Changed(); SettingsService.NotifyAppearance(); } }
+    public bool DeveloperMode
+    {
+        get => S.DeveloperMode;
+        set { S.DeveloperMode = value; Changed(); SettingsService.NotifyAppearance(); Accounts.AccountManager.NotifyDeveloperModeChanged(); }
+    }
+
+    // ---------------- Appearance
+    public List<ContentListStyle> ListStyles { get; } = [ContentListStyle.List, ContentListStyle.Grid];
+    public List<InstanceMenuStyle> MenuStyles { get; } = [InstanceMenuStyle.TopNavigation, InstanceMenuStyle.Grid];
+    public ContentListStyle ContentListStyle { get => S.ContentListStyle; set { S.ContentListStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
+    public InstanceMenuStyle InstanceMenuStyle { get => S.InstanceMenuStyle; set { S.InstanceMenuStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
+
     public int ConcurrentDownloads { get => S.ConcurrentDownloads; set { S.ConcurrentDownloads = Math.Clamp(value, 1, 64); Changed(); } }
     public LaunchBehaviorOption OnLaunch
     {
@@ -70,8 +81,9 @@ public partial class SettingsViewModel : ObservableObject
 
     // ---------------- Minecraft defaults
     public string JavaPath { get => G.JavaPath ?? ""; set { G.JavaPath = string.IsNullOrWhiteSpace(value) ? null : value; Changed(); } }
-    public int? MinMemory { get => G.MinMemoryMb; set { G.MinMemoryMb = value ?? 512; Changed(); } }
-    public int? MaxMemory { get => G.MaxMemoryMb; set { G.MaxMemoryMb = value ?? 4096; Changed(); } }
+    public int? MinMemory { get => G.MinMemoryMb; set { G.MinMemoryMb = value ?? 512; Changed(); OnPropertyChanged(nameof(MinAboveMax)); } }
+    public bool MinAboveMax => (G.MinMemoryMb ?? 0) > (G.MaxMemoryMb ?? int.MaxValue);
+    public int? MaxMemory { get => G.MaxMemoryMb; set { G.MaxMemoryMb = value ?? 4096; Changed(); OnPropertyChanged(nameof(MinAboveMax)); } }
     public string JvmArgs { get => G.JvmArgs ?? ""; set { G.JvmArgs = value; Changed(); } }
     public int? Width { get => G.WindowWidth; set { G.WindowWidth = value ?? 854; Changed(); } }
     public int? Height { get => G.WindowHeight; set { G.WindowHeight = value ?? 480; Changed(); } }

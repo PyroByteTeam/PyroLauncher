@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,35 +12,44 @@ using PyroLauncher.Instances;
 
 namespace PyroLauncher.UI.ViewModels;
 
-/// <summary>Mods / resource packs / shader packs tab: installed list + online suggestions + project page.</summary>
+/// <summary>
+/// Mods / resource packs / shader packs: a list (or icon grid) on the left and, when something is selected,
+/// its details on the right so you can switch between items without leaving the page.
+/// </summary>
 public partial class ContentTabViewModel : ObservableObject
 {
     public Instance Instance { get; }
     public ContentType Type { get; }
+    public ContentList List { get; }
 
-    public ObservableCollection<LocalItem> Installed { get; } = [];
+    public ObservableCollection<LocalItem> Installed => List.Items;
     public ICollectionView InstalledView { get; }
     public ObservableCollection<ProjectSummary> Suggestions { get; } = [];
 
     [ObservableProperty] private string _query = "";
     [ObservableProperty] private bool _suggestionsEnabled;
     [ObservableProperty] private SourceFilter _sourceFilter = SourceFilter.All;
-    [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private bool _isSearching;
     [ObservableProperty] private string? _searchWarning;
     [ObservableProperty] private bool _canLoadMore;
     [ObservableProperty] private ProjectDetailViewModel? _detail;
     [ObservableProperty] private string? _busyText;
-    [ObservableProperty] private int _installedCount;
-    [ObservableProperty] private int _enabledCount;
 
     private CancellationTokenSource? _searchCts;
     private int _page;
-    private DateTime _lastScan;
+    private object? _selected;
 
     public string Title => Type.Display();
     public bool IsMods => Type == ContentType.Mod;
+    public bool IsGrid => SettingsService.Current.ContentListStyle == ContentListStyle.Grid;
     public bool IsUnsupported => Type == ContentType.Mod && Instance.Config.Loader == ModLoader.Vanilla;
+    public GridLength DetailWidth => Detail == null ? new GridLength(0) : new GridLength(1.25, GridUnitType.Star);
+    public string ToggleTooltip => Type switch
+    {
+        ContentType.Mod => "Load this mod on launch",
+        ContentType.ResourcePack => "Active in game",
+        _ => "Use this shader pack (only one at a time)",
+    };
     public string SearchPlaceholder => SuggestionsEnabled
         ? $"Search Modrinth{(CurseForgeApi.HasKey ? " and CurseForge" : "")}…"
         : $"Filter installed {Type.Display().ToLower()}…";
@@ -49,17 +59,175 @@ public partial class ContentTabViewModel : ObservableObject
         ContentType.ResourcePack => "No resource packs yet. Turn on suggestions to browse online.",
         _ => "No shader packs yet. You'll need a shader mod like Iris or Oculus to use them.",
     };
-    public string CountText => Type == ContentType.Mod
-        ? $"{InstalledCount} installed · {EnabledCount} enabled"
-        : $"{InstalledCount} installed";
+    public string CountText => Type switch
+    {
+        ContentType.Mod => $"{Installed.Count} installed · {List.EnabledCount} enabled",
+        ContentType.ResourcePack => $"{Installed.Count} installed · {List.EnabledCount} active",
+        _ => $"{Installed.Count} installed · {(List.ActiveShader != null ? "using " + List.ActiveShader : "shaders off")}",
+    };
 
     public ContentTabViewModel(Instance inst, ContentType type)
     {
         Instance = inst;
         Type = type;
-        InstalledView = new ListCollectionView(Installed) { Filter = FilterInstalled };
-        _ = RefreshAsync();
+        List = ContentStore.Get(inst, type);
+        InstalledView = new ListCollectionView(List.Items) { Filter = FilterInstalled };
+        List.PropertyChanged += OnListPropertyChanged;
+        List.Items.CollectionChanged += OnItemsChanged;
+        List.Refreshed += OnListRefreshed;
+        WatchChecks();
+
+        // Restore the suggestions toggle as it was left for this instance.
+        Instance.Config.SuggestionsOn ??= [];
+        if (Instance.Config.SuggestionsOn.Contains(Type.ToString()))
+        {
+            _suggestionsEnabled = true;
+            _ = LoadCategoriesAsync();
+            DebouncedSearch(0);
+        }
     }
+
+    private void OnListPropertyChanged(object? s, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ContentList.EnabledCount) or nameof(ContentList.ActiveShader)) OnPropertyChanged(nameof(CountText));
+    }
+
+    private void OnItemsChanged(object? s, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(CountText));
+        WatchChecks();
+    }
+
+    // ---------------- multi-select
+    private readonly HashSet<LocalItem> _watched = [];
+    [ObservableProperty] private int _checkedCount;
+    public bool HasChecked => CheckedCount > 0;
+    public int CheckedUpdates => Installed.Count(i => i.IsChecked && i.HasUpdate);
+    partial void OnCheckedCountChanged(int value)
+    {
+        OnPropertyChanged(nameof(HasChecked));
+        OnPropertyChanged(nameof(CheckedUpdates));
+    }
+
+    private void WatchChecks()
+    {
+        foreach (var gone in _watched.Where(w => !Installed.Contains(w)).ToList())
+        {
+            gone.PropertyChanged -= OnItemCheckChanged;
+            _watched.Remove(gone);
+        }
+        foreach (var i in Installed)
+            if (_watched.Add(i)) i.PropertyChanged += OnItemCheckChanged;
+        CheckedCount = Installed.Count(i => i.IsChecked);
+    }
+
+    private void OnItemCheckChanged(object? s, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(LocalItem.IsChecked)) CheckedCount = Installed.Count(i => i.IsChecked);
+        else if (e.PropertyName is nameof(LocalItem.HasUpdate)) OnPropertyChanged(nameof(CheckedUpdates));
+    }
+
+    private List<LocalItem> Checked => Installed.Where(i => i.IsChecked).ToList();
+
+    [RelayCommand]
+    private void SelectAllVisible()
+    {
+        foreach (var i in InstalledView.Cast<LocalItem>()) i.IsChecked = true;
+    }
+
+    [RelayCommand]
+    private void ClearChecked()
+    {
+        foreach (var i in Installed) i.IsChecked = false;
+    }
+
+    [RelayCommand]
+    private void BulkEnable(string on)
+    {
+        var value = on == "true";
+        var items = Checked;
+        if (Type == ContentType.ShaderPack && value)
+        {
+            // Only one shader pack can be active.
+            if (items.Count > 0) items[^1].IsEnabled = true;
+            return;
+        }
+        foreach (var i in items) i.IsEnabled = value;
+    }
+
+    [RelayCommand]
+    private async Task BulkUpdate()
+    {
+        var list = Checked.Where(i => i.HasUpdate).ToList();
+        if (list.Count == 0) { Dialogs.Toast("None of the selected items has a known update — run Check for updates first."); return; }
+        int ok = 0;
+        foreach (var item in list)
+        {
+            BusyText = $"Updating {item.Name} ({ok + 1}/{list.Count})…";
+            try
+            {
+                await ContentService.InstallAsync(Instance, Type, item.Update!, item.Ref?.Title ?? item.Name, item.Ref?.IconUrl, item, null, CancellationToken.None);
+                ok++;
+            }
+            catch (Exception ex) { Dialogs.Toast($"{item.Name}: {ex.Message}", true); }
+        }
+        BusyText = null;
+        Dialogs.Toast($"Updated {ok} of {list.Count}");
+        await List.RefreshAsync();
+        UpdatesCount = Installed.Count(i => i.HasUpdate);
+    }
+
+    [RelayCommand]
+    private async Task BulkDelete()
+    {
+        var items = Checked;
+        if (items.Count == 0) return;
+        var names = string.Join("\n", items.Take(12).Select(i => "• " + i.Name)) + (items.Count > 12 ? $"\n…and {items.Count - 12} more" : "");
+        if (!await Dialogs.ConfirmAsync($"Delete {items.Count} item{(items.Count == 1 ? "" : "s")}",
+                $"These files will be deleted from the instance:\n\n{names}", "Delete", true)) return;
+        int failed = 0;
+        foreach (var i in items)
+        {
+            try
+            {
+                if (i.IsEnabled && Type != ContentType.Mod) i.IsEnabled = false;
+                ContentService.Delete(Instance, i);
+                if (Detail?.Installed == i) CloseDetail();
+            }
+            catch { failed++; }
+        }
+        if (failed > 0) Dialogs.Toast($"{failed} file(s) could not be deleted (in use?).", true);
+        await List.RefreshAsync();
+    }
+
+    /// <summary>Stops listening to the shared list (the list itself stays cached for fast reopening).</summary>
+    public void Detach()
+    {
+        List.PropertyChanged -= OnListPropertyChanged;
+        List.Items.CollectionChanged -= OnItemsChanged;
+        List.Refreshed -= OnListRefreshed;
+        foreach (var w in _watched) w.PropertyChanged -= OnItemCheckChanged;
+        _watched.Clear();
+        (InstalledView as ListCollectionView)?.DetachFromSourceCollection();
+    }
+
+    /// <summary>Called by the instance page when appearance settings change.</summary>
+    public void OnAppearanceChanged() => OnPropertyChanged(nameof(IsGrid));
+
+    private void OnListRefreshed()
+    {
+        UpdatesCount = Installed.Count(i => i.HasUpdate);
+        if (StatusFilter != "all") InstalledView.Refresh();
+        if (SuggestionsEnabled) FilterSuggestions();
+        // Keep the details pane pointing at the (possibly re-created) installed item.
+        if (Detail?.Installed is { } d && !Installed.Contains(d))
+            Detail.Installed = Detail.ProjectId != null ? FindInstalled(Detail.Source, Detail.ProjectId) : null;
+    }
+
+    public void RefreshIfStale() => _ = List.RefreshAsync();
+
+    [RelayCommand]
+    private Task Refresh() => List.RefreshAsync();
 
     // ---------------- filters
     [ObservableProperty] private string _statusFilter = "all";
@@ -73,6 +241,8 @@ public partial class ContentTabViewModel : ObservableObject
     public ObservableCollection<string> Categories { get; } = [AnyCategory];
     public List<SearchSort> Sorts { get; } = [SearchSort.Relevance, SearchSort.Downloads, SearchSort.Newest, SearchSort.Updated];
     public List<string> Environments { get; } = ["Any side", "Client", "Server"];
+    public string EnabledFilterText => Type == ContentType.Mod ? "Enabled" : "Active";
+    public string DisabledFilterText => Type == ContentType.Mod ? "Disabled" : "Inactive";
     private bool _categoriesLoaded;
 
     partial void OnStatusFilterChanged(string value) => InstalledView.Refresh();
@@ -96,6 +266,22 @@ public partial class ContentTabViewModel : ObservableObject
         catch (Exception ex) { Log.Warn($"Categories failed: {ex.Message}"); _categoriesLoaded = false; }
     }
 
+    private bool FilterInstalled(object o)
+    {
+        if (o is not LocalItem i) return true;
+        switch (StatusFilter)
+        {
+            case "enabled" when !i.IsEnabled: return false;
+            case "disabled" when i.IsEnabled: return false;
+            case "updates" when !i.HasUpdate: return false;
+        }
+        if (string.IsNullOrWhiteSpace(Query)) return true;
+        return i.Name.Contains(Query, StringComparison.OrdinalIgnoreCase)
+               || i.FileName.Contains(Query, StringComparison.OrdinalIgnoreCase)
+               || (i.ModId?.Contains(Query, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
+
+    // ---------------- updates
     [RelayCommand]
     private async Task CheckUpdates()
     {
@@ -123,10 +309,9 @@ public partial class ContentTabViewModel : ObservableObject
         try
         {
             BusyText = $"Updating {item.Name}…";
-            var v = item.Update;
-            await ContentService.InstallAsync(Instance, Type, v, item.Ref?.Title ?? item.Name, item.Ref?.IconUrl, item, null, CancellationToken.None);
-            item.Update = null;
+            await ContentService.InstallAsync(Instance, Type, item.Update, item.Ref?.Title ?? item.Name, item.Ref?.IconUrl, item, null, CancellationToken.None);
             UpdatesCount = Math.Max(0, UpdatesCount - 1);
+            await List.RefreshAsync();
         }
         catch (Exception ex) { Dialogs.Toast($"{item.Name}: {ex.Message}", true); }
         finally { BusyText = null; }
@@ -152,78 +337,10 @@ public partial class ContentTabViewModel : ObservableObject
         UpdatesCount = 0;
         UpdateStatus = null;
         StatusFilter = "all";
-        await RefreshAsync();
+        await List.RefreshAsync();
     }
 
-    private bool FilterInstalled(object o)
-    {
-        if (o is not LocalItem i) return true;
-        switch (StatusFilter)
-        {
-            case "enabled" when !i.IsEnabled: return false;
-            case "disabled" when i.IsEnabled: return false;
-            case "updates" when !i.HasUpdate: return false;
-        }
-        if (string.IsNullOrWhiteSpace(Query)) return true;
-        return i.Name.Contains(Query, StringComparison.OrdinalIgnoreCase)
-               || i.FileName.Contains(Query, StringComparison.OrdinalIgnoreCase)
-               || (i.ModId?.Contains(Query, StringComparison.OrdinalIgnoreCase) ?? false);
-    }
-
-    public void RefreshIfStale()
-    {
-        if ((DateTime.Now - _lastScan).TotalSeconds > 3) _ = RefreshAsync();
-    }
-
-    [RelayCommand]
-    private async Task RefreshAsync()
-    {
-        IsLoading = true;
-        try
-        {
-            _lastScan = DateTime.Now;
-            var items = await Task.Run(() => LocalContentScanner.Scan(Instance, Type));
-            var known = Installed.Where(i => i.HasUpdate).ToDictionary(i => i.FileName, i => i.Update);
-            foreach (var old in Installed) old.PropertyChanged -= OnItemChanged;
-            Installed.Clear();
-            foreach (var i in items)
-            {
-                if (known.TryGetValue(i.FileName, out var up)) i.Update = up;
-                i.PropertyChanged += OnItemChanged;
-                Installed.Add(i);
-            }
-            UpdatesCount = items.Count(i => i.HasUpdate);
-            UpdateCounts();
-            _ = IdentifyAsync(items);
-            if (SuggestionsEnabled) FilterSuggestions();
-        }
-        catch (Exception ex) { Dialogs.Toast($"Could not read {Type.Folder()}: {ex.Message}", true); }
-        finally { IsLoading = false; }
-    }
-
-    private async Task IdentifyAsync(List<LocalItem> items)
-    {
-        try { await ContentService.IdentifyAsync(Instance, items, CancellationToken.None); }
-        catch (Exception ex) { Log.Warn($"Identify failed: {ex.Message}"); }
-        if (SuggestionsEnabled) FilterSuggestions();
-    }
-
-    private void OnItemChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(LocalItem.IsEnabled))
-        {
-            UpdateCounts();
-            if (StatusFilter != "all") InstalledView.Refresh();
-        }
-    }
-
-    private void UpdateCounts()
-    {
-        InstalledCount = Installed.Count;
-        EnabledCount = Installed.Count(i => i.IsEnabled);
-        OnPropertyChanged(nameof(CountText));
-    }
-
+    // ---------------- search
     partial void OnQueryChanged(string value)
     {
         InstalledView.Refresh();
@@ -233,8 +350,11 @@ public partial class ContentTabViewModel : ObservableObject
     partial void OnSuggestionsEnabledChanged(bool value)
     {
         OnPropertyChanged(nameof(SearchPlaceholder));
-        if (value) _ = LoadCategoriesAsync();
-        if (value) DebouncedSearch(0);
+        var saved = Instance.Config.SuggestionsOn;
+        saved.Remove(Type.ToString());
+        if (value) saved.Add(Type.ToString());
+        Instance.Save();
+        if (value) { _ = LoadCategoriesAsync(); DebouncedSearch(0); }
         else
         {
             _searchCts?.Cancel();
@@ -279,14 +399,10 @@ public partial class ContentTabViewModel : ObservableObject
         }
         catch (OperationCanceledException) { }
         catch (Exception ex) { SearchWarning = ex.Message; }
-        finally
-        {
-            if (!ct.IsCancellationRequested) IsSearching = false;
-        }
+        finally { if (!ct.IsCancellationRequested) IsSearching = false; }
     }
 
-    private HashSet<string> InstalledProjectIds() =>
-        Installed.Where(i => i.Ref != null).Select(i => i.Ref!.ProjectId).ToHashSet();
+    private HashSet<string> InstalledProjectIds() => Installed.Where(i => i.Ref != null).Select(i => i.Ref!.ProjectId).ToHashSet();
 
     private void FilterSuggestions()
     {
@@ -302,8 +418,9 @@ public partial class ContentTabViewModel : ObservableObject
         await SearchAsync(cts.Token, true);
     }
 
+    // ---------------- files
     [RelayCommand]
-    private void OpenFolder() => Dialogs.OpenPath(Path.Combine(Instance.GameDir, Type.Folder()));
+    private void OpenFolder() => Dialogs.OpenPath(List.Folder);
 
     [RelayCommand]
     private async Task AddFiles()
@@ -320,18 +437,17 @@ public partial class ContentTabViewModel : ObservableObject
 
     public async Task AddFilesAsync(IEnumerable<string> files)
     {
-        var folder = Path.Combine(Instance.GameDir, Type.Folder());
-        Directory.CreateDirectory(folder);
+        Directory.CreateDirectory(List.Folder);
         int n = 0;
         foreach (var f in files)
         {
             var ext = Path.GetExtension(f).ToLowerInvariant();
             if (Type == ContentType.Mod ? ext != ".jar" : ext != ".zip") continue;
-            try { File.Copy(f, Path.Combine(folder, Path.GetFileName(f)), true); n++; }
+            try { File.Copy(f, Path.Combine(List.Folder, Path.GetFileName(f)), true); n++; }
             catch (Exception ex) { Dialogs.Toast($"{Path.GetFileName(f)}: {ex.Message}", true); }
         }
         if (n > 0) Dialogs.Toast($"Added {n} file{(n == 1 ? "" : "s")}");
-        await RefreshAsync();
+        await List.RefreshAsync();
     }
 
     [RelayCommand]
@@ -340,11 +456,10 @@ public partial class ContentTabViewModel : ObservableObject
         if (!await Dialogs.ConfirmAsync("Remove file", $"Delete \"{item.Name}\" ({item.FileName}) from this instance?", "Delete", true)) return;
         try
         {
+            if (item.IsEnabled && Type != ContentType.Mod) item.IsEnabled = false;
             ContentService.Delete(Instance, item);
-            item.PropertyChanged -= OnItemChanged;
-            Installed.Remove(item);
-            UpdateCounts();
-            if (Detail?.Installed == item) Detail = null;
+            if (Detail?.Installed == item) CloseDetail();
+            await List.RefreshAsync();
         }
         catch (Exception ex) { Dialogs.Toast($"Delete failed: {ex.Message}", true); }
     }
@@ -353,10 +468,31 @@ public partial class ContentTabViewModel : ObservableObject
     private void Reveal(LocalItem item) => Dialogs.RevealInExplorer(item.FilePath);
 
     [RelayCommand]
-    private void OpenItem(LocalItem item) => Detail = new ProjectDetailViewModel(this, item);
+    private void Toggle(LocalItem item) => item.IsEnabled = !item.IsEnabled;
+
+    // ---------------- selection / details pane
+    private void Select(object? item)
+    {
+        if (_selected is LocalItem a) a.IsSelected = false;
+        if (_selected is ProjectSummary b) b.IsSelected = false;
+        _selected = item;
+        if (item is LocalItem c) c.IsSelected = true;
+        if (item is ProjectSummary d) d.IsSelected = true;
+    }
 
     [RelayCommand]
-    private void OpenProject(ProjectSummary p) => Detail = new ProjectDetailViewModel(this, p);
+    private void OpenItem(LocalItem item)
+    {
+        Select(item);
+        Detail = new ProjectDetailViewModel(this, item);
+    }
+
+    [RelayCommand]
+    private void OpenProject(ProjectSummary p)
+    {
+        Select(p);
+        Detail = new ProjectDetailViewModel(this, p);
+    }
 
     [RelayCommand]
     private async Task QuickInstall(ProjectSummary p)
@@ -374,14 +510,20 @@ public partial class ContentTabViewModel : ObservableObject
             await ContentService.InstallAsync(Instance, Type, v, p.Title, p.IconUrl, null, null, CancellationToken.None);
             Dialogs.Toast($"Installed {p.Title} {v.VersionNumber}");
             Suggestions.Remove(p);
-            await RefreshAsync();
+            await List.RefreshAsync();
         }
         catch (Exception ex) { Dialogs.Toast(ex.Message, true); }
         finally { BusyText = null; }
     }
 
     [RelayCommand]
-    private void CloseDetail() => Detail = null;
+    private void CloseDetail()
+    {
+        Select(null);
+        Detail = null;
+    }
+
+    partial void OnDetailChanged(ProjectDetailViewModel? value) => OnPropertyChanged(nameof(DetailWidth));
 
     public LocalItem? FindInstalled(ContentSource source, string projectId) =>
         Installed.FirstOrDefault(i => i.Ref != null && i.Ref.Source == source && i.Ref.ProjectId == projectId);

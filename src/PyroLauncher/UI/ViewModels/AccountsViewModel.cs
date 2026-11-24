@@ -10,7 +10,13 @@ namespace PyroLauncher.UI.ViewModels;
 
 public partial class AccountsViewModel : ObservableObject
 {
-    public ObservableCollection<Account> Accounts => AccountManager.Accounts;
+    /// <summary>Accounts shown to the user: offline accounts are hidden unless developer mode is on.</summary>
+    public System.ComponentModel.ICollectionView Accounts { get; } = new System.Windows.Data.ListCollectionView(AccountManager.Accounts)
+    {
+        Filter = o => o is Account a && AccountManager.IsUsable(a),
+    };
+
+    public bool DeveloperMode => AccountManager.OfflineAllowed;
 
     [ObservableProperty] private string _offlineName = "";
     [ObservableProperty] private string? _offlineError;
@@ -20,11 +26,17 @@ public partial class AccountsViewModel : ObservableObject
     [ObservableProperty] private string? _msError;
     private CancellationTokenSource? _cts;
 
-    public bool HasAccounts => Accounts.Count > 0;
+    public bool HasAccounts => !Accounts.IsEmpty;
 
     public AccountsViewModel()
     {
-        Accounts.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAccounts));
+        AccountManager.Accounts.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAccounts));
+        AccountManager.DeveloperModeChanged += () =>
+        {
+            Accounts.Refresh();
+            OnPropertyChanged(nameof(HasAccounts));
+            OnPropertyChanged(nameof(DeveloperMode));
+        };
     }
 
     [RelayCommand]

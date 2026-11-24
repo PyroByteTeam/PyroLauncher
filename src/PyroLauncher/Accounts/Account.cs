@@ -43,7 +43,20 @@ public static class AccountManager
     public static ObservableCollection<Account> Accounts { get; } = [];
     public static event Action? SelectionChanged;
 
-    public static Account? Selected => Accounts.FirstOrDefault(a => a.IsSelected);
+    /// <summary>Offline accounts are a developer feature.</summary>
+    public static bool OfflineAllowed => SettingsService.Current.DeveloperMode;
+
+    public static bool IsUsable(Account a) => a.Type == AccountType.Microsoft || OfflineAllowed;
+
+    public static Account? Selected => Accounts.FirstOrDefault(a => a.IsSelected && IsUsable(a));
+
+    public static event Action? DeveloperModeChanged;
+
+    public static void NotifyDeveloperModeChanged()
+    {
+        DeveloperModeChanged?.Invoke();
+        SelectionChanged?.Invoke();
+    }
 
     public static void Load()
     {
@@ -84,6 +97,7 @@ public static class AccountManager
 
     public static Account AddOffline(string name)
     {
+        if (!OfflineAllowed) throw new InvalidOperationException("Offline accounts require developer mode.");
         var acc = new Account
         {
             Type = AccountType.Offline,

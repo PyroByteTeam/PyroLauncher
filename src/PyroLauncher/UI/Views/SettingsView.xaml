@@ -1,10 +1,129 @@
 <UserControl x:Class="PyroLauncher.UI.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:PyroLauncher.UI.Controls"
              x:Name="Self">
     <UserControl.Resources>
         <Style x:Key="RowTitle" TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
             <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <!-- ===== Layout preview mockups (shown as hover hints) ===== -->
+        <SolidColorBrush x:Key="MockFg" Color="#FF3C3C3C"/>
+        <SolidColorBrush x:Key="MockHi" Color="#FFE8E8E8"/>
+        <Style x:Key="MockFrame" TargetType="Border">
+            <Setter Property="Width" Value="236"/>
+            <Setter Property="Height" Value="150"/>
+            <Setter Property="Background" Value="#FF101010"/>
+            <Setter Property="BorderBrush" Value="#FF2E2E2E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10"/>
+        </Style>
+        <Style x:Key="MockBar" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource MockFg}"/>
+            <Setter Property="CornerRadius" Value="2"/>
+            <Setter Property="Height" Value="6"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style x:Key="MockCard" TargetType="Border">
+            <Setter Property="Background" Value="#FF1C1C1C"/>
+            <Setter Property="BorderBrush" Value="#FF2E2E2E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Margin" Value="0,0,5,5"/>
+        </Style>
+
+        <StackPanel x:Key="PreviewTopNav" x:Shared="False">
+            <TextBlock Text="Top navigation" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <Border Style="{StaticResource MockFrame}">
+                <StackPanel>
+                    <Border Style="{StaticResource MockBar}" Width="90" Height="8" Background="{StaticResource MockHi}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <StackPanel Margin="0,0,8,0">
+                            <Border Style="{StaticResource MockBar}" Width="24" Background="{StaticResource MockHi}"/>
+                            <Border Height="2" Background="{StaticResource MockHi}" Margin="0,3,0,0" Width="24"/>
+                        </StackPanel>
+                        <Border Style="{StaticResource MockBar}" Width="34" Margin="0,0,8,0" VerticalAlignment="Top"/>
+                        <Border Style="{StaticResource MockBar}" Width="24" Margin="0,0,8,0" VerticalAlignment="Top"/>
+                        <Border Style="{StaticResource MockBar}" Width="30" Margin="0,0,8,0" VerticalAlignment="Top"/>
+                        <Border Style="{StaticResource MockBar}" Width="20" VerticalAlignment="Top"/>
+                    </StackPanel>
+                    <Border Height="1" Background="#FF2E2E2E" Margin="0,4,0,8"/>
+                    <Border Style="{StaticResource MockCard}" Height="16" Margin="0,0,0,5"/>
+                    <Border Style="{StaticResource MockCard}" Height="16" Margin="0,0,0,5"/>
+                    <Border Style="{StaticResource MockCard}" Height="16" Margin="0,0,0,5"/>
+                    <Border Style="{StaticResource MockCard}" Height="16" Margin="0"/>
+                </StackPanel>
+            </Border>
+            <TextBlock Text="Sections are tabs across the top of the instance page." Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel x:Key="PreviewGridMenu" x:Shared="False">
+            <TextBlock Text="Grid" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <Border Style="{StaticResource MockFrame}">
+                <StackPanel>
+                    <Border Style="{StaticResource MockBar}" Width="90" Height="8" Background="{StaticResource MockHi}" Margin="0,0,0,10"/>
+                    <UniformGrid Columns="3" Rows="2" Height="104">
+                        <Border Style="{StaticResource MockCard}"><StackPanel Margin="5"><Border Style="{StaticResource MockBar}" Width="30" Background="{StaticResource MockHi}"/><WrapPanel Margin="0,6,0,0"><Ellipse Width="6" Height="6" Fill="#FF6A6A6A" Margin="0,0,2,2"/><Ellipse Width="6" Height="6" Fill="#FF6A6A6A" Margin="0,0,2,2"/><Ellipse Width="6" Height="6" Fill="#FF6A6A6A" Margin="0,0,2,2"/><Ellipse Width="6" Height="6" Fill="#FF6A6A6A" Margin="0,0,2,2"/><Ellipse Width="6" Height="6" Fill="#FF6A6A6A" Margin="0,0,2,2"/></WrapPanel></StackPanel></Border>
+                        <Border Style="{StaticResource MockCard}"><StackPanel Margin="5"><Border Style="{StaticResource MockBar}" Width="36" Background="{StaticResource MockHi}"/><WrapPanel Margin="0,6,0,0"><Ellipse Width="6" Height="6" Fill="#FF6A6A6A" Margin="0,0,2,2"/><Ellipse Width="6" Height="6" Fill="#FF6A6A6A" Margin="0,0,2,2"/></WrapPanel></StackPanel></Border>
+                        <Border Style="{StaticResource MockCard}"><StackPanel Margin="5"><Border Style="{StaticResource MockBar}" Width="26" Background="{StaticResource MockHi}"/></StackPanel></Border>
+                        <Border Style="{StaticResource MockCard}"><StackPanel Margin="5"><Border Style="{StaticResource MockBar}" Width="32" Background="{StaticResource MockHi}"/></StackPanel></Border>
+                        <Border Style="{StaticResource MockCard}"><StackPanel Margin="5"><Border Style="{StaticResource MockBar}" Width="24" Background="{StaticResource MockHi}"/></StackPanel></Border>
+                        <Border Style="{StaticResource MockCard}"><StackPanel Margin="5"><Border Style="{StaticResource MockBar}" Width="28" Background="{StaticResource MockHi}"/></StackPanel></Border>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+            <TextBlock Text="An overview of section cards; drag them to rearrange." Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel x:Key="PreviewList" x:Shared="False">
+            <TextBlock Text="List" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <Border Style="{StaticResource MockFrame}">
+                <StackPanel>
+                    <Border Style="{StaticResource MockCard}" Height="22" Margin="0,0,0,6"><StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center"><Border Width="12" Height="7" CornerRadius="3.5" Background="{StaticResource MockHi}" Margin="0,0,6,0"/><Border Width="12" Height="12" CornerRadius="2" Background="#FF6A6A6A" Margin="0,0,6,0"/><Border Style="{StaticResource MockBar}" Width="80"/></StackPanel></Border>
+                    <Border Style="{StaticResource MockCard}" Height="22" Margin="0,0,0,6"><StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center"><Border Width="12" Height="7" CornerRadius="3.5" Background="{StaticResource MockHi}" Margin="0,0,6,0"/><Border Width="12" Height="12" CornerRadius="2" Background="#FF6A6A6A" Margin="0,0,6,0"/><Border Style="{StaticResource MockBar}" Width="110"/></StackPanel></Border>
+                    <Border Style="{StaticResource MockCard}" Height="22" Margin="0,0,0,6"><StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center"><Border Width="12" Height="7" CornerRadius="3.5" Background="#FF3C3C3C" Margin="0,0,6,0"/><Border Width="12" Height="12" CornerRadius="2" Background="#FF6A6A6A" Margin="0,0,6,0"/><Border Style="{StaticResource MockBar}" Width="64"/></StackPanel></Border>
+                    <Border Style="{StaticResource MockCard}" Height="22" Margin="0,0,0,6"><StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center"><Border Width="12" Height="7" CornerRadius="3.5" Background="{StaticResource MockHi}" Margin="0,0,6,0"/><Border Width="12" Height="12" CornerRadius="2" Background="#FF6A6A6A" Margin="0,0,6,0"/><Border Style="{StaticResource MockBar}" Width="96"/></StackPanel></Border>
+                </StackPanel>
+            </Border>
+            <TextBlock Text="Detailed rows with switch, name, version and source." Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel x:Key="PreviewGridList" x:Shared="False">
+            <TextBlock Text="Grid" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <Border Style="{StaticResource MockFrame}">
+                <UniformGrid Columns="6" Rows="3">
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF8A8A8A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF5A5A5A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF8A8A8A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF5A5A5A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF8A8A8A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF5A5A5A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF8A8A8A"/></Border>
+                    <Border Style="{StaticResource MockCard}"><Border Width="14" Height="14" CornerRadius="3" Background="#FF6A6A6A"/></Border>
+                </UniformGrid>
+            </Border>
+            <TextBlock Text="Compact icon tiles (or two letters when there's no icon)." Style="{StaticResource Faint}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Style x:Key="PreviewHint" TargetType="RadioButton" BasedOn="{StaticResource SegmentButton}">
+            <Setter Property="ToolTipService.Placement" Value="Right"/>
+            <Setter Property="ToolTipService.HorizontalOffset" Value="12"/>
+            <Setter Property="ToolTipService.InitialShowDelay" Value="150"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
+            <Setter Property="Padding" Value="12,6"/>
+        </Style>
+
+        <Style x:Key="Section" TargetType="StackPanel">
+            <Setter Property="Width" Value="820"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
         </Style>
     </UserControl.Resources>
     <Grid Margin="36,0,20,0">
@@ -21,6 +140,7 @@
         <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,16,18">
             <StackPanel Orientation="Horizontal">
                 <RadioButton Style="{StaticResource TabButton}" Content="Launcher" Tag="&#xE8B7;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=launcher}"/>
+                <RadioButton Style="{StaticResource TabButton}" Content="Appearance" Tag="&#xE790;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=appearance}"/>
                 <RadioButton Style="{StaticResource TabButton}" Content="Minecraft (all instances)" Tag="&#xE7FC;" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=minecraft}"/>
             </StackPanel>
         </Border>
@@ -28,29 +148,16 @@
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="0,0,16,24">
             <Grid>
                 <!-- ================= Launcher ================= -->
-                <StackPanel Width="820" HorizontalAlignment="Left">
+                <StackPanel>
                     <StackPanel.Style>
-                        <Style TargetType="StackPanel">
-                            <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style TargetType="StackPanel" BasedOn="{StaticResource Section}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Section}" Value="launcher">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Section}" Value="launcher"><Setter Property="Visibility" Value="Visible"/></DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
 
-                    <TextBlock Text="Accounts &amp; services" Style="{StaticResource H2}" Margin="0,0,0,4"/>
-                    <Border Style="{StaticResource SettingRow}">
-                        <StackPanel>
-                            <TextBlock Text="Microsoft client ID" Style="{StaticResource RowTitle}"/>
-                            <TextBlock Style="{StaticResource Faint}" TextWrapping="Wrap" Margin="0,3,0,8">
-                                <Run Text="Application (client) ID of an Azure app registration with personal Microsoft accounts and the public client flow enabled, approved for the Minecraft API. Needed for Microsoft sign-in."/>
-                                <Hyperlink Foreground="White" Command="{Binding OpenUrlCommand}" CommandParameter="https://aka.ms/mce-reviewappid">How to get one</Hyperlink>
-                            </TextBlock>
-                            <TextBox Text="{Binding MicrosoftClientId, UpdateSourceTrigger=PropertyChanged}" Tag="00000000-0000-0000-0000-000000000000" FontFamily="{StaticResource MonoFont}"/>
-                        </StackPanel>
-                    </Border>
+                    <TextBlock Text="Services" Style="{StaticResource H2}" Margin="0,0,0,4"/>
                     <Border Style="{StaticResource SettingRow}">
                         <StackPanel>
                             <TextBlock Text="CurseForge API key" Style="{StaticResource RowTitle}"/>
@@ -60,30 +167,6 @@
                             </TextBlock>
                             <TextBox Text="{Binding CurseForgeApiKey, UpdateSourceTrigger=PropertyChanged}" Tag="$2a$10$…" FontFamily="{StaticResource MonoFont}"/>
                         </StackPanel>
-                    </Border>
-
-                    <TextBlock Text="Behaviour" Style="{StaticResource H2}" Margin="0,28,0,4"/>
-                    <Border Style="{StaticResource SettingRow}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="320"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel>
-                                <TextBlock Text="When the game starts" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="The launcher keeps tracking play time in every mode." Style="{StaticResource Faint}" Margin="0,3,0,0"/>
-                            </StackPanel>
-                            <ComboBox Grid.Column="1" ItemsSource="{Binding LaunchOptions}" SelectedItem="{Binding OnLaunch}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Border>
-                    <Border Style="{StaticResource SettingRow}">
-                        <DockPanel>
-                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding OpenConsoleOnLaunch}" VerticalAlignment="Center"/>
-                            <StackPanel>
-                                <TextBlock Text="Open the game console on launch" Style="{StaticResource RowTitle}"/>
-                                <TextBlock Text="A color-coded live log window for the launched instance. You can always open it from the instance page." Style="{StaticResource Faint}" Margin="0,3,0,0"/>
-                            </StackPanel>
-                        </DockPanel>
                     </Border>
                     <Border Style="{StaticResource SettingRow}">
                         <Grid>
@@ -132,7 +215,16 @@
                         <ProgressBar IsIndeterminate="True" Margin="0,6,0,0"/>
                     </StackPanel>
 
-                    <TextBlock Text="Storage" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                    <TextBlock Text="Advanced" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding DeveloperMode}" VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock Text="Developer mode" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="Unlocks offline accounts for testing. Without it, only Microsoft accounts can be added and used." Style="{StaticResource Faint}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
                     <Border Style="{StaticResource SettingRow}" BorderThickness="0">
                         <DockPanel>
                             <Button DockPanel.Dock="Right" Content="Open folder" Command="{Binding OpenDataFolderCommand}"/>
@@ -144,20 +236,99 @@
                     </Border>
                 </StackPanel>
 
-                <!-- ================= Minecraft ================= -->
-                <StackPanel Width="820" HorizontalAlignment="Left">
+                <!-- ================= Appearance ================= -->
+                <StackPanel>
                     <StackPanel.Style>
-                        <Style TargetType="StackPanel">
-                            <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style TargetType="StackPanel" BasedOn="{StaticResource Section}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Section}" Value="minecraft">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Section}" Value="appearance"><Setter Property="Visibility" Value="Visible"/></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <TextBlock Text="Layout" Style="{StaticResource H2}" Margin="0,0,0,4"/>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="Top navigation" GroupName="menu" ToolTip="{StaticResource PreviewTopNav}"
+                                             IsChecked="{Binding InstanceMenuStyle, Converter={StaticResource Eq}, ConverterParameter=TopNavigation}"/>
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="Grid" GroupName="menu" Margin="0" ToolTip="{StaticResource PreviewGridMenu}"
+                                             IsChecked="{Binding InstanceMenuStyle, Converter={StaticResource Eq}, ConverterParameter=Grid}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Instance menu" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="Tabs across the top, or an overview grid of section cards you can drag to rearrange." Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="List" GroupName="list" ToolTip="{StaticResource PreviewList}"
+                                             IsChecked="{Binding ContentListStyle, Converter={StaticResource Eq}, ConverterParameter=List}"/>
+                                <RadioButton Style="{StaticResource PreviewHint}" Content="Grid" GroupName="list" Margin="0" ToolTip="{StaticResource PreviewGridList}"
+                                             IsChecked="{Binding ContentListStyle, Converter={StaticResource Eq}, ConverterParameter=Grid}"/>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Text="Mod list style" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="How mods, resource packs and shader packs are listed: detailed rows or a grid of icons." Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <TextBlock Text="Behaviour" Style="{StaticResource H2}" Margin="0,28,0,4"/>
+                    <Border Style="{StaticResource SettingRow}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="320"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="When the game starts" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="The launcher keeps tracking play time in every mode." Style="{StaticResource Faint}" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <ComboBox Grid.Column="1" ItemsSource="{Binding LaunchOptions}" SelectedItem="{Binding OnLaunch}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}" BorderThickness="0">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding OpenConsoleOnLaunch}" VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock Text="Separate game console window" Style="{StaticResource RowTitle}"/>
+                                <TextBlock Text="Opens a live log window when a game starts or crashes. When off, logs are only shown on the instance's Logs page." Style="{StaticResource Faint}" Margin="0,3,16,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ================= Minecraft ================= -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel" BasedOn="{StaticResource Section}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Section}" Value="minecraft"><Setter Property="Visibility" Value="Visible"/></DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
 
                     <TextBlock Text="These defaults apply to every instance unless the instance overrides them in its own Settings tab." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,0,0,6"/>
+
+                    <Border Style="{StaticResource SettingRow}">
+                        <StackPanel>
+                            <TextBlock Text="Maximum memory" Style="{StaticResource RowTitle}"/>
+                            <TextBlock Text="{Binding SystemMemory}" Style="{StaticResource Faint}" Margin="0,3,0,10"/>
+                            <c:MemoryPicker Value="{Binding MaxMemory}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <StackPanel>
+                            <TextBlock Text="Minimum memory" Style="{StaticResource RowTitle}"/>
+                            <TextBlock Text="Memory reserved at start-up. Usually far below the maximum." Style="{StaticResource Faint}" Margin="0,3,0,10"/>
+                            <c:MemoryPicker Value="{Binding MinMemory}"/>
+                            <TextBlock Text="⚠  The minimum is higher than the maximum. The launcher will use the maximum for both when starting the game." Foreground="{StaticResource LogWarn}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                       Visibility="{Binding MinAboveMax, Converter={StaticResource VisibleIf}}"/>
+                        </StackPanel>
+                    </Border>
 
                     <Border Style="{StaticResource SettingRow}">
                         <StackPanel>
@@ -167,21 +338,6 @@
                                 <Button DockPanel.Dock="Right" Content="Browse…" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
                                 <TextBox Text="{Binding JavaPath, UpdateSourceTrigger=PropertyChanged}" Tag="Automatic (Adoptium)"/>
                             </DockPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource SettingRow}">
-                        <StackPanel>
-                            <TextBlock Text="Memory" Style="{StaticResource RowTitle}"/>
-                            <TextBlock Text="{Binding SystemMemory}" Style="{StaticResource Faint}" Margin="0,3,0,8"/>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Min" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBox Width="110" Text="{Binding MinMemory, Converter={StaticResource Memory}, UpdateSourceTrigger=LostFocus}" ToolTip="Type MB, or GB as 1, 2, 4, 8… — snapped to a power of two"/>
-                                <TextBlock Text="{Binding MinMemory, Converter={StaticResource MbToGb}}" Style="{StaticResource Faint}" VerticalAlignment="Center" Margin="8,0,24,0" MinWidth="60"/>
-                                <TextBlock Text="Max" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBox Width="110" Text="{Binding MaxMemory, Converter={StaticResource Memory}, UpdateSourceTrigger=LostFocus}" ToolTip="Type MB, or GB as 1, 2, 4, 8… — snapped to a power of two"/>
-                                <TextBlock Text="{Binding MaxMemory, Converter={StaticResource MbToGb}}" Style="{StaticResource Faint}" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            </StackPanel>
                         </StackPanel>
                     </Border>
 

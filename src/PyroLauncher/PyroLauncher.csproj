@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Product>PyroLauncher</Product>
     <AssemblyTitle>PyroLauncher</AssemblyTitle>
     <ApplicationIcon>Assets/pyro.ico</ApplicationIcon>
@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Resource Include="Assets/pyro.ico" />
+    <Resource Include="Assets/logo.png" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Markdig" Version="1.6.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4370.26" />

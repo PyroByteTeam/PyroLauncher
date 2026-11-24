@@ -42,23 +42,41 @@ public class GameSettings
 }
 
 public enum LaunchBehavior { KeepOpen, Minimize, Close }
+public enum ContentListStyle { List, Grid }
+public enum InstanceMenuStyle { TopNavigation, Grid }
 
 public class LauncherSettings
 {
     public GameSettings Game { get; set; } = GameSettings.Defaults();
     public string CurseForgeApiKey { get; set; } = "";
-    public string MicrosoftClientId { get; set; } = "4e4681e7-5d96-4d58-a514-ff4b8911b951";
     public int ConcurrentDownloads { get; set; } = 12;
-    public LaunchBehavior OnLaunch { get; set; } = LaunchBehavior.Minimize;
     public bool ShowSnapshots { get; set; }
-    public bool OpenConsoleOnLaunch { get; set; } = true;
     public List<string> Categories { get; set; } = [];
     public string? SelectedAccountId { get; set; }
+
+    /// <summary>Unlocks offline accounts and other developer options.</summary>
+    public bool DeveloperMode { get; set; }
+
+    // ---- Appearance & behaviour
+    public LaunchBehavior OnLaunch { get; set; } = LaunchBehavior.Minimize;
+    /// <summary>Separate game console window on launch / crash. When off, logs are only on the Logs tab.</summary>
+    public bool OpenConsoleOnLaunch { get; set; } = true;
+    public ContentListStyle ContentListStyle { get; set; } = ContentListStyle.List;
+    public InstanceMenuStyle InstanceMenuStyle { get; set; } = InstanceMenuStyle.TopNavigation;
+    /// <summary>Order of the section cards in the grid instance menu.</summary>
+    public List<string> SectionOrder { get; set; } = [];
+
+    /// <summary>Playtime of deleted instances, so the total never goes down.</summary>
+    public long DeletedPlaytimeSeconds { get; set; }
 }
 
 public static class SettingsService
 {
     public static LauncherSettings Current { get; private set; } = new();
+
+    /// <summary>Raised when an appearance/behaviour setting changes so open pages can update live.</summary>
+    public static event Action? AppearanceChanged;
+    public static void NotifyAppearance() => AppearanceChanged?.Invoke();
 
     public static void Load()
     {

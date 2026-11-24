@@ -812,4 +812,63 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Slider -->
+    <Style x:Key="SliderThumb" TargetType="Thumb">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Ellipse x:Name="e" Width="16" Height="16" Fill="White" Stroke="#FF0F0F0F" StrokeThickness="2"/>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDragging" Value="True"><Setter TargetName="e" Property="Fill" Value="#FFDADADA"/></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="Slider">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid MinHeight="24">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Border Height="4" CornerRadius="2" Background="{StaticResource Bg4}" VerticalAlignment="Center" Margin="8,0"/>
+                        <Track x:Name="PART_Track">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="Slider.DecreaseLarge" Focusable="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Height="4" CornerRadius="2" Background="White" Margin="8,0,-8,0"/>
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="Slider.IncreaseLarge" Focusable="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Background="Transparent"/>
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource SliderThumb}"/>
+                            </Track.Thumb>
+                        </Track>
+                        <TickBar Grid.Row="1" Placement="Bottom" Fill="{StaticResource Fg3}" Height="4" Margin="8,2,8,0"
+                                 Visibility="Visible" x:Name="ticks"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="TickPlacement" Value="None"><Setter TargetName="ticks" Property="Visibility" Value="Collapsed"/></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

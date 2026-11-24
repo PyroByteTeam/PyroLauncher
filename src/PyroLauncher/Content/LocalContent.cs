@@ -29,6 +29,35 @@ public partial class LocalItem : ObservableObject
     partial void OnUpdateChanged(ProjectVersion? value) => OnPropertyChanged(nameof(HasUpdate));
     public string? ModId { get; set; }
     public long Size { get; set; }
+    public DateTime Modified { get; set; }
+    /// <summary>Raw icon bytes captured while reading metadata (only until the scanner caches them).</summary>
+    internal byte[]? IconBytes { get; set; }
+
+    [ObservableProperty] private bool _isSelected;
+    /// <summary>Ticked for bulk actions (multi-select).</summary>
+    [ObservableProperty] private bool _isChecked;
+
+    /// <summary>First two letters of the name, shown when there is no icon.</summary>
+    public string Initials
+    {
+        get
+        {
+            var letters = new string(Name.Where(char.IsLetterOrDigit).Take(2).ToArray());
+            return letters.Length == 0 ? "?" : char.ToUpperInvariant(letters[0]) + (letters.Length > 1 ? letters[1..].ToLowerInvariant() : "");
+        }
+    }
+    partial void OnNameChanged(string value) => OnPropertyChanged(nameof(Initials));
+
+    // ---- Resource packs / shaders: "enabled" means active in game (options.txt / shader config), not renamed.
+    private bool _active;
+    /// <summary>Called when a resource pack or shader is switched on/off; returns whether the change was applied.</summary>
+    public Func<LocalItem, bool, bool>? ActivationHandler { get; set; }
+    internal void SetActiveSilently(bool value)
+    {
+        if (_active == value) return;
+        _active = value;
+        OnPropertyChanged(nameof(IsEnabled));
+    }
 
     public string FileName => Path.GetFileName(FilePath);
     /// <summary>File name without the ".disabled" suffix; stable key for the content index.</summary>
@@ -39,10 +68,16 @@ public partial class LocalItem : ObservableObject
 
     public bool IsEnabled
     {
-        get => !FileName.EndsWith(DisabledSuffix, StringComparison.OrdinalIgnoreCase);
+        get => Type == ContentType.Mod ? !FileName.EndsWith(DisabledSuffix, StringComparison.OrdinalIgnoreCase) : _active;
         set
         {
             if (value == IsEnabled) return;
+            if (Type != ContentType.Mod)
+            {
+                if (ActivationHandler?.Invoke(this, value) == true) _active = value;
+                OnPropertyChanged();
+                return;
+            }
             try
             {
                 var dir = Path.GetDirectoryName(FilePath)!;
@@ -117,13 +152,19 @@ public static class LocalContentScanner
             if (type == ContentType.Mod && ext != ".jar") continue;
             if (type != ContentType.Mod && ext != ".zip") continue;
 
-            var item = new LocalItem { Type = type, FilePath = file, Name = Path.GetFileNameWithoutExtension(baseName), Size = new FileInfo(file).Length };
-            try
+            var fi = new FileInfo(file);
+            var item = new LocalItem { Type = type, FilePath = file, Name = Path.GetFileNameWithoutExtension(baseName), Size = fi.Length, Modified = fi.LastWriteTimeUtc };
+            // Metadata + icons are cached on disk by (name, size, mtime) so large mod folders open instantly.
+            if (!MetaCache.TryApply(item, baseName))
             {
-                if (type == ContentType.Mod) ReadModMetadata(item);
-                else if (type == ContentType.ResourcePack) ReadPackMetadataZip(item);
+                try
+                {
+                    if (type == ContentType.Mod) ReadModMetadata(item);
+                    else if (type == ContentType.ResourcePack) ReadPackMetadataZip(item);
+                }
+                catch (Exception ex) { Log.Warn($"Metadata read failed for {name}: {ex.Message}"); }
+                MetaCache.Store(item, baseName);
             }
-            catch (Exception ex) { Log.Warn($"Metadata read failed for {name}: {ex.Message}"); }
             ApplyRef(item, index);
             items.Add(item);
         }
@@ -149,6 +190,7 @@ public static class LocalContentScanner
                 items.Add(item);
             }
         }
+        MetaCache.Flush();
         return items.OrderBy(i => i.Name, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
@@ -219,7 +261,7 @@ public static class LocalContentScanner
             using var s = iconEntry.Open();
             using var ms = new MemoryStream();
             s.CopyTo(ms);
-            item.Icon = LoadImage(ms.ToArray());
+            item.IconBytes = ms.ToArray();
         }
     }
 
@@ -233,7 +275,7 @@ public static class LocalContentScanner
             using var s = png.Open();
             using var ms = new MemoryStream();
             s.CopyTo(ms);
-            item.Icon = LoadImage(ms.ToArray());
+            item.IconBytes = ms.ToArray();
         }
     }
 

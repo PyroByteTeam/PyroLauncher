@@ -12,17 +12,8 @@ public static class MicrosoftAuth
     private const string Authority = "https://login.microsoftonline.com/consumers/oauth2/v2.0";
     private const string Scope = "XboxLive.signin offline_access";
 
-    private static string ClientId
-    {
-        get
-        {
-            var id = SettingsService.Current.MicrosoftClientId?.Trim();
-            if (string.IsNullOrEmpty(id))
-                throw new InvalidOperationException(
-                    "Microsoft login needs an Azure application (client) ID. Set it in Settings → Launcher → Microsoft Client ID.");
-            return id;
-        }
-    }
+    /// <summary>PyroLauncher's Azure application (client) ID, approved for the Minecraft API. Not user-configurable.</summary>
+    public const string ClientId = "4e4681e7-5d96-4d58-a514-ff4b8911b951";
 
     public static async Task<DeviceCodeInfo> StartDeviceCodeAsync(CancellationToken ct)
     {
