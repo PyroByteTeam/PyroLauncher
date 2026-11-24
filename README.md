@@ -9,7 +9,7 @@ A Minecraft launcher for people who play with mods.
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-1f1f1f?style=flat-square)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-1f1f1f?style=flat-square)](https://dotnet.microsoft.com/)
 [![Platform](https://img.shields.io/badge/platform-Windows-1f1f1f?style=flat-square)](#requirements)
-[![Latest release](https://img.shields.io/github/v/release/PyroByteTeam/PyroLauncher?style=flat-square&color=1f1f1f&label=release)](https://github.com/PyroByteTeam/PyroLauncher/releases)
+[![Latest release](https://img.shields.io/github/v/release/PyroByteTeam/PyroLauncher?style=flat-square&color=1f1f1f&label=release)](https://github.com/PyroByteTeam/PyroLauncher/releases/latest)
 
 <img src=".github/assets/home.png" width="860" alt="Instances on the home page">
 
@@ -17,20 +17,23 @@ A Minecraft launcher for people who play with mods.
 
 ## Why another launcher
 
-We wanted something between the official launcher and the power-user tools: every instance
-isolated, mods and modpacks from both Modrinth and CurseForge in one place, and no fiddling
-with Java. PyroLauncher is that, wrapped in a quiet black-and-white interface.
+I am LynxarA, the creator of this project. The main reason behind it was to build something that doesn't stop at basic features, while also not being a web app and actually performing well. I am not trying to reach the blazingly fast speeds of vanilla launchers, but I think lag during navigation and loading is unacceptable (no guarantees, though).
+
+The main philosophy behind this launcher, and other popular custom launchers - is to treat every Minecraft instance as a modpack, even if you play vanilla (in which case, it's just a modpack without mods). I find this approach the most optimal, since most of the player base uses Vanilla+ mods at a minimum (in my observation). However, after creating multiple modpacks, I realized that the most popular launchers don't really implement features for power users (and I consider anyone who constantly iterates on 300+ mod packs, updates them, and shares them with friends to be a power user).
+
+So, here is a launcher with all the features I want (mhm, bloat, crucify me), without nuking your PC before you even add an instance.
 
 ## What it does
 
 **Instances.** Vanilla, Fabric, Forge or NeoForge, each with its own folder, settings and
-play time. Group them into categories by dragging cards around. A new instance shows an
+play time (nothing special there). Group them into categories by dragging cards around. A new instance shows an
 **Install** button first, which downloads the game, mod loader and Java without launching.
 
 **Mods, resource packs and shaders.** Search Modrinth and CurseForge side by side, read
 descriptions, galleries and changelogs, pick a version, and install with dependencies. Files
 you already have are recognised by hash, so updates work for mods you dropped in by hand.
-Turn resource packs on and pick a shader pack before you start the game.
+Turn resource packs on and pick a shader pack before you start the game (or don't :3).
+You can easilly update mods, filter them by update availability and much more!
 
 **Modpacks.** Browse packs on the Discover page, install one as a new instance, and update or
 roll it back later from its Modpack tab. Your worlds, screenshots and anything you added
@@ -53,15 +56,22 @@ tells you what is missing, and lets you untick anything before installing.
 and the right one is picked for each Minecraft version. Bring your own if you prefer.
 
 **Accounts.** Microsoft sign-in with several accounts, a 3D skin preview, skin upload and cape
-switching. Offline accounts are available behind developer mode.
+switching. Currently we are awaiting verification, so login doesn't work properly.
 
-**Everything else.** A live, colour-coded game console. Screenshot and server-list managers.
+**Everything else.** Screenshot and server-list managers.
 A downloads page with pause, cancel and a list of every domain the launcher talked to. English
-and Russian interface.
+and Russian interface (for now). And much more (more features coming)
 
 <p align="center">
   <img src=".github/assets/presets.png" width="70%" alt="Applying a preset to an instance">
 </p>
+
+### AI usage
+
+Large parts of this codebase were written with the help of Claude Code (using the Opus 5.5 model),
+alongside code written directly by humans. Nothing is blindly merged. Every generated file and
+change goes through a thorough audit by the PyroByte team, where we read through the code, test
+it, and edit it by hand before it makes it into the project.
 
 ## Requirements
 
@@ -69,6 +79,7 @@ and Russian interface.
 - Nothing else: the installer ships its own .NET runtime, and Java is downloaded when needed
 
 macOS and Linux aren't supported yet. The interface is built on WPF, which is Windows-only.
+Currently we are working on migration to Avalonia UI and Core to be able to ship it to macos/linux too!
 
 ## Installing
 
