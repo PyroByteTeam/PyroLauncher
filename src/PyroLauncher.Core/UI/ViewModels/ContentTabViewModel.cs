@@ -37,6 +37,7 @@ public partial class ContentTabViewModel : ObservableObject
     private object? _selected;
 
     public string Title => Type.Display();
+    public string DropHint => L.F("Drop {0} here to add them", Type.Display().ToLower());
     public bool IsMods => Type == ContentType.Mod;
     public bool IsGrid => SettingsService.Current.ContentListStyle == ContentListStyle.Grid;
     public bool IsUnsupported => Type == ContentType.Mod && Instance.Config.Loader == ModLoader.Vanilla;
@@ -73,6 +74,7 @@ public partial class ContentTabViewModel : ObservableObject
         List.Items.CollectionChanged += OnItemsChanged;
         List.Refreshed += OnListRefreshed;
         WatchChecks();
+        MarkClientOnly();
 
         // Restore the suggestions toggle as it was left for this instance.
         Instance.Config.SuggestionsOn ??= [];
@@ -95,7 +97,6 @@ public partial class ContentTabViewModel : ObservableObject
         WatchChecks();
     }
 
-    // ---------------- multi-select
     private readonly HashSet<LocalItem> _watched = [];
     [ObservableProperty] private int _checkedCount;
     public bool HasChecked => CheckedCount > 0;
@@ -211,9 +212,26 @@ public partial class ContentTabViewModel : ObservableObject
     /// <summary>Called by the instance page when appearance settings change.</summary>
     public void OnAppearanceChanged() => OnPropertyChanged(nameof(IsGrid));
 
+    public bool IsServer => Instance.IsServer;
+    public int ClientOnlyCount => Installed.Count(i => i.IsClientOnly && i.IsEnabled);
+
+    /// <summary>On server packs, flags mods that only belong on the client.</summary>
+    private async void MarkClientOnly()
+    {
+        if (!Instance.IsServer || Type != ContentType.Mod || Installed.Count == 0) return;
+        try
+        {
+            var sides = await Servers.ModSides.ResolveAsync(Installed.ToList());
+            foreach (var (item, side) in sides) item.IsClientOnly = side == Servers.ModSide.Client;
+            OnPropertyChanged(nameof(ClientOnlyCount));
+        }
+        catch (Exception ex) { Log.Warn($"Mod side lookup failed: {ex.Message}"); }
+    }
+
     private void OnListRefreshed()
     {
         UpdatesCount = Installed.Count(i => i.HasUpdate);
+        MarkClientOnly();
         if (StatusFilter != "all") InstalledView.Refresh();
         if (SuggestionsEnabled) FilterSuggestions();
         // Keep the details pane pointing at the (possibly re-created) installed item.
@@ -226,7 +244,6 @@ public partial class ContentTabViewModel : ObservableObject
     [RelayCommand]
     private Task Refresh() => List.RefreshAsync();
 
-    // ---------------- filters
     [ObservableProperty] private string _statusFilter = "all";
     [ObservableProperty] private SearchSort _sort = SearchSort.Relevance;
     [ObservableProperty] private string _category = AnyCategory;
@@ -278,7 +295,6 @@ public partial class ContentTabViewModel : ObservableObject
                || (i.ModId?.Contains(Query, StringComparison.OrdinalIgnoreCase) ?? false);
     }
 
-    // ---------------- updates
     [RelayCommand]
     private async Task CheckUpdates()
     {
@@ -337,7 +353,6 @@ public partial class ContentTabViewModel : ObservableObject
         await List.RefreshAsync();
     }
 
-    // ---------------- search
     partial void OnQueryChanged(string value)
     {
         InstalledView.Refresh();
@@ -415,7 +430,6 @@ public partial class ContentTabViewModel : ObservableObject
         await SearchAsync(cts.Token, true);
     }
 
-    // ---------------- files
     [RelayCommand]
     private void OpenFolder() => Dialogs.OpenPath(List.Folder);
 
@@ -431,15 +445,16 @@ public partial class ContentTabViewModel : ObservableObject
     public async Task AddFilesAsync(IEnumerable<string> files)
     {
         Directory.CreateDirectory(List.Folder);
-        int n = 0;
+        int n = 0, skipped = 0;
         foreach (var f in files)
         {
             var ext = Path.GetExtension(f).ToLowerInvariant();
-            if (Type == ContentType.Mod ? ext != ".jar" : ext != ".zip") continue;
+            if (Type == ContentType.Mod ? ext != ".jar" : ext != ".zip") { skipped++; continue; }
             try { File.Copy(f, Path.Combine(List.Folder, Path.GetFileName(f)), true); n++; }
             catch (Exception ex) { Dialogs.Toast(L.F("{0}: {1}", Path.GetFileName(f), ex.Message), true); }
         }
         if (n > 0) Dialogs.Toast(L.F("Added files: {0}", n));
+        if (skipped > 0) Dialogs.Toast(L.F("Skipped {0} file(s): expected {1}", skipped, Type == ContentType.Mod ? ".jar" : ".zip"), true);
         await List.RefreshAsync();
     }
 
@@ -463,7 +478,6 @@ public partial class ContentTabViewModel : ObservableObject
     [RelayCommand]
     private void Toggle(LocalItem item) => item.IsEnabled = !item.IsEnabled;
 
-    // ---------------- selection / details pane
     private void Select(object? item)
     {
         if (_selected is LocalItem a) a.IsSelected = false;

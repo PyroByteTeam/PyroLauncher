@@ -1,0 +1,84 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ServerPlayersView">
+    <UserControl.Styles>
+        <Style Selector="ToggleButton.flag">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="CornerRadius" Value="7"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="ToggleButton.flag:checked /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Fg}"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+        <Style Selector="ToggleButton.flag:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#FFDADADA"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+    </UserControl.Styles>
+    <Grid RowDefinitions="Auto,*" Margin="0,0,0,20">
+        <DockPanel Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                <TextBox Text="{Binding NewPlayer}" Watermark="{l:T 'Username'}" Width="200">
+                    <TextBox.KeyBindings><KeyBinding Gesture="Enter" Command="{Binding AddToWhitelistCommand}"/></TextBox.KeyBindings>
+                </TextBox>
+                <Button Classes="primary" Command="{Binding AddToWhitelistCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E710}" FontSize="12"/><TextBlock Text="{l:T 'Add to whitelist'}"/></StackPanel>
+                </Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <TextBlock Classes="h3" Text="{Binding OnlineText}" VerticalAlignment="Center"/>
+                <CheckBox IsChecked="{Binding OnlineOnly}" Content="{l:T 'Online only'}"/>
+                <Button Classes="ghost" Command="{Binding RefreshListCommand}" ToolTip.Tip="{l:T 'Refresh'}">
+                    <TextBlock Classes="icon" Text="{i:I E72C}" FontSize="12"/>
+                </Button>
+            </StackPanel>
+        </DockPanel>
+
+        <TextBlock Grid.Row="1" Classes="muted" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460"
+                   Text="{l:T 'No players yet. Everyone who joins the server shows up here, and you can whitelist players by name before they ever join.'}"
+                   IsVisible="{Binding IsEmpty}"/>
+
+        <ScrollViewer Grid.Row="1" Padding="0,0,8,0" IsVisible="{Binding !IsEmpty}">
+            <ItemsControl ItemsSource="{Binding Players}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Classes="settingRow">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <ToggleButton Classes="flag" IsChecked="{Binding IsOp, Mode=OneWay}" Content="{l:T 'Operator'}"
+                                                  Command="{Binding $parent[UserControl].DataContext.ToggleOpCommand}" CommandParameter="{Binding}"/>
+                                    <ToggleButton Classes="flag" IsChecked="{Binding IsWhitelisted, Mode=OneWay}" Content="{l:T 'Whitelisted'}"
+                                                  Command="{Binding $parent[UserControl].DataContext.ToggleWhitelistCommand}" CommandParameter="{Binding}"/>
+                                    <ToggleButton Classes="flag" IsChecked="{Binding IsBanned, Mode=OneWay}" Content="{l:T 'Banned'}"
+                                                  Command="{Binding $parent[UserControl].DataContext.ToggleBanCommand}" CommandParameter="{Binding}"/>
+                                    <Button Classes="ghost" Margin="6,0,0,0" Content="{l:T 'Kick'}" IsVisible="{Binding IsOnline}"
+                                            Command="{Binding $parent[UserControl].DataContext.KickCommand}" CommandParameter="{Binding}"/>
+                                </StackPanel>
+                                <Border Width="36" Height="36" CornerRadius="6" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0">
+                                    <Image c:RemoteImage.Url="{Binding AvatarUrl}" c:RemoteImage.DecodeWidth="64" RenderOptions.BitmapInterpolationMode="None"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                        <Border Classes="badge" IsVisible="{Binding IsOnline}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="6" Height="6" Fill="White" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                <TextBlock Classes="badgeText" Text="{l:T 'Online'}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Classes="faint" Text="{Binding Uuid}" FontFamily="{StaticResource MonoFont}" FontSize="11" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

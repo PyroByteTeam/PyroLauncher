@@ -13,7 +13,7 @@ public partial class MainWindow : Window
     private string? _launchDir;
     private bool _busy;
 
-    public MainWindow(bool uninstallMode)
+    public MainWindow(bool uninstallMode, bool autoUpdate = false)
     {
         InitializeComponent();
         _installed = InstallerCore.GetInstalled();
@@ -26,6 +26,29 @@ public partial class MainWindow : Window
         BuildDataOptions();
         SetupMain();
         if (uninstallMode) ShowPage(UninstallPage);
+        else if (autoUpdate && _installed != null && InstallerCore.HasPayload) Loaded += async (_, _) => await AutoUpdateAsync(_installed.Path);
+    }
+
+    private async Task AutoUpdateAsync(string dir)
+    {
+        _busy = true;
+        CloseX.IsEnabled = false;
+        ProgressHeading.Text = "Updating…";
+        ShowPage(ProgressPage);
+        try
+        {
+            await InstallerCore.InstallAsync(dir, InstallerCore.HasDesktopShortcut, MakeProgress());
+            StartLauncher(dir);
+            Close();
+        }
+        catch (Exception ex)
+        {
+            ProgressHeading.Text = "Update failed";
+            ProgressText.Text = ex.Message;
+            _busy = false;
+            CloseX.IsEnabled = true;
+            FinishButton.Visibility = Visibility.Visible;
+        }
     }
 
     private void SetupMain()
@@ -37,7 +60,7 @@ public partial class MainWindow : Window
         if (!InstallerCore.HasPayload)
         {
             Heading.Text = "Setup package incomplete";
-            SubHeading.Text = "This setup was built without the launcher files. Run build-installer.ps1 to create a full setup.";
+            SubHeading.Text = "This setup was built without the launcher files. Run build.ps1 to create a full setup.";
             PrimaryButton.Visibility = Visibility.Collapsed;
             Options.Visibility = Visibility.Collapsed;
             return;
@@ -122,8 +145,6 @@ public partial class MainWindow : Window
             FinishButton.Visibility = Visibility.Visible;
         }
     }
-
-    // ------------------------------------------------------------------ data options
 
     private readonly List<(InstallerCore.DataCategory cat, CheckBox box)> _dataBoxes = [];
 

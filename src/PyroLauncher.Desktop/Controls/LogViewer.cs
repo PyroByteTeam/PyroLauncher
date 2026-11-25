@@ -41,6 +41,47 @@ public class LogViewer : UserControl
         _ => Res("LogInfo"),
     });
 
+    private static readonly System.Text.RegularExpressions.Regex UrlRx = new(@"https?://[^\s""'<>\]\)]+", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    /// <summary>Plain text, or text with clickable links when the line contains URLs.</summary>
+    private static void FillLine(TextBlock t, string text)
+    {
+        var matches = UrlRx.Matches(text);
+        if (matches.Count == 0)
+        {
+            t.Inlines = null;
+            t.Text = text;
+            return;
+        }
+        var inlines = new Avalonia.Controls.Documents.InlineCollection();
+        int pos = 0;
+        foreach (System.Text.RegularExpressions.Match m in matches)
+        {
+            if (m.Index > pos) inlines.Add(new Avalonia.Controls.Documents.Run(text[pos..m.Index]));
+            var url = m.Value.TrimEnd('.', ',', ';');
+            var link = new TextBlock
+            {
+                Text = url,
+                TextDecorations = TextDecorations.Underline,
+                Cursor = new Cursor(StandardCursorType.Hand),
+                Foreground = Res("Fg"),
+            };
+            ToolTip.SetTip(link, L.T("Open in browser"));
+            link.PointerPressed += (_, e) =>
+            {
+                if (!e.GetCurrentPoint(link).Properties.IsLeftButtonPressed) return;
+                e.Handled = true;
+                Ui.OpenUrl(url);
+            };
+            inlines.Add(new Avalonia.Controls.Documents.InlineUIContainer(link) { BaselineAlignment = BaselineAlignment.TextBottom });
+            if (url.Length < m.Value.Length) inlines.Add(new Avalonia.Controls.Documents.Run(m.Value[url.Length..]));
+            pos = m.Index + m.Length;
+        }
+        if (pos < text.Length) inlines.Add(new Avalonia.Controls.Documents.Run(text[pos..]));
+        t.Text = null;
+        t.Inlines = inlines;
+    }
+
     private static IBrush Res(string key) =>
         Application.Current!.TryGetResource(key, null, out var v) && v is IBrush b ? b : Brushes.White;
 
@@ -56,8 +97,8 @@ public class LogViewer : UserControl
             ItemTemplate = new FuncDataTemplate<LogLine>((_, _) =>
             {
                 var t = new TextBlock { TextWrapping = TextWrapping.NoWrap };
-                t.Bind(TextBlock.TextProperty, new Avalonia.Data.Binding(nameof(LogLine.Text)));
                 t.Bind(TextBlock.ForegroundProperty, new Avalonia.Data.Binding(nameof(LogLine.Level)) { Converter = LevelBrush });
+                t.DataContextChanged += (_, _) => FillLine(t, (t.DataContext as LogLine)?.Text ?? "");
                 return t;
             }),
         };

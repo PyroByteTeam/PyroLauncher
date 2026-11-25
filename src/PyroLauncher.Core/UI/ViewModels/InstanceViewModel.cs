@@ -87,6 +87,9 @@ public partial class InstanceViewModel : ObservableObject
     public InstanceViewModel(Instance inst)
     {
         Instance = inst;
+        LoadLinkedServers();
+        Servers.ServerPackManager.Changed += LoadLinkedServers;
+        _unsub.Add(() => Servers.ServerPackManager.Changed -= LoadLinkedServers);
         _tab = IsGridMenu ? "overview" : inst.IsModpack ? "modpack" : "mods";
         Instance.PropertyChanged += OnInstanceChanged;
         SettingsService.AppearanceChanged += OnAppearanceChanged;
@@ -162,8 +165,6 @@ public partial class InstanceViewModel : ObservableObject
         _tabs[key] = vm;
         return vm;
     }
-
-    // ------------------------------------------------------------------ grid menu
 
     private void BuildCards()
     {
@@ -275,6 +276,20 @@ public partial class InstanceViewModel : ObservableObject
     {
         await LaunchService.PrimaryActionAsync(Instance);
     }
+
+    /// <summary>Server packs linked to this instance; each gets a start/stop button next to Play.</summary>
+    public ObservableCollection<Servers.ServerPack> LinkedServers { get; } = [];
+    public bool HasLinkedServers => LinkedServers.Count > 0;
+
+    private void LoadLinkedServers()
+    {
+        LinkedServers.Clear();
+        foreach (var p in Servers.ServerPackManager.LinkedTo(Instance)) LinkedServers.Add(p);
+        OnPropertyChanged(nameof(HasLinkedServers));
+    }
+
+    [RelayCommand] private async Task ToggleServer(Servers.ServerPack pack) => await ServerService.ToggleAsync(pack);
+    [RelayCommand] private void OpenServer(Servers.ServerPack pack) => ServerService.Open(pack);
 
     [RelayCommand]
     private void OpenFolder() => Dialogs.OpenPath(Instance.GameDir);

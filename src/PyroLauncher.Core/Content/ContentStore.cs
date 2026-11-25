@@ -133,8 +133,6 @@ public partial class ContentList : ObservableObject
         ActiveShader = Type == ContentType.ShaderPack ? Items.FirstOrDefault(i => i.IsEnabled)?.Name : null;
     }
 
-    // ------------------------------------------------------------------ resource pack / shader activation
-
     private void ApplyActivation()
     {
         if (Type == ContentType.Mod) return;

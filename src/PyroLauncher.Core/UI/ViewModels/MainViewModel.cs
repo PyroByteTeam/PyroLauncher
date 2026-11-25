@@ -22,6 +22,16 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private object _currentPage;
     [ObservableProperty] private object? _dialog;
+    /// <summary>Dialogs (except the image viewer) are shrunk to fit small windows instead of running off-screen.</summary>
+    public bool IsImageDialog => Dialog is ImageViewerViewModel;
+    public object? FormDialog => IsImageDialog ? null : Dialog;
+    public object? ImageDialog => IsImageDialog ? Dialog : null;
+    partial void OnDialogChanged(object? value)
+    {
+        OnPropertyChanged(nameof(IsImageDialog));
+        OnPropertyChanged(nameof(FormDialog));
+        OnPropertyChanged(nameof(ImageDialog));
+    }
     [ObservableProperty] private string _nav = "home";
     [ObservableProperty] private Account? _account;
     public string AccountLabel => Account?.Username ?? L.T("No account");
@@ -37,6 +47,63 @@ public partial class MainViewModel : ObservableObject
         _currentPage = Home;
         Account = AccountManager.Selected;
         AccountManager.SelectionChanged += () => Account = AccountManager.Selected;
+        Updater.AvailableChanged += () => Ui.Post(() =>
+        {
+            OnPropertyChanged(nameof(UpdateAvailable));
+            OnPropertyChanged(nameof(UpdateTip));
+        });
+    }
+
+    public bool UpdateAvailable => Updater.Available != null;
+    public string UpdateTip => Updater.Available is { } u ? L.F("Update to {0}", u.Version.ToString(3)) : "";
+    [ObservableProperty] private bool _isUpdating;
+    [ObservableProperty] private double _updateProgress;
+
+    /// <summary>Checks GitHub once when the launcher starts; silent when offline.</summary>
+    private bool _startupCheckDone;
+
+    public async void CheckForUpdatesOnStartup()
+    {
+        if (_startupCheckDone) return;
+        _startupCheckDone = true;
+        try { await Updater.CheckAsync(); }
+        catch (Exception ex) { Log.Info("Update check skipped: " + ex.Message); }
+    }
+
+    [RelayCommand]
+    public async Task UpdateLauncher()
+    {
+        if (Updater.Available is not { } info || IsUpdating) return;
+        var version = info.Version.ToString(3);
+        var auto = L.T("Update automatically");
+        var manual = L.T("Download manually");
+        string? choice;
+        if (Updater.AutoUpdateUrl(info) != null)
+            choice = await Dialogs.ChooseAsync(L.F("Update to {0}", version),
+                L.F("PyroLauncher {0} is available (you have {1}). The launcher can download it, close, replace itself and start again. If you installed it in an unusual way, download the update yourself instead.",
+                    version, Updater.Current.ToString(3)),
+                [auto, manual]);
+        else
+            choice = await Dialogs.ConfirmAsync(L.F("Update to {0}", version),
+                L.F("PyroLauncher {0} is available (you have {1}). This copy was installed by your package manager or in a way the launcher can't update itself, so download the new version from the releases page.",
+                    version, Updater.Current.ToString(3)), L.T("Open releases page")) ? manual : null;
+
+        if (choice == manual) { Ui.OpenUrl(info.PageUrl); return; }
+        if (choice != auto) return;
+
+        IsUpdating = true;
+        UpdateProgress = 0;
+        try
+        {
+            await Updater.PrepareAsync(info, new Progress<double>(p => UpdateProgress = p));
+            Ui.Platform.MainWindow(WindowAction.Quit);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Launcher update failed", ex);
+            Dialogs.Toast(L.F("Update failed: {0}", ex.Message), true);
+            IsUpdating = false;
+        }
     }
 
     partial void OnNavChanged(string value)
@@ -46,7 +113,7 @@ public partial class MainViewModel : ObservableObject
             case "home":
                 if (CurrentPage is not HomeViewModel and not InstanceViewModel) CurrentPage = (object?)_lastInstance ?? Home;
                 break;
-            case "serverpacks": CurrentPage = _serverPacks ??= new ServerPacksViewModel(); break;
+            case "serverpacks": CurrentPage = (object?)_serverPage ?? (_serverPacks ??= new ServerPacksViewModel()); break;
             case "presets": CurrentPage = _presets ??= new PresetsViewModel(); break;
             case "discover": CurrentPage = (object?)_modpackPage ?? (_discover ??= new DiscoverViewModel()); break;
             case "settings": CurrentPage = _settings ??= new SettingsViewModel(); break;
@@ -133,5 +200,35 @@ public partial class MainViewModel : ObservableObject
         _lastInstance = vm;
         CurrentPage = vm;
         Nav = "home";
+    }
+
+    private ServerPackViewModel? _serverPage;
+
+    public void OpenServerPack(Servers.ServerPack pack, string? tab = null)
+    {
+        if (_serverPage?.Pack == pack)
+        {
+            if (tab != null) _serverPage.Tab = tab;
+        }
+        else
+        {
+            _serverPage?.Detach();
+            _serverPage = new ServerPackViewModel(pack, tab);
+        }
+        if (Nav != "serverpacks") Nav = "serverpacks";
+        CurrentPage = _serverPage;
+    }
+
+    [RelayCommand]
+    private void GoServers()
+    {
+        if (Nav == "serverpacks" && CurrentPage is ServerPackViewModel) CloseServerPack();
+    }
+
+    public void CloseServerPack()
+    {
+        _serverPage?.Detach();
+        _serverPage = null;
+        CurrentPage = _serverPacks ??= new ServerPacksViewModel();
     }
 }

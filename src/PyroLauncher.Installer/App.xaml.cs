@@ -14,7 +14,8 @@ public partial class App : Application
             Shutdown();
             return;
         }
-        var w = new MainWindow(uninstall);
+        // --update: started by the launcher itself; update the existing install without asking, then relaunch it.
+        var w = new MainWindow(uninstall, e.Args.Contains("--update"));
         MainWindow = w;
         w.Show();
     }

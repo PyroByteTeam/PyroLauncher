@@ -140,7 +140,6 @@ public static class ModpackImporter
                 {
                     var full = SafeCombine(inst.GameDir, rel);
                     if (File.Exists(full)) File.Delete(full);
-                    // Disabled copies too.
                     if (File.Exists(full + ".disabled")) File.Delete(full + ".disabled");
                 }
                 catch (Exception ex) { Log.Warn($"Could not remove {rel}: {ex.Message}"); }

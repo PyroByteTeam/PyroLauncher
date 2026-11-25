@@ -18,7 +18,6 @@
             <TextBlock Classes="muted" Text="{l:T 'Lists of mods, resource packs and shaders you can add to any instance in one go.'}" Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- ===== Left: preset list ===== -->
         <DockPanel Grid.Row="1" Margin="0,0,18,0">
             <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10" Spacing="8">
                 <Button Classes="primary" Command="{Binding NewCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
@@ -48,7 +47,6 @@
             </ListBox>
         </DockPanel>
 
-        <!-- ===== Right: nothing selected ===== -->
         <Border Grid.Row="1" Grid.Column="1" Classes="card" IsVisible="{Binding !HasSelection}">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="380">
                 <TextBlock Classes="icon" Text="{i:I E8FD}" FontSize="28" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
@@ -58,7 +56,6 @@
             </StackPanel>
         </Border>
 
-        <!-- ===== Right: selected preset ===== -->
         <DockPanel Grid.Row="1" Grid.Column="1" IsVisible="{Binding HasSelection}">
             <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Spacing="6">
@@ -85,7 +82,6 @@
             </DockPanel>
 
             <Grid>
-                <!-- ===== Edit: contents + search ===== -->
                 <Grid ColumnDefinitions="*,360" IsVisible="{Binding IsEditMode}">
                     <Border Classes="card" Padding="16,12" Margin="0,0,16,0">
                         <DockPanel>
@@ -121,7 +117,6 @@
                         </DockPanel>
                     </Border>
 
-                    <!-- search to add -->
                     <DockPanel Grid.Column="1">
                         <TextBlock DockPanel.Dock="Top" Classes="h3" Text="{l:T 'Add to preset'}" Margin="0,0,0,10"/>
                         <Grid DockPanel.Dock="Top" Margin="0,0,0,8" ColumnDefinitions="*,8,*">
@@ -169,7 +164,6 @@
                     </DockPanel>
                 </Grid>
 
-                <!-- ===== Apply: pick an instance, choose what to install ===== -->
                 <Border Classes="card" Padding="18,16" IsVisible="{Binding IsApplyMode}">
                     <DockPanel>
                         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">

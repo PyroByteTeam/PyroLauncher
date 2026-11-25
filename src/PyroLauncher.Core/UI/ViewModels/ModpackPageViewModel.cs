@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using PyroLauncher.Content;
 using PyroLauncher.Core;
 using PyroLauncher.Instances;
+using PyroLauncher.Minecraft;
 
 namespace PyroLauncher.UI.ViewModels;
 
@@ -41,7 +42,6 @@ public partial class ModpackPageViewModel : ObservableObject
     private List<ProjectVersion> _allVersions = [];
     private CancellationTokenSource? _changelogCts;
 
-    // ---- install / update
     [ObservableProperty] private string _instanceName = "";
     public List<string> Categories { get; } = [L.T("- None -"), .. SettingsService.Current.Categories];
     [ObservableProperty] private string _category;
@@ -321,6 +321,61 @@ public partial class ModpackPageViewModel : ObservableObject
             return;
         Dialogs.OpenUrl(url);
     }
+
+    /// <summary>Downloads the published server pack and turns it into a server pack in the launcher.</summary>
+    [RelayCommand]
+    private async Task CreateServerPack()
+    {
+        if (!HasServerPack || SelectedVersion?.Version is not { } v || IsBusy) return;
+        IsBusy = true;
+        Dialogs.Toast(L.T("Preparing the server pack…"));
+        try
+        {
+            string mc;
+            ModLoader loader;
+            string? loaderVersion;
+            if (Instance is { } inst && inst.Config.Modpack?.VersionId == v.Id)
+                (mc, loader, loaderVersion) = (inst.Config.MinecraftVersion, inst.Config.Loader, inst.Config.LoaderVersion);
+            else
+            {
+                var clientUrl = v.Url ?? (v.Source == ContentSource.CurseForge && long.TryParse(v.Id, out var cid) ? ForgeCdn(cid, v.FileName) : null)
+                                ?? throw new InvalidOperationException(L.T("This version can't be downloaded."));
+                var tmp = System.IO.Path.Combine(AppPaths.Cache, "serverpacks", "client-" + v.FileName);
+                await Http.DownloadFileAsync(clientUrl, tmp);
+                var info = ModpackImporter.Inspect(tmp);
+                System.IO.File.Delete(tmp);
+                (mc, loader) = (info.MinecraftVersion, info.Loader);
+                loaderVersion = info.LoaderVersion == null ? null
+                    : await LoaderService.NormalizeLoaderVersionAsync(info.Loader, info.MinecraftVersion, info.LoaderVersion, CancellationToken.None);
+            }
+
+            string zipUrl;
+            if (v.Source == ContentSource.CurseForge)
+            {
+                var file = (await CurseForgeApi.GetFilesAsync([v.ServerPackFileId], CancellationToken.None)).FirstOrDefault()
+                           ?? throw new InvalidOperationException(L.T("The server pack file wasn't found."));
+                zipUrl = file.Url ?? ForgeCdn(v.ServerPackFileId, file.FileName);
+            }
+            else zipUrl = ServerPackUrl!;
+
+            var source = new ModpackSource
+            {
+                Source = v.Source, ProjectId = v.ProjectId, VersionId = v.Id, VersionNumber = v.VersionNumber,
+                Title = Title, IconUrl = Details?.IconUrl ?? Listing?.IconUrl,
+            };
+            IsBusy = false;
+            await NewServerPackViewModel.CreateFromServerZipAsync(L.F("{0} Server", Title), mc, loader, loaderVersion, zipUrl, source, Instance);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Creating a server pack from the modpack failed", ex);
+            Dialogs.Toast(L.F("Couldn't create the server pack: {0}", ex.Message), true);
+        }
+        finally { IsBusy = false; }
+    }
+
+    private static string ForgeCdn(long fileId, string fileName) =>
+        $"https://edge.forgecdn.net/files/{fileId / 1000}/{fileId % 1000}/{Uri.EscapeDataString(fileName)}";
 
     [RelayCommand] private void CancelBusy() => _busyCts?.Cancel();
     [RelayCommand] private void OpenWeb() => Dialogs.OpenUrl(Details?.WebUrl ?? Listing?.WebUrl);

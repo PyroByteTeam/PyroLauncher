@@ -76,12 +76,10 @@ public static class GameInstaller
                 result.NativeJars.Add(result.Classpath[^1]);
         }
 
-        // Client jar
         result.ClientJar = MojangMeta.VersionJarPath(v.JarId);
         if (v.ClientDownload != null)
             downloads.Add(new DownloadItem(v.ClientDownload.Str("url")!, result.ClientJar, v.ClientDownload.Str("sha1"), v.ClientDownload.Long("size", -1)));
 
-        // Logging config
         if (v.LoggingClient?.Obj("file") is { } logFile)
         {
             var logPath = Path.Combine(AppPaths.Assets, "log_configs", logFile.Str("id") ?? "client.xml");
@@ -108,7 +106,6 @@ public static class GameInstaller
             result.ClientJar = own;
         }
 
-        // Assets
         if (v.AssetIndex != null)
             await PrepareAssetsAsync(v, gameDir, result, progress, ct);
 

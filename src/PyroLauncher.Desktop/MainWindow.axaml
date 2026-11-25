@@ -9,7 +9,6 @@
         Background="{StaticResource Bg0}" Foreground="{StaticResource Fg}" FontSize="13"
         ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="44">
     <Grid x:Name="Root" ColumnDefinitions="76,*">
-        <!-- ============ Sidebar ============ -->
         <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
             <DockPanel LastChildFill="False" x:Name="Sidebar">
                 <Border DockPanel.Dock="Top" Height="64" Background="Transparent" PointerPressed="TitleBar_PointerPressed">
@@ -22,7 +21,7 @@
                     <RadioButton Classes="nav" Content="{l:T 'Home'}" Tag="{i:I E80F}" GroupName="nav"
                                  IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=home}" Command="{Binding GoHomeCommand}"/>
                     <RadioButton Classes="nav" Content="{l:T 'Servers'}" ToolTip.Tip="{l:T 'Server packs'}" Tag="{i:I E968}" GroupName="nav"
-                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=serverpacks}"/>
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=serverpacks}" Command="{Binding GoServersCommand}"/>
                     <RadioButton Classes="nav" Content="{l:T 'Discover'}" Tag="{i:I E909}" GroupName="nav"
                                  IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=discover}"/>
                     <RadioButton Classes="nav" Content="{l:T 'Profile'}" Tag="{i:I E77B}" GroupName="nav"
@@ -46,10 +45,19 @@
                 </Button>
                 <TextBlock DockPanel.Dock="Bottom" Text="{Binding AccountLabel}" FontSize="10" Foreground="{StaticResource Fg3}"
                            HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="68" Margin="0,0,0,2"/>
+                <Button DockPanel.Dock="Bottom" Classes="primary" Margin="0,0,0,12" Width="48" Height="48" Padding="0" CornerRadius="12"
+                        HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                        IsVisible="{Binding UpdateAvailable}" IsEnabled="{Binding !IsUpdating}"
+                        Command="{Binding UpdateLauncherCommand}" ToolTip.Tip="{Binding UpdateTip}">
+                    <Grid>
+                        <TextBlock Classes="icon" Text="{i:I E777}" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   IsVisible="{Binding !IsUpdating}"/>
+                        <ProgressBar Width="34" MinWidth="0" Maximum="1" Value="{Binding UpdateProgress}" IsVisible="{Binding IsUpdating}" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
             </DockPanel>
         </Border>
 
-        <!-- ============ Main area ============ -->
         <Grid Grid.Column="1" RowDefinitions="44,*">
             <!-- drag area for the window -->
             <Border Background="Transparent" PointerPressed="TitleBar_PointerPressed" DoubleTapped="TitleBar_DoubleTapped"/>
@@ -72,12 +80,13 @@
             <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False"/>
         </Grid>
 
-        <!-- ============ Dialog overlay ============ -->
         <Grid Grid.ColumnSpan="2" IsVisible="{Binding Dialog, Converter={StaticResource VisibleIf}}" Background="{StaticResource Scrim}">
-            <ContentControl Content="{Binding Dialog}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40"/>
+            <ContentControl Content="{Binding ImageDialog}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40" IsVisible="{Binding IsImageDialog}"/>
+            <Viewbox StretchDirection="DownOnly" Margin="24" IsVisible="{Binding !IsImageDialog}">
+                <ContentControl Content="{Binding FormDialog}"/>
+            </Viewbox>
         </Grid>
 
-        <!-- ============ Toasts ============ -->
         <ItemsControl Grid.ColumnSpan="2" ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,20" Width="380">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>

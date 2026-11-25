@@ -60,18 +60,17 @@ public class LauncherSettings
     /// <summary>Unlocks offline accounts and other developer options.</summary>
     public bool DeveloperMode { get; set; }
 
-    // ---- Appearance & behaviour
     public LaunchBehavior OnLaunch { get; set; } = LaunchBehavior.Minimize;
     /// <summary>Separate game console window on launch / crash. When off, logs are only on the Logs tab.</summary>
     public bool OpenConsoleOnLaunch { get; set; } = true;
     public ContentListStyle ContentListStyle { get; set; } = ContentListStyle.List;
     public InstanceMenuStyle InstanceMenuStyle { get; set; } = InstanceMenuStyle.TopNavigation;
     public ContentListStyle DiscoverStyle { get; set; } = ContentListStyle.Grid;
+    public ContentListStyle ServerListStyle { get; set; } = ContentListStyle.Grid;
 
     /// <summary>Content presets (Settings → Presets).</summary>
     public List<Content.ContentPreset> Presets { get; set; } = [];
 
-    // ---- Modpack export
     public string? ExportFolder { get; set; }
     public string ExportFormat { get; set; } = "Modrinth";
     public string? ExportAuthor { get; set; }
@@ -80,6 +79,8 @@ public class LauncherSettings
 
     /// <summary>Playtime of deleted instances, so the total never goes down.</summary>
     public long DeletedPlaytimeSeconds { get; set; }
+    /// <summary>"key=value" lines applied to the server.properties of every new server pack.</summary>
+    public string ServerPropertiesDefaults { get; set; } = "";
 }
 
 public static class SettingsService

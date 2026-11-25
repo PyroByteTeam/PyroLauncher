@@ -33,7 +33,6 @@ public partial class DependencyItem : ObservableObject
 
 public partial class ProjectDetailViewModel : ObservableObject
 {
-    // ---------------- dependencies of the selected version
     public ObservableCollection<DependencyItem> Dependencies { get; } = [];
     [ObservableProperty] private bool _dependenciesExpanded;
     [ObservableProperty] private bool _loadingDependencies;

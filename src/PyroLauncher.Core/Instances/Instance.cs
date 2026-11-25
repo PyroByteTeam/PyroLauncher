@@ -37,7 +37,10 @@ public partial class Instance : ObservableObject
 {
     public string Id { get; }
     public string Dir { get; }
-    public string GameDir => Path.Combine(Dir, "minecraft");
+    public string GameDir => Path.Combine(Dir, _gameSubdir);
+    private readonly string _gameSubdir;
+    /// <summary>True for the instance view of a server pack (files live in "server", no client-only content tabs).</summary>
+    public bool IsServer => _gameSubdir == "server";
     public string NativesDir => Path.Combine(Dir, "natives");
     public string ConfigPath => Path.Combine(Dir, "instance.json");
     public string IconPath => Path.Combine(Dir, "icon.png");
@@ -54,8 +57,9 @@ public partial class Instance : ObservableObject
     public CancellationTokenSource? LaunchCts { get; set; }
     public System.Diagnostics.Process? Process { get; set; }
 
-    public Instance(string dir, InstanceConfig config)
+    public Instance(string dir, InstanceConfig config, string gameSubdir = "minecraft")
     {
+        _gameSubdir = gameSubdir;
         Dir = dir;
         Id = Path.GetFileName(dir);
         Config = config;

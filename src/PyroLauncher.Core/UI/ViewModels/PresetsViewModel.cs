@@ -71,7 +71,6 @@ public partial class PresetsViewModel : ObservableObject
     public ObservableCollection<PresetVm> Presets { get; } = [];
     [ObservableProperty] private PresetVm? _selected;
 
-    // ---- search to add
     public List<Choice<ContentType>> Types { get; } =
     [
         new(ContentType.Mod, L.T("Mods")), new(ContentType.ResourcePack, L.T("Resource packs")), new(ContentType.ShaderPack, L.T("Shaders")),
@@ -113,7 +112,6 @@ public partial class PresetsViewModel : ObservableObject
         RebuildApply();
     }
 
-    // ---- apply to an instance
     /// <summary>"edit" shows the preset's contents and search; "apply" resolves it against an instance.</summary>
     [ObservableProperty] private string _mode = "edit";
     public ObservableCollection<Instance> Instances => InstanceManager.Instances;
@@ -291,8 +289,6 @@ public partial class PresetsViewModel : ObservableObject
         MarkAdded();
     }
 }
-
-// ======================================================================= applying a preset
 
 public partial class PresetApplyRow(PresetItem item) : ObservableObject
 {

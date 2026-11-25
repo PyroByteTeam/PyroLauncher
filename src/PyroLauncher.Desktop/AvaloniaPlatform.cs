@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
@@ -20,8 +21,6 @@ public sealed class AvaloniaPlatform : IPlatformUi
 
     public bool CheckAccess() => Dispatcher.UIThread.CheckAccess();
     public void Post(Action action) => Dispatcher.UIThread.Post(action);
-
-    // ------------------------------------------------------------------ images
 
     public object? DecodeImage(byte[] data, int decodeWidth)
     {
@@ -70,8 +69,6 @@ public sealed class AvaloniaPlatform : IPlatformUi
         catch { return null; }
     }
 
-    // ------------------------------------------------------------------ pickers
-
     private static IStorageProvider? Storage => Main?.StorageProvider;
 
     private static List<FilePickerFileType> Types(IReadOnlyList<FileFilter> filters) =>
@@ -99,8 +96,6 @@ public sealed class AvaloniaPlatform : IPlatformUi
         return dirs.FirstOrDefault()?.TryGetLocalPath();
     }
 
-    // ------------------------------------------------------------------ clipboard
-
     public async Task SetClipboardTextAsync(string text)
     {
         if (Main?.Clipboard is { } c) await c.SetTextAsync(text);
@@ -112,13 +107,9 @@ public sealed class AvaloniaPlatform : IPlatformUi
         if (Main is not { Clipboard: { } c } w) return false;
         var file = await w.StorageProvider.TryGetFileFromPathAsync(path);
         if (file == null) return false;
-        var data = new DataObject();
-        data.Set(DataFormats.Files, new[] { file });
-        await c.SetDataObjectAsync(data);
+        await c.SetFileAsync(file);
         return true;
     }
-
-    // ------------------------------------------------------------------ windows
 
     public void ShowConsole(Instance instance, bool activate) => ConsoleWindow.ShowFor(instance, activate);
     public void CloseConsoles() => ConsoleWindow.CloseAll();
@@ -134,6 +125,9 @@ public sealed class AvaloniaPlatform : IPlatformUi
                 w.Show();
                 if (w.WindowState == WindowState.Minimized) w.WindowState = WindowState.Normal;
                 w.Activate();
+                break;
+            case WindowAction.Quit:
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime life) life.Shutdown();
                 break;
         }
     }

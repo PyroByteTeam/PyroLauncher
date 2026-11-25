@@ -20,7 +20,6 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto,Auto,Auto,*">
-        <!-- Header -->
         <Grid Margin="0,0,0,14" ColumnDefinitions="Auto,*,Auto">
             <Border Width="56" Height="56" CornerRadius="12" Background="{StaticResource Bg3}" ClipToBounds="True">
                 <Grid>
@@ -44,7 +43,6 @@
             </StackPanel>
         </Grid>
 
-        <!-- Info chips -->
         <WrapPanel Grid.Row="1" Margin="0,0,0,2">
             <Border Classes="chip" IsVisible="{Binding Details, Converter={StaticResource VisibleIf}}">
                 <TextBlock><Run Text="{l:T 'Side  '}" Foreground="{StaticResource Fg3}"/><Run Text="{Binding Details.Side}"/></TextBlock>
@@ -67,7 +65,6 @@
             </Border>
         </WrapPanel>
 
-        <!-- Tabs -->
         <Border Grid.Row="2" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,14">
             <StackPanel Orientation="Horizontal">
                 <RadioButton Classes="tab" Content="{l:T 'Description'}" GroupName="ptab" IsVisible="{Binding !IsLocalOnly}"
@@ -81,12 +78,10 @@
             </StackPanel>
         </Border>
 
-        <!-- Body -->
         <Grid Grid.Row="3">
             <ProgressBar IsIndeterminate="True" VerticalAlignment="Top" IsVisible="{Binding IsLoading}"/>
             <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Foreground="{StaticResource Fg2}" VerticalAlignment="Top" IsVisible="{Binding Error, Converter={StaticResource VisibleIf}}"/>
 
-            <!-- Description -->
             <Border Background="{StaticResource Bg2}" CornerRadius="10" Padding="16,10,4,0" Margin="0,0,0,16">
                 <Border.IsVisible>
                     <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -95,7 +90,6 @@
                     </MultiBinding>
                 </Border.IsVisible>
                 <DockPanel>
-                    <!-- Dependencies dropdown -->
                     <Border DockPanel.Dock="Top" Margin="0,0,12,10" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="0,0,0,8">
                         <StackPanel>
                             <ToggleButton Classes="plain" IsChecked="{Binding DependenciesExpanded}" IsEnabled="{Binding HasDependencies}" HorizontalAlignment="Stretch">
@@ -135,7 +129,6 @@
                 </DockPanel>
             </Border>
 
-            <!-- Gallery -->
             <ScrollViewer IsVisible="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=gallery}">
                 <StackPanel>
                     <TextBlock Classes="muted" Text="{l:T 'This project has no gallery images.'}" IsVisible="{Binding !Details.Gallery.Count}"/>
@@ -158,7 +151,6 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Versions -->
             <Grid Margin="0,0,0,16" RowDefinitions="2*,3*" IsVisible="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=versions}">
                 <DockPanel Margin="0,0,0,12" MinHeight="140">
                     <CheckBox DockPanel.Dock="Top" IsChecked="{Binding CompatibleOnly}" Content="{Binding CompatText}" Margin="2,0,0,10"/>
@@ -209,7 +201,6 @@
                 </Border>
             </Grid>
 
-            <!-- Local file info -->
             <StackPanel IsVisible="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=info}">
                 <Border Classes="card" Padding="20,16">
                     <StackPanel>

@@ -8,7 +8,7 @@ namespace PyroLauncher.Desktop.Views;
 
 public partial class InstanceView : UserControl
 {
-    private const string Format = "pyro/section";
+    private static readonly DataFormat<string> Format = DataFormat.CreateStringApplicationFormat("pyro.section");
     private Point _down;
     private bool _pressed;
     private bool _onGrip;
@@ -44,10 +44,10 @@ public partial class InstanceView : UserControl
         _dragging = true;
         _pressed = false;
         _dragged = card;
-        var data = new DataObject();
-        data.Set(Format, card.Key);
+        var data = new DataTransfer();
+        data.Add(DataTransferItem.Create(Format, card.Key));
         if (sender is Control c) c.Opacity = 0.5;
-        await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
+        await DragDrop.DoDragDropAsync(e, data, DragDropEffects.Move);
         if (sender is Control c2) c2.Opacity = 1;
         _dragged = null;
         ClearHighlights();
@@ -71,7 +71,7 @@ public partial class InstanceView : UserControl
 
     private void OnDragOver(object? sender, DragEventArgs e)
     {
-        var target = e.Data.Contains(Format) ? CardBorder(e.Source) : null;
+        var target = e.DataTransfer.Contains(Format) ? CardBorder(e.Source) : null;
         e.DragEffects = target != null ? DragDropEffects.Move : DragDropEffects.None;
         ClearHighlights();
         target?.Classes.Add("dropTarget");

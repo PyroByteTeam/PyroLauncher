@@ -17,7 +17,6 @@
             <TextBlock Classes="muted" Text="{l:T 'Find modpacks on Modrinth and CurseForge and install them as new instances.'}" Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- Search + platform -->
         <DockPanel Grid.Row="1" Margin="0,0,16,10">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="6">
                 <RadioButton Classes="segment" Content="{l:T 'All'}" Padding="14,7" GroupName="platform" IsChecked="{Binding Platform, Converter={StaticResource Eq}, ConverterParameter=All}"/>
@@ -30,7 +29,6 @@
             </Grid>
         </DockPanel>
 
-        <!-- Filters -->
         <DockPanel Grid.Row="2" Margin="0,0,16,14">
             <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding ClearFiltersCommand}" Padding="10,6" VerticalAlignment="Center">
                 <StackPanel Orientation="Horizontal" Spacing="7">
@@ -58,7 +56,6 @@
                 <TextBlock Text="{Binding Error}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" IsVisible="{Binding Error, Converter={StaticResource VisibleIf}}"/>
                 <TextBlock Classes="muted" Text="{l:T 'No modpacks match your search.'}" Margin="0,20,0,0" HorizontalAlignment="Center" IsVisible="{Binding IsEmpty}"/>
 
-                <!-- grid -->
                 <ItemsControl ItemsSource="{Binding Results}" IsVisible="{Binding IsGrid}">
                     <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
@@ -123,7 +120,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <!-- list -->
                 <ItemsControl ItemsSource="{Binding Results}" IsVisible="{Binding !IsGrid}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>

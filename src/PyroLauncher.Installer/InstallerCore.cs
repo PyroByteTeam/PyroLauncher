@@ -28,7 +28,7 @@ public static class InstallerCore
     private static string DesktopShortcut => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), $"{AppName}.lnk");
 
-    // ------------------------------------------------------------------ state
+    public static bool HasDesktopShortcut => File.Exists(DesktopShortcut);
 
     public static bool HasPayload => typeof(InstallerCore).Assembly.GetManifestResourceInfo("payload.zip") != null;
 
@@ -56,8 +56,6 @@ public static class InstallerCore
         return new InstalledInfo(Version.TryParse(ver, out var v) ? v : new Version(0, 0), path);
     }
 
-    // ------------------------------------------------------------------ install / update
-
     public static async Task InstallAsync(string dir, bool desktopShortcut, IProgress<(string msg, double pct)> progress)
     {
         await Task.Run(() =>
@@ -66,7 +64,7 @@ public static class InstallerCore
             CloseRunning(dir);
 
             Directory.CreateDirectory(dir);
-            using var zip = OpenPayload() ?? throw new InvalidOperationException("This setup has no launcher payload. Build it with build-installer.ps1.");
+            using var zip = OpenPayload() ?? throw new InvalidOperationException("This setup has no launcher payload. Build it with build.ps1.");
 
             // Remove files from a previous version (keep nothing: user data lives in %APPDATA%).
             foreach (var f in Directory.GetFiles(dir))
@@ -113,8 +111,6 @@ public static class InstallerCore
             progress.Report(("Done", 1));
         });
     }
-
-    // ------------------------------------------------------------------ uninstall
 
     /// <summary>A group of user data that can optionally be removed on uninstall. Paths are relative to <see cref="UserDataDir"/>.</summary>
     public record DataCategory(string Key, string Title, string Description, string[] Paths);
@@ -203,8 +199,6 @@ public static class InstallerCore
             cmd += $" & del /f /q \"{self}\"";
         Process.Start(new ProcessStartInfo("cmd.exe", cmd) { CreateNoWindow = true, UseShellExecute = false });
     }
-
-    // ------------------------------------------------------------------ helpers
 
     public static bool IsLauncherRunning(string dir) => FindRunning(dir).Any();
 

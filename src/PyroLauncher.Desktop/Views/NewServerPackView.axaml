@@ -1,0 +1,148 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.NewServerPackView">
+    <UserControl.Styles>
+        <Style Selector="Border.side">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="7,2"/>
+            <Setter Property="Background" Value="{StaticResource Bg4}"/>
+        </Style>
+        <Style Selector="Border.side.client"><Setter Property="Background" Value="#33E0A030"/></Style>
+    </UserControl.Styles>
+    <Border Classes="dialog" Width="820" Height="640">
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
+                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="12" Command="{Binding CancelCommand}" VerticalAlignment="Top" ToolTip.Tip="{l:T 'Close'}"/>
+                <StackPanel>
+                    <TextBlock Classes="h2" Text="{l:T 'New server pack'}"/>
+                    <TextBlock Classes="muted" Margin="0,4,0,0" Text="{l:T 'Pick the instance to base the server on.'}" IsVisible="{Binding IsPickStep}"/>
+                    <TextBlock Classes="muted" Margin="0,4,0,0" Text="{l:T 'Choose the mods the server should run. Client-only mods are left out by default.'}" IsVisible="{Binding !IsPickStep}"/>
+                </StackPanel>
+            </DockPanel>
+
+            <DockPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
+                <Button DockPanel.Dock="Right" Classes="primary" Command="{Binding NextCommand}" IsVisible="{Binding IsPickStep}"
+                        IsEnabled="{Binding SelectedInstance, Converter={x:Static ObjectConverters.IsNotNull}}" MinWidth="120" HorizontalContentAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{l:T 'Next'}"/>
+                        <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="11"/>
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Right" Classes="primary" Command="{Binding CreateCommand}" IsVisible="{Binding !IsPickStep}"
+                        IsEnabled="{Binding !IsBusy}" MinWidth="140" HorizontalContentAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E968}"/>
+                        <TextBlock Text="{l:T 'Create server'}"/>
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Right" Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}" Margin="0,0,8,0" IsCancel="True"/>
+                <Button DockPanel.Dock="Left" Classes="ghost" Command="{Binding BackCommand}" IsVisible="{Binding !IsPickStep}">
+                    <Button.IsEnabled><MultiBinding Converter="{x:Static BoolConverters.And}"><Binding Path="CanGoBack"/><Binding Path="!IsBusy"/></MultiBinding></Button.IsEnabled>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E72B}" FontSize="11"/>
+                        <TextBlock Text="{l:T 'Back'}"/>
+                    </StackPanel>
+                </Button>
+                <TextBlock Classes="faint" Text="{Binding Status}" VerticalAlignment="Center" Margin="12,0"/>
+            </DockPanel>
+
+            <Grid>
+                <!-- step 1 -->
+                <Border IsVisible="{Binding IsPickStep}" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="8">
+                    <Grid>
+                        <TextBlock Classes="muted" Text="{l:T 'Create an instance first - the server is built from its mods and configs.'}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   IsVisible="{Binding !Instances.Count}"/>
+                        <ListBox ItemsSource="{Binding Instances}" SelectedItem="{Binding SelectedInstance}" Background="Transparent">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel Margin="2,4">
+                                        <Border Width="36" Height="36" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0">
+                                            <Grid>
+                                                <TextBlock Text="{Binding Initial}" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                            <TextBlock Classes="faint" Text="{Binding VersionText}"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <!-- step 2 -->
+                <Grid IsVisible="{Binding !IsPickStep}" ColumnDefinitions="210,*">
+                    <StackPanel Margin="0,0,18,0">
+                        <TextBlock Classes="overline" Text="{l:T 'NAME'}" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding Name}"/>
+                        <TextBlock Classes="overline" Text="{l:T 'SIDE'}" Margin="0,16,0,5"/>
+                        <ListBox ItemsSource="{Binding SideFilters}" SelectedItem="{Binding SideFilter}" Background="Transparent">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate><TextBlock Text="{Binding Converter={x:Static l:LocText.Instance}}"/></DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Classes="overline" Text="{l:T 'SORT BY'}" Margin="0,16,0,5"/>
+                        <ComboBox ItemsSource="{Binding Sorts}" SelectedItem="{Binding Sort}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate><TextBlock Text="{Binding Converter={x:Static l:LocText.Instance}}"/></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <CheckBox IsChecked="{Binding CopyConfigs}" Margin="0,18,0,0">
+                            <TextBlock Text="{l:T 'Copy configs (config, defaultconfigs, kubejs…)'}" TextWrapping="Wrap"/>
+                        </CheckBox>
+                    </StackPanel>
+
+                    <DockPanel Grid.Column="1">
+                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="8,0,0,0">
+                                <Button Classes="ghost" Content="{l:T 'All'}" Padding="8,5" Command="{Binding SelectAllCommand}"/>
+                                <Button Classes="ghost" Content="{l:T 'None'}" Padding="8,5" Command="{Binding SelectNoneCommand}"/>
+                            </StackPanel>
+                            <Grid>
+                                <TextBox Classes="search" Text="{Binding Search}" Watermark="{l:T 'Search mods'}"/>
+                                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                            </Grid>
+                        </DockPanel>
+                        <DockPanel DockPanel.Dock="Bottom" Margin="2,8,0,0">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsResolving}">
+                                <ProgressBar IsIndeterminate="True" Width="60" MinWidth="0" VerticalAlignment="Center"/>
+                                <TextBlock Classes="faint" Text="{l:T 'Checking mod sides…'}"/>
+                            </StackPanel>
+                            <TextBlock Classes="faint" Text="{Binding SelectionText}"/>
+                        </DockPanel>
+                        <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="8" Padding="4">
+                            <ListBox ItemsSource="{Binding ModsView}" Background="Transparent">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel Margin="2,2">
+                                            <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsChecked}" MinWidth="0" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <Border DockPanel.Dock="Right" Classes="side" Classes.client="{Binding IsClientOnly}" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SideText}" FontSize="11"/>
+                                            </Border>
+                                            <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{Binding SizeText}" Margin="10,0" VerticalAlignment="Center"/>
+                                            <Border Width="28" Height="28" CornerRadius="6" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,10,0">
+                                                <Grid>
+                                                    <TextBlock Text="{Binding Initials}" FontSize="10" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
+                                                </Grid>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Classes="faint" Text="{Binding FileName}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </DockPanel>
+                </Grid>
+            </Grid>
+        </DockPanel>
+    </Border>
+</UserControl>

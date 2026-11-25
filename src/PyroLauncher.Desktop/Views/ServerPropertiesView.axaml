@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.ServerPropertiesView">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="0,0,0,20">
+        <DockPanel Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" Margin="10,0,0,0">
+                <Button Classes="ghost" Command="{Binding OpenFileCommand}" ToolTip.Tip="{l:T 'Open server.properties in your editor'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E8A5}" FontSize="12"/><TextBlock Text="{l:T 'Open file'}"/></StackPanel>
+                </Button>
+                <Button Classes="ghost" Command="{Binding LoadCommand}" ToolTip.Tip="{l:T 'Discard changes and reload the file'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E72C}" FontSize="12"/><TextBlock Text="{l:T 'Reload'}"/></StackPanel>
+                </Button>
+            </StackPanel>
+            <Grid MaxWidth="420" HorizontalAlignment="Left">
+                <TextBox Classes="search" Text="{Binding Search}" Watermark="{l:T 'Search settings'}" Width="420"/>
+                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+            </Grid>
+        </DockPanel>
+
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !Exists}" Spacing="12">
+            <TextBlock Classes="muted" Text="{l:T 'This server has no server.properties yet.'}" HorizontalAlignment="Center"/>
+            <Button Classes="primary" Command="{Binding CreateCommand}" Content="{l:T 'Create with defaults'}" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Padding="0,0,8,0" IsVisible="{Binding Exists}">
+            <ItemsControl ItemsSource="{Binding ItemsView}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Classes="settingRow">
+                            <Grid ColumnDefinitions="*,320">
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,20,0">
+                                    <TextBlock Classes="rowTitle" Text="{Binding Key}" FontFamily="{StaticResource MonoFont}"/>
+                                    <TextBlock Classes="faint" Text="{Binding Description}" TextWrapping="Wrap" Margin="0,3,0,0" IsVisible="{Binding HasDescription}"/>
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding BoolValue}" HorizontalAlignment="Right" OnContent="" OffContent="" IsVisible="{Binding IsBool}"/>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding Choices}" SelectedItem="{Binding Value}" HorizontalAlignment="Stretch" IsVisible="{Binding IsChoice}"/>
+                                <TextBox Grid.Column="1" Text="{Binding Value}" IsVisible="{Binding IsText}" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Margin="0,12,0,0" Padding="14,10" CornerRadius="10" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line2}" BorderThickness="1"
+                IsVisible="{Binding IsDirty}">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="primary" Command="{Binding SaveCommand}" Content="{l:T 'Save'}"/>
+                <Button DockPanel.Dock="Right" Command="{Binding LoadCommand}" Content="{l:T 'Discard'}" Margin="0,0,8,0"/>
+                <TextBlock Text="{l:T 'You have unsaved changes. They apply the next time the server starts.'}" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

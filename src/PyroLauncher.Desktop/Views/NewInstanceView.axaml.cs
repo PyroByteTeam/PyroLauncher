@@ -11,10 +11,10 @@ public partial class NewInstanceView : UserControl
     {
         InitializeComponent();
         DropZone.AddHandler(DragDrop.DragOverEvent, (_, e) =>
-            e.DragEffects = e.Data.Contains(DataFormats.Files) ? DragDropEffects.Copy : DragDropEffects.None);
+            e.DragEffects = e.DataTransfer.Contains(DataFormat.File) ? DragDropEffects.Copy : DragDropEffects.None);
         DropZone.AddHandler(DragDrop.DropEvent, (_, e) =>
         {
-            var file = e.Data.GetFiles()?.FirstOrDefault()?.TryGetLocalPath();
+            var file = e.DataTransfer.TryGetFiles()?.FirstOrDefault()?.TryGetLocalPath();
             if (file != null && DataContext is NewInstanceViewModel vm) vm.SetImportFile(file);
         });
     }

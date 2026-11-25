@@ -67,7 +67,6 @@
         </ResourceDictionary>
     </Styles.Resources>
 
-    <!-- ===================== text ===================== -->
     <Style Selector="TextBlock.h1"><Setter Property="FontSize" Value="28"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
     <Style Selector="TextBlock.h2"><Setter Property="FontSize" Value="18"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
     <Style Selector="TextBlock.h3"><Setter Property="FontSize" Value="14"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
@@ -85,7 +84,6 @@
     </Style>
     <Style Selector="TextBlock.mono"><Setter Property="FontFamily" Value="{StaticResource MonoFont}"/></Style>
 
-    <!-- ===================== surfaces ===================== -->
     <Style Selector="Border.card">
         <Setter Property="Background" Value="{StaticResource Bg2}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
@@ -122,7 +120,6 @@
         <Setter Property="BoxShadow" Value="0 8 40 0 #B0000000"/>
     </Style>
 
-    <!-- ===================== buttons ===================== -->
     <Style Selector="Button">
         <Setter Property="Background" Value="{StaticResource Bg3}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Line2}"/>
@@ -132,6 +129,39 @@
         <Setter Property="Padding" Value="14,7"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <!-- Instance and server cards -->
+    <Style Selector="Border.instanceCard">
+        <Setter Property="Background" Value="{StaticResource Bg2}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Border.instanceCard:pointerover"><Setter Property="BorderBrush" Value="{StaticResource Line2}"/></Style>
+    <Style Selector="Border.instanceCard Button.play"><Setter Property="IsVisible" Value="False"/></Style>
+    <Style Selector="Border.instanceCard:pointerover Button.play"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="Border.instanceCard.active Button.play"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="Border.instanceCard Button.play.always"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="Button.play">
+        <Setter Property="Width" Value="42"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="CornerRadius" Value="21"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="White"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.play:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#FFDADADA"/>
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
+    <!-- Window caption buttons: Windows sets the arrow cursor over them itself; a hand here makes it flicker. -->
+    <Style Selector="CaptionButtons /template/ Button">
+        <Setter Property="Cursor" Value="Arrow"/>
     </Style>
     <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{StaticResource Bg4}"/>
@@ -199,7 +229,6 @@
         <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
 
-    <!-- ===================== radio buttons as nav / tabs / segments ===================== -->
     <!-- Sidebar entry: icon (Tag) above the label -->
     <Style Selector="RadioButton.nav">
         <Setter Property="Foreground" Value="{StaticResource Fg3}"/>
@@ -246,7 +275,6 @@
     <Style Selector="RadioButton.tab:checked"><Setter Property="Foreground" Value="{StaticResource Fg}"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
     <Style Selector="RadioButton.tab:checked /template/ Border#line"><Setter Property="IsVisible" Value="True"/></Style>
 
-    <!-- Pill segment -->
     <Style Selector="RadioButton.segment">
         <Setter Property="Foreground" Value="{StaticResource Fg2}"/>
         <Setter Property="Background" Value="{StaticResource Bg2}"/>
@@ -278,7 +306,6 @@
         </Setter>
     </Style>
 
-    <!-- ===================== inputs ===================== -->
     <Style Selector="TextBox">
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="10,7"/>

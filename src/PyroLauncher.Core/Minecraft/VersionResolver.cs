@@ -30,7 +30,6 @@ public static class VersionResolver
 {
     public static ResolvedVersion Resolve(string id)
     {
-        // Build chain child -> parent
         var chain = new List<JsonNode>();
         var cur = id;
         var seen = new HashSet<string>();
@@ -89,8 +88,6 @@ public static class VersionResolver
         return r;
     }
 
-    // ---------------- Rules ----------------
-
     /// <summary>Mojang's name for this OS in version rules: windows, osx or linux.</summary>
     public static string OsName => OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsMacOS() ? "osx" : "linux";
 
@@ -136,8 +133,6 @@ public static class VersionResolver
         }
         return allow;
     }
-
-    // ---------------- Maven helpers ----------------
 
     public static string MavenPath(string name)
     {
