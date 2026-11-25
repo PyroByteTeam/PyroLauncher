@@ -1,0 +1,274 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ContentTabView"
+             DragDrop.AllowDrop="True">
+    <UserControl.Styles>
+        <!-- rows / tiles -->
+        <Style Selector="Border.item">
+            <Setter Property="Background" Value="{StaticResource Bg2}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Border.item:pointerover"><Setter Property="Background" Value="{StaticResource Bg3}"/><Setter Property="BorderBrush" Value="{StaticResource Line2}"/></Style>
+        <Style Selector="Border.item.checked"><Setter Property="Background" Value="#FF222222"/></Style>
+        <Style Selector="Border.item.selected"><Setter Property="BorderBrush" Value="{StaticResource Fg}"/><Setter Property="Background" Value="{StaticResource Bg3}"/></Style>
+        <Style Selector="Border.item CheckBox.chk"><Setter Property="Opacity" Value="0"/></Style>
+        <Style Selector="Border.item:pointerover CheckBox.chk"><Setter Property="Opacity" Value="1"/></Style>
+        <Style Selector="Border.item.showChk CheckBox.chk"><Setter Property="Opacity" Value="1"/></Style>
+        <Style Selector="Border.item.checked CheckBox.chk"><Setter Property="Opacity" Value="1"/></Style>
+        <Style Selector="Border.item.off :is(Control).dim"><Setter Property="Opacity" Value="0.4"/></Style>
+        <Style Selector="Border.item Border.offBadge"><Setter Property="IsVisible" Value="False"/></Style>
+        <Style Selector="Border.item.off Border.offBadge"><Setter Property="IsVisible" Value="True"/></Style>
+        <Style Selector="CheckBox.chk"><Setter Property="MinWidth" Value="0"/><Setter Property="Padding" Value="0"/></Style>
+    </UserControl.Styles>
+
+    <UserControl.DataTemplates>
+    </UserControl.DataTemplates>
+
+    <Grid x:Name="Root" ColumnDefinitions="*,0">
+        <!-- ================= Left: list ================= -->
+        <Grid RowDefinitions="Auto,Auto,*" MinWidth="380">
+            <!-- Toolbar -->
+            <DockPanel Margin="0,0,0,12">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Classes="icon" Content="{i:I E710}" ToolTip.Tip="{l:T 'Add files from disk'}" Command="{Binding AddFilesCommand}"/>
+                    <Button Classes="icon" Content="{i:I E838}" ToolTip.Tip="{l:T 'Open folder'}" Command="{Binding OpenFolderCommand}"/>
+                    <Button Classes="icon" Content="{i:I E72C}" ToolTip.Tip="{l:T 'Refresh'}" Command="{Binding RefreshCommand}"/>
+                </StackPanel>
+                <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding SuggestionsEnabled}" Margin="14,0,10,0" VerticalAlignment="Center" OnContent="{l:T 'Suggestions'}" OffContent="{l:T 'Suggestions'}">
+                              <ToolTip.Tip><l:T Key="Also search Modrinth and CurseForge for content you don't have yet"/></ToolTip.Tip>
+                              </ToggleSwitch>
+                <ComboBox DockPanel.Dock="Right" Width="130" Margin="10,0,0,0" ItemsSource="{x:Static c:EnumValues.SourceFilters}" SelectedItem="{Binding SourceFilter}"
+                          IsVisible="{Binding SuggestionsEnabled}"/>
+                <Grid>
+                    <TextBox Classes="search" Text="{Binding Query}" Watermark="{Binding SearchPlaceholder}"/>
+                    <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="13" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                </Grid>
+            </DockPanel>
+
+            <!-- Filters + banners -->
+            <StackPanel Grid.Row="1">
+                <WrapPanel Margin="0,0,0,8">
+                    <RadioButton Classes="segment" Content="{l:T 'All'}" Margin="0,0,6,6" GroupName="{Binding Title}"
+                                 IsChecked="{Binding StatusFilter, Converter={StaticResource Eq}, ConverterParameter=all}"/>
+                    <RadioButton Classes="segment" Content="{Binding EnabledFilterText}" Margin="0,0,6,6" GroupName="{Binding Title}"
+                                 IsChecked="{Binding StatusFilter, Converter={StaticResource Eq}, ConverterParameter=enabled}"/>
+                    <RadioButton Classes="segment" Content="{Binding DisabledFilterText}" Margin="0,0,6,6" GroupName="{Binding Title}"
+                                 IsChecked="{Binding StatusFilter, Converter={StaticResource Eq}, ConverterParameter=disabled}"/>
+                    <RadioButton Classes="segment" Margin="0,0,14,6" GroupName="{Binding Title}"
+                                 IsChecked="{Binding StatusFilter, Converter={StaticResource Eq}, ConverterParameter=updates}"
+                                 Content="{Binding UpdatesCount, Converter={StaticResource Format}, ConverterParameter='Updates ({0})'}"/>
+                    <Button Command="{Binding CheckUpdatesCommand}" Padding="12,6" Margin="0,0,6,6">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{i:I E895}"/>
+                            <TextBlock Text="{l:T 'Check for updates'}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="primary" Command="{Binding UpdateAllCommand}" Margin="0,0,6,6" Padding="12,6" IsVisible="{Binding UpdatesCount, Converter={StaticResource VisibleIf}}"
+                            Content="{Binding UpdatesCount, Converter={StaticResource Format}, ConverterParameter='Update all ({0})'}"/>
+                </WrapPanel>
+                <WrapPanel Margin="0,0,0,8" IsVisible="{Binding SuggestionsEnabled}">
+                    <ComboBox Width="140" ItemsSource="{Binding Sorts}" SelectedItem="{Binding Sort}" Margin="0,0,8,6" ToolTip.Tip="{l:T 'Sort suggestions'}"/>
+                    <ComboBox Width="170" ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}" Margin="0,0,8,6" ToolTip.Tip="{l:T 'Category'}"/>
+                    <ComboBox Width="130" ItemsSource="{Binding Environments}" SelectedItem="{Binding Environment}" Margin="0,0,8,6" ToolTip.Tip="{l:T 'Client / server side'}"
+                              IsVisible="{Binding IsMods}"/>
+                </WrapPanel>
+                <!-- Bulk actions (appears when items are ticked) -->
+                <Border Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="10" Padding="12,8" Margin="0,0,0,10"
+                        IsVisible="{Binding HasChecked}">
+                    <WrapPanel>
+                        <TextBlock VerticalAlignment="Center" Margin="0,0,14,0" FontWeight="SemiBold">
+                            <Run Text="{Binding CheckedCount}"/><Run Text="{l:T ' selected'}"/>
+                        </TextBlock>
+                        <Button Classes="ghost" Content="{l:T 'Select all shown'}" Padding="10,5" Command="{Binding SelectAllVisibleCommand}"/>
+                        <Button Content="{l:T 'Turn on'}" Padding="10,5" Margin="4,0,0,0" Command="{Binding BulkEnableCommand}" CommandParameter="true"/>
+                        <Button Content="{l:T 'Turn off'}" Padding="10,5" Margin="6,0,0,0" Command="{Binding BulkEnableCommand}" CommandParameter="false"/>
+                        <Button Padding="10,5" Margin="6,0,0,0" Command="{Binding BulkUpdateCommand}"
+                                Content="{Binding CheckedUpdates, Converter={StaticResource Format}, ConverterParameter='Update ({0})'}"/>
+                        <Button Content="{l:T 'Delete'}" Padding="10,5" Margin="6,0,0,0" Command="{Binding BulkDeleteCommand}"/>
+                        <Button Classes="icon" Content="{i:I E8BB}" FontSize="11" Width="28" Height="28" Margin="6,0,0,0" ToolTip.Tip="{l:T 'Clear selection'}" Command="{Binding ClearCheckedCommand}"/>
+                    </WrapPanel>
+                </Border>
+                <StackPanel Orientation="Horizontal" Margin="2,0,0,10" IsVisible="{Binding UpdateStatus, Converter={StaticResource VisibleIf}}">
+                    <ProgressBar Width="80" IsIndeterminate="True" Margin="0,0,10,0" IsVisible="{Binding IsCheckingUpdates}"/>
+                    <TextBlock Classes="muted" Text="{Binding UpdateStatus}" TextWrapping="Wrap"/>
+                </StackPanel>
+                <Border Classes="card" Padding="14,10" Margin="0,0,0,12" IsVisible="{Binding IsUnsupported}">
+                    <TextBlock Text="{l:T 'This is a vanilla instance - mods need Fabric, Forge or NeoForge. Create a modded instance to use mods.'}" TextWrapping="Wrap" Foreground="{StaticResource Fg2}"/>
+                </Border>
+                <Border Classes="card" Padding="14,10" Margin="0,0,0,12" IsVisible="{Binding BusyText, Converter={StaticResource VisibleIf}}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding BusyText}" Foreground="{StaticResource Fg2}"/>
+                        <ProgressBar IsIndeterminate="True" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <ScrollViewer x:Name="ListScroller" Grid.Row="2" Padding="0,0,8,20">
+                <StackPanel>
+                    <DockPanel Margin="2,0,0,10">
+                        <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{Binding CountText}" VerticalAlignment="Center"/>
+                        <TextBlock Classes="overline" Text="{l:T 'INSTALLED'}" VerticalAlignment="Center"/>
+                    </DockPanel>
+                    <ProgressBar IsIndeterminate="True" Margin="0,0,0,10" IsVisible="{Binding List.IsLoading}"/>
+                    <TextBlock Classes="muted" Text="{Binding EmptyText}" Margin="2,4,0,16" TextWrapping="Wrap" IsVisible="{Binding !Installed.Count}"/>
+
+                    <!-- Installed: list -->
+                    <ItemsControl ItemsSource="{Binding InstalledView}" IsVisible="{Binding !IsGrid}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Classes="item" Classes.checked="{Binding IsChecked}" Classes.selected="{Binding IsSelected}" Classes.off="{Binding !IsEnabled}"
+                                        Classes.showChk="{Binding $parent[UserControl].DataContext.HasChecked}"
+                                        Padding="12,8" Margin="0,0,0,6" c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenItemCommand}">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{l:T 'Toggle on / off'}" Command="{Binding $parent[UserControl].DataContext.ToggleCommand}" CommandParameter="{Binding}"/>
+                                            <MenuItem Header="{l:T 'Show in Explorer'}" Command="{Binding $parent[UserControl].DataContext.RevealCommand}" CommandParameter="{Binding}"/>
+                                            <Separator/>
+                                            <MenuItem Header="{l:T 'Delete'}" Command="{Binding $parent[UserControl].DataContext.DeleteCommand}" CommandParameter="{Binding}"/>
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+                                        <CheckBox Classes="chk" IsChecked="{Binding IsChecked}" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip.Tip="{l:T 'Select for bulk actions'}"/>
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsEnabled}" VerticalAlignment="Center" Margin="0,0,8,0" MinWidth="0"
+                                                      ToolTip.Tip="{Binding $parent[UserControl].DataContext.ToggleTooltip}"/>
+                                        <Border Classes="dim" Grid.Column="2" Width="40" Height="40" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0">
+                                            <Grid>
+                                                <TextBlock Text="{Binding Initials}" FontWeight="Bold" FontSize="14" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Image c:RemoteImage.DecodeWidth="80" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                                <Image Source="{Binding Icon}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="None"/>
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel Classes="dim" Grid.Column="3" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Classes="faint" TextTrimming="CharacterEllipsis" Margin="0,2,0,0">
+                                                <Run Text="{Binding Version}"/><Run Text="  ·  " Foreground="{StaticResource Line2}"/><Run Text="{Binding FileName}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <Button Grid.Column="4" Classes="primary" Padding="10,4" Margin="8,0,6,0" FontSize="12" ToolTip.Tip="{Binding Update.Name}"
+                                                IsVisible="{Binding HasUpdate}" Command="{Binding $parent[UserControl].DataContext.UpdateItemCommand}" CommandParameter="{Binding}">
+                                            <TextBlock MaxWidth="120" TextTrimming="CharacterEllipsis" Text="{Binding Update.VersionNumber, Converter={StaticResource Format}, ConverterParameter='Update → {0}'}"/>
+                                        </Button>
+                                        <Border Grid.Column="5" Classes="badge"><TextBlock Classes="badgeText" Text="{Binding SourceText}"/></Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Installed: grid -->
+                    <ItemsControl ItemsSource="{Binding InstalledView}" IsVisible="{Binding IsGrid}">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Classes="item" Classes.checked="{Binding IsChecked}" Classes.selected="{Binding IsSelected}" Classes.off="{Binding !IsEnabled}"
+                                        Classes.showChk="{Binding $parent[UserControl].DataContext.HasChecked}"
+                                        Width="96" Height="108" Margin="0,0,8,8" ToolTip.Tip="{Binding Name}"
+                                        c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenItemCommand}"
+                                        c:Tap.DoubleCommand="{Binding $parent[UserControl].DataContext.ToggleCommand}">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{l:T 'Toggle on / off'}" Command="{Binding $parent[UserControl].DataContext.ToggleCommand}" CommandParameter="{Binding}"/>
+                                            <MenuItem Header="{l:T 'Show in Explorer'}" Command="{Binding $parent[UserControl].DataContext.RevealCommand}" CommandParameter="{Binding}"/>
+                                            <Separator/>
+                                            <MenuItem Header="{l:T 'Delete'}" Command="{Binding $parent[UserControl].DataContext.DeleteCommand}" CommandParameter="{Binding}"/>
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <Grid>
+                                        <StackPanel Classes="dim" Margin="6,10,6,6">
+                                            <Border Width="52" Height="52" CornerRadius="10" Background="{StaticResource Bg3}" ClipToBounds="True" HorizontalAlignment="Center">
+                                                <Grid>
+                                                    <TextBlock Text="{Binding Initials}" FontWeight="Bold" FontSize="18" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Image c:RemoteImage.DecodeWidth="104" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                                    <Image Source="{Binding Icon}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="None"/>
+                                                </Grid>
+                                            </Border>
+                                            <TextBlock Text="{Binding Name}" FontSize="11.5" Margin="0,7,0,0" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="30"/>
+                                        </StackPanel>
+                                        <Ellipse Width="8" Height="8" Fill="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,7,34"
+                                                 IsVisible="{Binding HasUpdate}" ToolTip.Tip="{l:T 'Update available'}"/>
+                                        <Border Classes="badge offBadge" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5" Padding="4,0">
+                                            <TextBlock Classes="badgeText" Text="{l:T 'OFF'}" FontSize="9"/>
+                                        </Border>
+                                        <CheckBox Classes="chk" IsChecked="{Binding IsChecked}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6,2" ToolTip.Tip="{l:T 'Select for bulk actions'}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Suggestions -->
+                    <StackPanel IsVisible="{Binding SuggestionsEnabled}" Margin="0,18,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                            <TextBlock Classes="overline" Text="{l:T 'SUGGESTIONS'}" VerticalAlignment="Center"/>
+                            <TextBlock Classes="faint" Text="{l:T '  ·  not installed'}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ProgressBar IsIndeterminate="True" Margin="0,0,0,10" IsVisible="{Binding IsSearching}"/>
+                        <TextBlock Classes="muted" Text="{Binding SearchWarning}" TextWrapping="Wrap" Margin="2,0,0,10" IsVisible="{Binding SearchWarning, Converter={StaticResource VisibleIf}}"/>
+
+                        <ItemsControl ItemsSource="{Binding Suggestions}" IsVisible="{Binding !IsGrid}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Classes="item" Classes.selected="{Binding IsSelected}" Padding="12,9" Margin="0,0,0,6"
+                                            c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenProjectCommand}">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                            <Border Width="42" Height="42" CornerRadius="9" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0">
+                                                <Grid>
+                                                    <TextBlock Text="{Binding Initials}" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Image c:RemoteImage.DecodeWidth="84" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                                </Grid>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock TextTrimming="CharacterEllipsis">
+                                                    <Run Text="{Binding Title}" FontWeight="SemiBold"/>
+                                                    <Run Text="{Binding Author, Converter={StaticResource Format}, ConverterParameter='by {0}'}" Foreground="{StaticResource Fg3}" FontSize="12"/>
+                                                </TextBlock>
+                                                <TextBlock Classes="muted" Text="{Binding Description}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="10,0" HorizontalAlignment="Right">
+                                                <Border Classes="badge" HorizontalAlignment="Right"><TextBlock Classes="badgeText" Text="{Binding SourceText}"/></Border>
+                                                <TextBlock Classes="faint" Text="{Binding DownloadsText, StringFormat='↓ {0}'}" HorizontalAlignment="Right" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="3" Content="{l:T 'Install'}" Padding="12,6"
+                                                    Command="{Binding $parent[UserControl].DataContext.QuickInstallCommand}" CommandParameter="{Binding}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <ItemsControl ItemsSource="{Binding Suggestions}" IsVisible="{Binding IsGrid}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Classes="item" Classes.selected="{Binding IsSelected}" Width="96" Height="108" Margin="0,0,8,8" ToolTip.Tip="{Binding Description}"
+                                            c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenProjectCommand}">
+                                        <StackPanel Margin="6,10,6,6">
+                                            <Border Width="52" Height="52" CornerRadius="10" Background="{StaticResource Bg3}" ClipToBounds="True" HorizontalAlignment="Center">
+                                                <Grid>
+                                                    <TextBlock Text="{Binding Initials}" FontWeight="Bold" FontSize="18" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Image c:RemoteImage.DecodeWidth="104" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                                </Grid>
+                                            </Border>
+                                            <TextBlock Text="{Binding Title}" FontSize="11.5" Margin="0,7,0,0" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="30"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="{l:T 'Load more'}" Command="{Binding LoadMoreCommand}" HorizontalAlignment="Center" Margin="0,8,0,0" IsVisible="{Binding CanLoadMore}"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- ================= Right: details ================= -->
+        <Border Grid.Column="1" Margin="16,0,0,0" BorderBrush="{StaticResource Line}" BorderThickness="1,0,0,0" Padding="18,0,0,0" IsVisible="{Binding HasDetail}">
+            <ContentControl Content="{Binding Detail}"/>
+        </Border>
+    </Grid>
+</UserControl>

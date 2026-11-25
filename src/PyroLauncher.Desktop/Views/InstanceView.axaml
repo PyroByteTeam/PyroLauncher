@@ -1,0 +1,163 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.InstanceView">
+    <UserControl.Styles>
+        <Style Selector="Border.sectionCard">
+            <Setter Property="Background" Value="{StaticResource Bg2}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Border.sectionCard:pointerover"><Setter Property="BorderBrush" Value="{StaticResource Line2}"/></Style>
+        <Style Selector="Border.sectionCard.dropTarget"><Setter Property="BorderBrush" Value="{StaticResource Fg}"/></Style>
+        <Style Selector="Border.grip"><Setter Property="Background" Value="Transparent"/></Style>
+        <Style Selector="Border.grip:pointerover"><Setter Property="Background" Value="{StaticResource Bg4}"/></Style>
+    </UserControl.Styles>
+
+    <Grid Margin="36,0,36,0" RowDefinitions="Auto,Auto,*">
+        <!-- Header -->
+        <Grid Margin="0,0,0,18" ColumnDefinitions="Auto,Auto,*,Auto">
+            <Button Classes="icon" Content="{i:I E72B}" Command="{Binding BackCommand}" ToolTip.Tip="{l:T 'Back to instances'}" VerticalAlignment="Top" Margin="-8,0,10,0"/>
+            <Border Grid.Column="1" Width="84" Height="84" CornerRadius="14" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line}" BorderThickness="1" ClipToBounds="True">
+                <Grid>
+                    <TextBlock Text="{Binding Instance.Initial}" FontSize="38" FontWeight="Bold" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Image Source="{Binding Instance.Icon}" Stretch="UniformToFill"/>
+                </Grid>
+            </Border>
+            <StackPanel Grid.Column="2" Margin="20,2,20,0" VerticalAlignment="Center">
+                <TextBlock Classes="h1" Text="{Binding Instance.Name}" TextTrimming="CharacterEllipsis"/>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Border Classes="badge"><TextBlock Classes="badgeText" Text="{Binding Instance.Config.MinecraftVersion}"/></Border>
+                    <Border Classes="badge" Margin="6,0,0,0">
+                        <TextBlock Classes="badgeText"><Run Text="{Binding Instance.LoaderText}"/> <Run Text="{Binding Instance.ShortLoaderVersion}"/></TextBlock>
+                    </Border>
+                    <TextBlock Classes="icon" Text="{i:I E823}" Foreground="{StaticResource Fg2}" Margin="16,0,6,0"/>
+                    <TextBlock VerticalAlignment="Center">
+                        <Run Text="{Binding Instance.PlayTimeClock}" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}"/><Run Text="{l:T ' played'}" Foreground="{StaticResource Fg2}"/>
+                    </TextBlock>
+                    <TextBlock Text="·" Foreground="{StaticResource Fg3}" Margin="8,0" VerticalAlignment="Center"/>
+                    <TextBlock Classes="muted" Text="{Binding Instance.LastPlayedText}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="3" VerticalAlignment="Center" Width="240">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Classes="icon" Content="{i:I E756}" ToolTip.Tip="{l:T 'Open console'}" Command="{Binding OpenConsoleCommand}" Margin="0,0,4,0" Width="44" Height="44"
+                            IsVisible="{Binding ConsoleEnabled}"/>
+                    <Button Classes="icon" Content="{i:I E838}" ToolTip.Tip="{l:T 'Open game folder'}" Command="{Binding OpenFolderCommand}" Margin="0,0,8,0" Width="44" Height="44"/>
+                    <Button Classes="primary" Command="{Binding LaunchCommand}" Padding="26,11" FontSize="15" MinWidth="140" ToolTip.Tip="{Binding LaunchTip}"
+                            HorizontalContentAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Classes="icon" Text="{Binding LaunchGlyph, Converter={StaticResource Icon}}" FontSize="14"/>
+                            <TextBlock Text="{Binding LaunchText}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0" IsVisible="{Binding Instance.IsBusy}">
+                    <TextBlock Classes="faint" Text="{Binding Instance.Status}" TextTrimming="CharacterEllipsis" HorizontalAlignment="Right"/>
+                    <ProgressBar Margin="0,6,0,0" Maximum="100" Value="{Binding Instance.Progress, Converter={StaticResource Percent}}"
+                                 IsIndeterminate="{Binding Instance.Progress, Converter={StaticResource Indeterminate}}"/>
+                </StackPanel>
+                <TextBlock Classes="faint" Text="{l:T 'Game is running'}" HorizontalAlignment="Right" Margin="0,10,0,0" IsVisible="{Binding Instance.IsRunning}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Top navigation -->
+        <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,18" IsVisible="{Binding ShowTabs}">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Classes="tab" Content="{l:T 'Modpack'}" Tag="{i:I E7B8}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=modpack}"
+                             IsVisible="{Binding Instance.IsModpack}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Mods'}" Tag="{i:I EA86}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=mods}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Resource Packs'}" Tag="{i:I E790}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=resourcepacks}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Shaders'}" Tag="{i:I E706}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=shaders}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Screenshots'}" Tag="{i:I EB9F}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=screenshots}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Servers'}" Tag="{i:I E774}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=servers}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Logs'}" Tag="{i:I E9D9}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=logs}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Configs'}" Tag="{i:I E90F}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=configs}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Settings'}" Tag="{i:I E713}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=settings}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Grid menu: breadcrumb back to the overview -->
+        <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,18" Padding="0,0,0,10" IsVisible="{Binding ShowBreadcrumb}">
+            <StackPanel Orientation="Horizontal">
+                <Button Classes="ghost" Command="{Binding ShowOverviewCommand}" Padding="10,6" Margin="-10,0,4,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E72B}" FontSize="12"/>
+                        <TextBlock Text="{l:T 'Overview'}"/>
+                    </StackPanel>
+                </Button>
+                <TextBlock Text="/" Foreground="{StaticResource Fg3}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Classes="h3" Text="{Binding SectionTitle}" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Section content -->
+        <ContentControl Grid.Row="2" Content="{Binding CurrentTab}" IsVisible="{Binding !IsOverview}"/>
+
+        <!-- Grid menu: overview cards (drag the corner grip to rearrange) -->
+        <ScrollViewer Grid.Row="2" Padding="0,0,6,24" IsVisible="{Binding IsOverview}">
+            <ItemsControl ItemsSource="{Binding Cards}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Columns="3"/></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Classes="sectionCard" Margin="0,0,14,14" Padding="18,16" Height="236" DragDrop.AllowDrop="True"
+                                PointerPressed="Card_PointerPressed" PointerMoved="Card_PointerMoved" PointerReleased="Card_PointerReleased">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0" Spacing="8">
+                                    <TextBlock Classes="faint" Text="{l:T 'Open'}" VerticalAlignment="Center"/>
+                                    <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="10" Foreground="{StaticResource Fg3}"/>
+                                </StackPanel>
+                                <DockPanel DockPanel.Dock="Top">
+                                    <Border Classes="grip" DockPanel.Dock="Right" Width="30" Height="30" Margin="0,-6,-8,0" CornerRadius="6" Cursor="SizeAll"
+                                            ToolTip.Tip="{l:T 'Drag to rearrange'}" VerticalAlignment="Top">
+                                        <TextBlock Classes="icon" Text="{i:I E76F}" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Classes="icon" Text="{Binding Glyph, Converter={StaticResource Icon}}" FontSize="20" Margin="0,0,12,0"/>
+                                        <TextBlock Classes="h2" Text="{Binding Title}" FontSize="19" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Classes="muted" Text="{Binding Description}" Margin="0,8,0,12" TextTrimming="CharacterEllipsis"/>
+                                <Grid ClipToBounds="True">
+                                    <ItemsControl ItemsSource="{Binding Icons}" IsVisible="{Binding IsContent}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Width="26" Height="26" Margin="0,0,4,4" CornerRadius="13" Background="{StaticResource Bg4}" ClipToBounds="True"
+                                                        ToolTip.Tip="{Binding Name}" Opacity="{Binding IsEnabled, Converter={x:Static l:BoolToOpacity.Instance}}">
+                                                    <Grid>
+                                                        <TextBlock Text="{Binding Initials}" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource Fg2}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        <Image Source="{Binding Icon}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="None"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <ItemsControl ItemsSource="{Binding Thumbs}" IsVisible="{Binding IsScreenshots}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><UniformGrid Columns="2"/></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="6" Margin="0,0,6,6" Height="48" ClipToBounds="True" Background="{StaticResource Bg3}">
+                                                    <Image Source="{Binding}" Stretch="UniformToFill"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

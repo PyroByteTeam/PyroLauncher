@@ -151,7 +151,7 @@ public interface ICollectionView : IEnumerable, INotifyCollectionChanged
 /// Filtered (and optionally grouped) live view over an observable list. Grouping is flattened:
 /// a <see cref="GroupHeader"/> precedes each group, so any items control can show it with a second template.
 /// </summary>
-public sealed class ListCollectionView : ICollectionView, INotifyPropertyChanged
+public sealed class ListCollectionView : ICollectionView, IList, INotifyPropertyChanged
 {
     private readonly IList _source;
     private List<object> _items = [];
@@ -206,4 +206,19 @@ public sealed class ListCollectionView : ICollectionView, INotifyPropertyChanged
     }
 
     public IEnumerator GetEnumerator() => _items.GetEnumerator();
+
+    // Read-only IList so UI frameworks can index it and follow Reset notifications.
+    public object? this[int index] { get => _items[index]; set => throw new NotSupportedException(); }
+    public bool IsReadOnly => true;
+    public bool IsFixedSize => false;
+    public bool IsSynchronized => false;
+    public object SyncRoot => this;
+    public bool Contains(object? value) => value != null && _items.Contains(value);
+    public int IndexOf(object? value) => value == null ? -1 : _items.IndexOf(value);
+    public void CopyTo(Array array, int index) => ((ICollection)_items).CopyTo(array, index);
+    public int Add(object? value) => throw new NotSupportedException();
+    public void Clear() => throw new NotSupportedException();
+    public void Insert(int index, object? value) => throw new NotSupportedException();
+    public void Remove(object? value) => throw new NotSupportedException();
+    public void RemoveAt(int index) => throw new NotSupportedException();
 }

@@ -6,3 +6,4 @@ obj/
 artifacts/
 docs/
 src/PyroLauncher.Installer/payload.zip
+.tools/

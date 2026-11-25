@@ -1,0 +1,83 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.ServersView">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <DockPanel Margin="0,0,0,14">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                <Button Command="{Binding ShowAddCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E710}"/>
+                        <TextBlock Text="{l:T 'Add server'}"/>
+                    </StackPanel>
+                </Button>
+                <Button Classes="icon" Content="{i:I E72C}" ToolTip.Tip="{l:T 'Refresh'}" Command="{Binding RefreshCommand}"/>
+            </StackPanel>
+            <TextBlock Classes="muted" VerticalAlignment="Center" TextWrapping="Wrap">
+                <TextBlock.Text><l:T Key="Servers from this instance's servers.dat - the same list you see in Multiplayer."/></TextBlock.Text>
+            </TextBlock>
+        </DockPanel>
+
+        <Border Grid.Row="1" Classes="card" Padding="16" Margin="0,0,0,14" IsVisible="{Binding IsAdding}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom" Spacing="8" Margin="10,0,0,0">
+                    <Button Content="{l:T 'Cancel'}" Command="{Binding CancelAddCommand}"/>
+                    <Button Classes="primary" Content="{l:T 'Add'}" Command="{Binding AddCommand}"/>
+                </StackPanel>
+                <Grid ColumnDefinitions="*,12,*">
+                    <StackPanel>
+                        <TextBlock Classes="overline" Text="{l:T 'NAME'}" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding NewName}" Watermark="{l:T 'Minecraft Server'}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Classes="overline" Text="{l:T 'ADDRESS'}" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding NewAddress}" Watermark="play.example.com:25565"/>
+                    </StackPanel>
+                </Grid>
+            </DockPanel>
+        </Border>
+
+        <TextBlock Grid.Row="2" Classes="muted" Text="{l:T 'No servers saved yet.'}" IsVisible="{Binding IsEmpty}"/>
+
+        <ScrollViewer Grid.Row="2" Padding="0,0,8,20">
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Classes="card" CornerRadius="10" Padding="12,10" Margin="0,0,0,6">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                <Border Width="48" Height="48" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,14,0">
+                                    <Grid>
+                                        <TextBlock Classes="icon" Text="{i:I E774}" FontSize="18" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
+                                        <Image Source="{Binding Icon}" RenderOptions.BitmapInterpolationMode="None"/>
+                                    </Grid>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                    <TextBlock Classes="faint" Text="{Binding Address}" Margin="0,2,0,0"/>
+                                    <TextBlock Classes="muted" Text="{Binding Motd}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis" IsVisible="{Binding Motd, Converter={StaticResource VisibleIf}}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="16,0" HorizontalAlignment="Right">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Grid Margin="0,0,7,0" VerticalAlignment="Center">
+                                            <Ellipse Width="7" Height="7" Fill="{StaticResource Fg3}" IsVisible="{Binding !IsOnline}"/>
+                                            <Ellipse Width="7" Height="7" Fill="White" IsVisible="{Binding IsOnline}"/>
+                                        </Grid>
+                                        <TextBlock Classes="muted" Text="{Binding Status}"/>
+                                    </StackPanel>
+                                    <TextBlock Classes="faint" Text="{Binding Ping}" HorizontalAlignment="Right" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                    <Button Classes="icon" Content="{i:I E8C8}" ToolTip.Tip="{l:T 'Copy address'}" FontSize="13"
+                                            Command="{Binding $parent[UserControl].DataContext.CopyAddressCommand}" CommandParameter="{Binding}"/>
+                                    <Button Classes="icon" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Remove'}" FontSize="13"
+                                            Command="{Binding $parent[UserControl].DataContext.RemoveCommand}" CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

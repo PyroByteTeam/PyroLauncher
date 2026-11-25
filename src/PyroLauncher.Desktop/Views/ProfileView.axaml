@@ -1,0 +1,175 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ProfileView">
+    <UserControl.Styles>
+        <Style Selector="Button.account.active"><Setter Property="BorderBrush" Value="{StaticResource Fg}"/><Setter Property="Background" Value="{StaticResource Bg4}"/></Style>
+        <Style Selector="Button.cape.active"><Setter Property="BorderBrush" Value="{StaticResource Fg}"/><Setter Property="Background" Value="{StaticResource Bg4}"/></Style>
+    </UserControl.Styles>
+    <Grid Margin="36,0,36,24" RowDefinitions="Auto,*">
+        <StackPanel Margin="0,0,0,20">
+            <TextBlock Classes="h1" Text="{l:T 'Profile'}"/>
+            <TextBlock Classes="muted" Text="{l:T 'Switch accounts, preview your skin and change capes.'}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="310,20,*,20,300">
+            <!-- ================= Accounts ================= -->
+            <ScrollViewer DataContext="{Binding AccountsVm}">
+                <StackPanel>
+                    <TextBlock Classes="overline" Text="{l:T 'ACCOUNTS'}" Margin="2,0,0,10"/>
+                    <ItemsControl ItemsSource="{Binding Accounts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Classes="account" Classes.active="{Binding IsSelected}" Command="{Binding $parent[ScrollViewer].DataContext.SelectCommand}" CommandParameter="{Binding}"
+                                        Margin="0,0,0,8" Padding="10,9" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Classes="icon" Width="28" Height="28" Content="{i:I E74D}" FontSize="12" ToolTip.Tip="{l:T 'Remove'}"
+                                                Command="{Binding $parent[ScrollViewer].DataContext.RemoveCommand}" CommandParameter="{Binding}"/>
+                                        <Border Width="34" Height="34" CornerRadius="7" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
+                                            <Image c:RemoteImage.DecodeWidth="64" c:RemoteImage.Url="{Binding AvatarUrl}" RenderOptions.BitmapInterpolationMode="None"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Username}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Classes="faint" Text="{Binding TypeText}"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Classes="muted" Text="{l:T 'No accounts yet - add one below.'}" Margin="2,0,0,8" IsVisible="{Binding !HasAccounts}"/>
+
+                    <TextBlock Classes="overline" Text="{l:T 'ADD MICROSOFT ACCOUNT'}" Margin="2,14,0,8"/>
+                    <Button Command="{Binding SignInMicrosoftCommand}" HorizontalAlignment="Stretch" IsVisible="{Binding !IsSigningIn}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{i:I E77B}"/>
+                            <TextBlock Text="{l:T 'Sign in with Microsoft'}"/>
+                        </StackPanel>
+                    </Button>
+                    <Border Classes="card" Padding="14,12" IsVisible="{Binding IsSigningIn}">
+                        <StackPanel>
+                            <TextBlock Classes="muted" Text="{Binding MsStatus}" TextWrapping="Wrap"/>
+                            <StackPanel IsVisible="{Binding DeviceCode, Converter={StaticResource VisibleIf}}" Margin="0,10,0,0">
+                                <WrapPanel>
+                                    <TextBlock Classes="faint" Text="{l:T 'Enter this code at'}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                    <Button Classes="ghost" Padding="2,0" Foreground="White" Content="{Binding DeviceCode.VerificationUri}" Command="{Binding OpenVerificationCommand}"/>
+                                </WrapPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="8" Padding="12,6">
+                                        <TextBlock Classes="mono" Text="{Binding DeviceCode.UserCode}" FontSize="18" FontWeight="Bold"/>
+                                    </Border>
+                                    <Button Classes="icon" Content="{i:I E8C8}" ToolTip.Tip="{l:T 'Copy code'}" Command="{Binding CopyCodeCommand}" Margin="6,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <ProgressBar IsIndeterminate="True" Margin="0,12,0,0"/>
+                            <Button Content="{l:T 'Cancel'}" Command="{Binding CancelSignInCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Classes="muted" Text="{Binding MsError}" TextWrapping="Wrap" Margin="2,8,0,0" IsVisible="{Binding MsError, Converter={StaticResource VisibleIf}}"/>
+
+                    <StackPanel IsVisible="{Binding DeveloperMode}">
+                        <TextBlock Classes="overline" Text="{l:T 'ADD OFFLINE ACCOUNT (DEVELOPER MODE)'}" Margin="2,18,0,8"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="{l:T 'Add'}" Command="{Binding AddOfflineCommand}" Margin="8,0,0,0"/>
+                            <TextBox Text="{Binding OfflineName}" Watermark="{l:T 'Player name'}">
+                                <TextBox.KeyBindings><KeyBinding Gesture="Enter" Command="{Binding AddOfflineCommand}"/></TextBox.KeyBindings>
+                            </TextBox>
+                        </DockPanel>
+                        <TextBlock Classes="muted" Text="{Binding OfflineError}" Margin="2,6,0,0" TextWrapping="Wrap" IsVisible="{Binding OfflineError, Converter={StaticResource VisibleIf}}"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ================= 3D skin ================= -->
+            <Border Grid.Column="2" Classes="card" ClipToBounds="True">
+                <Grid>
+                    <Grid.Background>
+                        <RadialGradientBrush GradientOrigin="50%,45%" Center="50%,45%" RadiusX="70%" RadiusY="60%">
+                            <GradientStop Color="#FF1E1E1E" Offset="0"/>
+                            <GradientStop Color="#FF121212" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Grid.Background>
+                    <c:SkinViewer Skin="{Binding Skin}" Cape="{Binding CapeTexture}" Slim="{Binding Slim}" Margin="10,60,10,60"/>
+                    <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,18,0,0" IsHitTestVisible="False">
+                        <TextBlock Classes="h2" Text="{Binding Account.Username, FallbackValue=''}"/>
+                        <TextBlock Classes="muted" Margin="0,3,0,0"><Run Text="{Binding Account.TypeText}"/><Run Text="  ·  "/><Run Text="{Binding VariantText}"/></TextBlock>
+                    </StackPanel>
+                    <Border Classes="badge" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,18,18,0" IsVisible="{Binding HasPending}" Background="White" BorderBrush="White">
+                        <TextBlock Classes="badgeText" Text="{l:T 'Preview - not uploaded'}" Foreground="Black" FontWeight="SemiBold"/>
+                    </Border>
+                    <TextBlock Classes="faint" Text="{l:T 'Drag to rotate'}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0,0,22" IsHitTestVisible="False"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,14" Spacing="6"
+                                ToolTip.Tip="{l:T 'Arm style used for the preview. Uploaded skins use the variant chosen on the right.'}">
+                        <RadioButton Classes="segment" Content="{l:T 'Classic'}" GroupName="previewArms" Padding="10,5" IsChecked="{Binding !Slim}"/>
+                        <RadioButton Classes="segment" Content="{l:T 'Slim'}" GroupName="previewArms" Padding="10,5" IsChecked="{Binding Slim}"/>
+                    </StackPanel>
+                    <ProgressBar IsIndeterminate="True" VerticalAlignment="Top" IsVisible="{Binding IsLoading}"/>
+                    <TextBlock Classes="muted" Text="{Binding Error}" TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="20,0,20,44"
+                               HorizontalAlignment="Center" TextAlignment="Center" IsVisible="{Binding Error, Converter={StaticResource VisibleIf}}"/>
+                </Grid>
+            </Border>
+
+            <!-- ================= Wardrobe ================= -->
+            <ScrollViewer Grid.Column="4">
+                <StackPanel IsEnabled="{Binding !IsBusy}">
+                    <TextBlock Classes="overline" Text="{l:T 'SKIN'}" Margin="2,0,0,10"/>
+                    <StackPanel IsVisible="{Binding IsMicrosoft}">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10" Spacing="6">
+                            <RadioButton Classes="segment" Content="{l:T 'Classic'}" GroupName="variant" IsChecked="{Binding !UploadSlim}"/>
+                            <RadioButton Classes="segment" Content="{l:T 'Slim'}" GroupName="variant" IsChecked="{Binding UploadSlim}"/>
+                        </StackPanel>
+                        <Button Command="{Binding ChooseSkinCommand}" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="icon" Text="{i:I E898}"/>
+                                <TextBlock Text="{l:T 'Choose skin file…'}"/>
+                            </StackPanel>
+                        </Button>
+                        <StackPanel IsVisible="{Binding HasPending}">
+                            <TextBlock Classes="faint" Text="{Binding PendingSkinPath}" TextTrimming="CharacterEllipsis" Margin="2,0,0,8"/>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="{l:T 'Cancel'}" Command="{Binding CancelSkinCommand}" Margin="8,0,0,0"/>
+                                <Button Classes="primary" Content="{l:T 'Upload to Minecraft'}" Command="{Binding UploadSkinCommand}"/>
+                            </DockPanel>
+                        </StackPanel>
+                        <Button Classes="ghost" Content="{l:T 'Reset to default skin'}" Command="{Binding ResetSkinCommand}" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                    </StackPanel>
+                    <TextBlock Classes="muted" Text="{l:T 'Skins and capes can only be changed for Microsoft accounts. Offline accounts show the public skin for that name, if any.'}"
+                               TextWrapping="Wrap" IsVisible="{Binding !IsMicrosoft}"/>
+                    <TextBlock Classes="overline" Text="{l:T 'CAPES'}" Margin="2,24,0,10" IsVisible="{Binding IsMicrosoft}"/>
+                    <TextBlock Classes="muted" TextWrapping="Wrap" Margin="2,-4,0,0">
+                        <TextBlock.IsVisible>
+                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                <Binding Path="IsMicrosoft"/>
+                                <Binding Path="!Capes.Count"/>
+                            </MultiBinding>
+                        </TextBlock.IsVisible>
+                        <TextBlock.Text><l:T Key="This account doesn't own any capes."/></TextBlock.Text>
+                    </TextBlock>
+                    <ItemsControl ItemsSource="{Binding Capes}">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Classes="cape" Classes.active="{Binding IsActive}" Width="88" Margin="0,0,8,8" Padding="6,8" ToolTip.Tip="{Binding Name}"
+                                        Command="{Binding $parent[UserControl].DataContext.SelectCapeCommand}" CommandParameter="{Binding}" HorizontalContentAlignment="Center">
+                                    <StackPanel>
+                                        <Border Width="40" Height="64" Background="{StaticResource Bg1}" CornerRadius="4" ClipToBounds="True" HorizontalAlignment="Center">
+                                            <Grid>
+                                                <TextBlock Classes="icon" Text="{i:I E711}" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
+                                                <Image Source="{Binding Preview}" Stretch="Fill" RenderOptions.BitmapInterpolationMode="None"/>
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock Text="{Binding Name}" FontSize="11" Margin="0,6,0,0" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ProgressBar IsIndeterminate="True" Margin="0,10,0,0" IsVisible="{Binding IsBusy}"/>
+                    <Button Classes="ghost" Content="{l:T 'Reload profile'}" Command="{Binding ReloadCommand}" HorizontalAlignment="Left" Margin="0,16,0,0"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

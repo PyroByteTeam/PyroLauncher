@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/PyroLauncher/Assets/logo.png" width="96" alt="PyroLauncher logo">
+<img src="src/PyroLauncher.Desktop/Assets/logo.png" width="96" alt="PyroLauncher logo">
 
 # PyroLauncher
 
@@ -9,7 +9,7 @@ Mojang or Microsoft)
 
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-1f1f1f?style=flat-square)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-1f1f1f?style=flat-square)](https://dotnet.microsoft.com/)
-[![Platform](https://img.shields.io/badge/platform-Windows-1f1f1f?style=flat-square)](#requirements)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-1f1f1f?style=flat-square)](#requirements)
 [![Latest release](https://img.shields.io/github/v/release/PyroByteTeam/PyroLauncher?style=flat-square&color=1f1f1f&label=release)](https://github.com/PyroByteTeam/PyroLauncher/releases/latest)
 
 <img src=".github/assets/home.png" width="860" alt="Instances on the home page">
@@ -76,43 +76,80 @@ it, and edit it by hand before it makes it into the project.
 
 ## Requirements
 
-- Windows 10 or 11, x64 or ARM64
-- Nothing else: the installer ships its own .NET runtime, and Java is downloaded when needed
-
-macOS and Linux aren't supported yet. The interface is built on WPF, which is Windows-only.
-Currently we are working on migration to Avalonia UI and Core to be able to ship it to macos/linux too!
+- Windows 10 or 11, macOS 12 or newer, or a desktop Linux (x64 or ARM64 for all three)
+- Nothing else: every build ships its own .NET runtime, and Java is downloaded when needed
 
 ## Installing
 
-Grab `PyroLauncher-Setup-<version>-win-x64.exe` (or `win-arm64`) from
-[Releases](https://github.com/PyroByteTeam/PyroLauncher/releases) and run it. There's also a
-portable zip if you'd rather not install anything. It installs for
+Everything is on the [Releases](https://github.com/PyroByteTeam/PyroLauncher/releases) page.
+
+**Windows** - run `PyroLauncher-Setup-<version>-win-x64.exe` (or `win-arm64`). It installs for
 your user only, so no administrator prompt. Running the same setup again updates or repairs
 the install, and it also handles uninstalling. You choose whether to keep your instances and
-settings.
+settings. There's also a portable zip if you'd rather not install anything.
 
-Launcher data lives in `%APPDATA%\PyroLauncher`. Set `PYROLAUNCHER_HOME` to keep it somewhere
-else, e.g. on another drive or next to a portable copy.
+**macOS** - open `PyroLauncher-<version>-osx-arm64.dmg` (`osx-x64` for Intel Macs) and drag
+`PyroLauncher.app` onto Applications. A plain `.zip` of the app is there too. The app isn't
+notarized, so the first time macOS will refuse to open it. Clear the quarantine flag once and it
+opens normally:
+
+```sh
+xattr -cr /Applications/PyroLauncher.app
+```
+
+If it still won't start on Apple Silicon, give it an ad-hoc signature:
+`codesign --force --deep --sign - /Applications/PyroLauncher.app`.
+
+**Linux** - pick whichever suits your distro (all of them come in `x64` and `arm64`):
+
+- `.deb` for Debian, Ubuntu, Mint and friends: `sudo apt install ./PyroLauncher-<version>-linux-x64.deb`
+- `.rpm` for Fedora, openSUSE and friends: `sudo dnf install ./PyroLauncher-<version>-linux-x64.rpm`
+- `.AppImage` for anything else: `chmod +x` it and run it
+- `.tar.gz` if you just want the files: extract anywhere and run `./PyroLauncher`
+
+The `.deb` and `.rpm` install to `/opt/pyrolauncher`, add a `pyrolauncher` command and a menu entry.
+
+Launcher data lives in `%APPDATA%\PyroLauncher` on Windows,
+`~/Library/Application Support/PyroLauncher` on macOS and `~/.local/share/PyroLauncher` on Linux.
+Set `PYROLAUNCHER_HOME` to keep it somewhere else, e.g. on another drive or next to a portable copy.
 
 ## Building from source
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
-```powershell
+```sh
 git clone https://github.com/PyroByteTeam/PyroLauncher.git
 cd PyroLauncher
-dotnet run --project src/PyroLauncher
+dotnet run --project src/PyroLauncher.Desktop
 ```
 
-To build release files:
+The interface is [Avalonia](https://avaloniaui.net/) (`src/PyroLauncher.Desktop`); everything
+else - instances, installs, downloads, accounts - is in `src/PyroLauncher.Core`.
+
+To build release files, run the build script in PowerShell 7 (`pwsh` on macOS and Linux):
 
 ```powershell
-.\build-installer.ps1                     # x64 and ARM64
-.\build-installer.ps1 -Runtime win-x64    # just one
+./build.ps1                                # every platform, x64 and ARM64
+./build.ps1 -Platform windows              # windows, macos and/or linux
+./build.ps1 -Runtime win-x64, linux-x64    # exact runtimes
 ```
 
-For each runtime you get a setup (`PyroLauncher-Setup-<version>-<runtime>.exe`) and a portable
-zip (`PyroLauncher-<version>-<runtime>-portable.zip`) in `artifacts/`. Both are self-contained.
+Everything ends up in `artifacts/`. All of it is self-contained:
+
+| Platform | Files |
+|---|---|
+| Windows | setup `.exe`, portable `.zip` |
+| macOS | `.dmg`, zipped `PyroLauncher.app` |
+| Linux | `.deb`, `.rpm`, `.AppImage`, `.tar.gz` |
+
+Some formats need the matching OS: the Windows setup builds only on Windows, the `.dmg` only on a
+Mac (which also signs the app ad hoc), and the `.AppImage` only on Linux. The script skips what it
+can't make and says so. `.deb` and `.rpm` build anywhere. The packaging tools
+([nFPM](https://nfpm.goreleaser.com/), appimagetool) are downloaded into `.tools/` the first time.
+
+To get every format at once without owning three computers, use the **Release** GitHub Actions
+workflow: run it by hand from the Actions tab to get the files as build artifacts, or push a
+version tag (`git tag v1.5.0 && git push --tags`) to have them attached to a draft release.
 
 ### CurseForge
 
@@ -124,18 +161,20 @@ CurseForge's API needs a key. Get one for free at
 
 ```
 src/
-  PyroLauncher/              the launcher (WPF)
+  PyroLauncher.Core/         everything that isn't UI
     Accounts/                Microsoft sign-in, profiles, skins
     Content/                 Modrinth & CurseForge APIs, modpacks, presets, export
     Minecraft/               version resolving, loaders, Java, launching
     Instances/               instance model and storage
-    UI/                      views, view models, controls, translations
+    UI/                      view models, dialogs, translations
     Lang/                    translation files
-  PyroLauncher.Installer/    the setup / uninstaller
+  PyroLauncher.Desktop/      the launcher interface (Avalonia: Windows, macOS, Linux)
+  PyroLauncher.Installer/    the Windows setup / uninstaller
+  PyroLauncher/              the older Windows-only WPF interface
 ```
 
-Adding a language means adding `Lang/<code>.json` (English text → translation) and listing it
-in `UI/Loc.cs`. Anything without a translation falls back to English.
+Adding a language means adding `PyroLauncher.Core/Lang/<code>.json` (English text → translation)
+and listing it in `UI/Loc.cs`. Anything without a translation falls back to English.
 
 ## Contributing
 

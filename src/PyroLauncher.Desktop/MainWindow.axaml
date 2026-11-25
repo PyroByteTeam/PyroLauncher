@@ -1,0 +1,97 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:PyroLauncher.Desktop"
+        xmlns:i="clr-namespace:PyroLauncher.Desktop"
+        xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+        x:Class="PyroLauncher.Desktop.MainWindow"
+        Title="PyroLauncher" Icon="avares://PyroLauncher/Assets/pyro.ico"
+        Width="1280" Height="800" MinWidth="980" MinHeight="640" WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Bg0}" Foreground="{StaticResource Fg}" FontSize="13"
+        ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="44">
+    <Grid x:Name="Root" ColumnDefinitions="76,*">
+        <!-- ============ Sidebar ============ -->
+        <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
+            <DockPanel LastChildFill="False" x:Name="Sidebar">
+                <Border DockPanel.Dock="Top" Height="64" Background="Transparent" PointerPressed="TitleBar_PointerPressed">
+                    <Border Width="40" Height="40" CornerRadius="10" ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip.Tip="PyroLauncher">
+                        <Image Source="avares://PyroLauncher/Assets/logo.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                    </Border>
+                </Border>
+
+                <StackPanel DockPanel.Dock="Top" Margin="0,8,0,0">
+                    <RadioButton Classes="nav" Content="{l:T 'Home'}" Tag="{i:I E80F}" GroupName="nav"
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=home}" Command="{Binding GoHomeCommand}"/>
+                    <RadioButton Classes="nav" Content="{l:T 'Servers'}" ToolTip.Tip="{l:T 'Server packs'}" Tag="{i:I E968}" GroupName="nav"
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=serverpacks}"/>
+                    <RadioButton Classes="nav" Content="{l:T 'Discover'}" Tag="{i:I E909}" GroupName="nav"
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=discover}"/>
+                    <RadioButton Classes="nav" Content="{l:T 'Profile'}" Tag="{i:I E77B}" GroupName="nav"
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=profile}"/>
+                    <RadioButton Classes="nav" Content="{l:T 'Presets'}" Tag="{i:I E8FD}" GroupName="nav"
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=presets}"/>
+                    <RadioButton Classes="nav" Content="{l:T 'Downloads'}" Tag="{i:I E896}" GroupName="nav"
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=downloads}"/>
+                    <RadioButton Classes="nav" Content="{l:T 'Settings'}" Tag="{i:I E713}" GroupName="nav"
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=settings}"/>
+                </StackPanel>
+
+                <Button DockPanel.Dock="Bottom" Classes="ghost" Margin="0,0,0,14" Command="{Binding OpenAccountsCommand}"
+                        Width="56" Height="56" Padding="0" HorizontalAlignment="Center" HorizontalContentAlignment="Center" ToolTip.Tip="{l:T 'Accounts'}">
+                    <Border Width="34" Height="34" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True">
+                        <Grid>
+                            <TextBlock Classes="icon" Text="{i:I E77B}" FontSize="15" Foreground="{StaticResource Fg2}" HorizontalAlignment="Center"/>
+                            <Image c:RemoteImage.DecodeWidth="64" c:RemoteImage.Url="{Binding Account.AvatarUrl}" RenderOptions.BitmapInterpolationMode="None"/>
+                        </Grid>
+                    </Border>
+                </Button>
+                <TextBlock DockPanel.Dock="Bottom" Text="{Binding AccountLabel}" FontSize="10" Foreground="{StaticResource Fg3}"
+                           HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="68" Margin="0,0,0,2"/>
+            </DockPanel>
+        </Border>
+
+        <!-- ============ Main area ============ -->
+        <Grid Grid.Column="1" RowDefinitions="44,*">
+            <!-- drag area for the window -->
+            <Border Background="Transparent" PointerPressed="TitleBar_PointerPressed" DoubleTapped="TitleBar_DoubleTapped"/>
+
+            <!-- Download pill (visible while something downloads) -->
+            <Button HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding GoDownloadsCommand}" Padding="14,4"
+                    ToolTip.Tip="{l:T 'Open downloads'}" IsVisible="{Binding Downloads.IsActive}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Classes="icon" Text="{i:I E896}" FontSize="12" Margin="0,0,9,0"/>
+                    <TextBlock VerticalAlignment="Center">
+                        <Run Text="{l:T 'Downloading'}"/><Run Text="{Binding Downloads.ActiveCount, StringFormat=' ({0})'}" Foreground="{StaticResource Fg2}"/>
+                    </TextBlock>
+                    <ProgressBar Width="120" Margin="12,0" VerticalAlignment="Center" Maximum="100"
+                                 Value="{Binding Downloads.Progress, Converter={StaticResource Percent}}"
+                                 IsIndeterminate="{Binding Downloads.Progress, Converter={StaticResource Indeterminate}}"/>
+                    <TextBlock Classes="mono" Text="{Binding Downloads.Text}" FontSize="12" VerticalAlignment="Center" MinWidth="110"/>
+                </StackPanel>
+            </Button>
+
+            <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False"/>
+        </Grid>
+
+        <!-- ============ Dialog overlay ============ -->
+        <Grid Grid.ColumnSpan="2" IsVisible="{Binding Dialog, Converter={StaticResource VisibleIf}}" Background="{StaticResource Scrim}">
+            <ContentControl Content="{Binding Dialog}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40"/>
+        </Grid>
+
+        <!-- ============ Toasts ============ -->
+        <ItemsControl Grid.ColumnSpan="2" ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,20" Width="380">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="10" Padding="14,11" Margin="0,8,0,0"
+                            BoxShadow="0 4 24 0 #99000000">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Classes="icon" Width="24" Height="24" FontSize="11" Content="{i:I E8BB}" VerticalAlignment="Top" ToolTip.Tip="{l:T 'Dismiss'}"
+                                    Command="{Binding $parent[Window].DataContext.DismissToastCommand}" CommandParameter="{Binding}"/>
+                            <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{Binding Glyph, Converter={StaticResource Icon}}" FontSize="15" Margin="0,1,12,0" VerticalAlignment="Top"/>
+                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</Window>

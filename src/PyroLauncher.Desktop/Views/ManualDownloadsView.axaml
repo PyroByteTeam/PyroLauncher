@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.ManualDownloadsView">
+    <Border Classes="dialog" Width="680">
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Top">
+                <TextBlock Classes="h2" Text="{l:T 'Some files need a manual download'}"/>
+                <TextBlock Classes="muted" TextWrapping="Wrap" Margin="0,8,0,4">
+                    <TextBlock.Text><l:T Key="The authors of these mods don't allow other launchers to download them. Open the pages in your browser and download each file - files saved to your Downloads folder are moved into the instance automatically."/></TextBlock.Text>
+                </TextBlock>
+                <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" Margin="0,8,0,14"/>
+            </StackPanel>
+            <!-- Two rows so long (e.g. Russian) labels never get clipped -->
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,18,0,0">
+                <WrapPanel>
+                    <Button Classes="ghost" Command="{Binding OpenFolderCommand}" Margin="-10,0,8,0">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{i:I E838}"/>
+                            <TextBlock Text="{l:T 'Open mods folder'}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="ghost" Command="{Binding CollectCommand}" ToolTip.Tip="{l:T 'Look for the files in your Downloads folder again'}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{i:I E72C}"/>
+                            <TextBlock Text="{l:T 'Check Downloads'}"/>
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0" Spacing="8">
+                    <Button Classes="primary" Command="{Binding OpenAllCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{i:I E8A7}"/>
+                            <TextBlock Text="{l:T 'Open all in browser'}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Content="{l:T 'Done'}" Command="{Binding CloseCommand}" IsCancel="True" MinWidth="100" HorizontalContentAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+            <ScrollViewer MaxHeight="340">
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Classes="row" Padding="12,8" Margin="0,0,0,6">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Classes="ghost" Padding="10,4" IsVisible="{Binding !IsDone}"
+                                            Command="{Binding $parent[UserControl].DataContext.OpenCommand}" CommandParameter="{Binding}" ToolTip.Tip="{l:T 'Open the download page'}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{l:T 'Open page'}"/>
+                                            <TextBlock Classes="icon" Text="{i:I E8A7}" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Grid DockPanel.Dock="Left" Margin="0,0,12,0">
+                                        <TextBlock Classes="icon" Text="{i:I E896}" Foreground="{StaticResource Fg3}" IsVisible="{Binding !IsDone}"/>
+                                        <TextBlock Classes="icon" Text="{i:I E73E}" IsVisible="{Binding IsDone}"/>
+                                    </Grid>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Classes="faint" Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</UserControl>

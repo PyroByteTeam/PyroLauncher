@@ -1,0 +1,206 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             xmlns:core="clr-namespace:PyroLauncher.Core;assembly=PyroLauncher.Core"
+             xmlns:vm="clr-namespace:PyroLauncher.UI.ViewModels;assembly=PyroLauncher.Core"
+             x:Class="PyroLauncher.Desktop.Views.PresetsView">
+    <UserControl.Styles>
+        <Style Selector="Border.presetItem Button.rm"><Setter Property="Opacity" Value="0"/></Style>
+        <Style Selector="Border.presetItem:pointerover Button.rm"><Setter Property="Opacity" Value="1"/></Style>
+        <Style Selector="Border.presetItem:pointerover"><Setter Property="Background" Value="{StaticResource Bg4}"/></Style>
+    </UserControl.Styles>
+
+    <Grid Margin="36,0,36,24" RowDefinitions="Auto,*" ColumnDefinitions="270,*">
+        <StackPanel Grid.ColumnSpan="2" Margin="0,0,0,18">
+            <TextBlock Classes="h1" Text="{l:T 'Presets'}"/>
+            <TextBlock Classes="muted" Text="{l:T 'Lists of mods, resource packs and shaders you can add to any instance in one go.'}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- ===== Left: preset list ===== -->
+        <DockPanel Grid.Row="1" Margin="0,0,18,0">
+            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10" Spacing="8">
+                <Button Classes="primary" Command="{Binding NewCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E710}"/>
+                        <TextBlock Text="{l:T 'New preset'}"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding NewFromInstanceCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                        ToolTip.Tip="{l:T 'Start a preset with the mods, resource packs and shaders of an existing instance'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E8C8}"/>
+                        <TextBlock Text="{l:T 'From an instance…'}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <TextBlock DockPanel.Dock="Top" Classes="faint" Text="{l:T 'No presets yet.'}" Margin="2,4,0,0" IsVisible="{Binding !Presets.Count}"/>
+            <ListBox ItemsSource="{Binding Presets}" SelectedItem="{Binding Selected}" Background="Transparent">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,2">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Classes="faint" Text="{Binding CountText}" TextTrimming="CharacterEllipsis" FontSize="11.5"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+
+        <!-- ===== Right: nothing selected ===== -->
+        <Border Grid.Row="1" Grid.Column="1" Classes="card" IsVisible="{Binding !HasSelection}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="380">
+                <TextBlock Classes="icon" Text="{i:I E8FD}" FontSize="28" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
+                <TextBlock Classes="h3" Text="{l:T 'Presets are lists of mods, resource packs and shaders'}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,12,0,6"/>
+                <TextBlock Classes="muted" Text="{l:T 'Create one, fill it with projects, then apply it to an instance: the launcher finds versions that fit and lets you choose what to install.'}"
+                           TextAlignment="Center" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ===== Right: selected preset ===== -->
+        <DockPanel Grid.Row="1" Grid.Column="1" IsVisible="{Binding HasSelection}">
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Spacing="6">
+                    <RadioButton Classes="segment" GroupName="pmode" Padding="14,7" IsChecked="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=edit}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{i:I E70F}" FontSize="12"/>
+                            <TextBlock Text="{l:T 'Edit'}"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Classes="segment" GroupName="pmode" Padding="14,7" Margin="0,0,8,0" IsChecked="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=apply}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{i:I E896}" FontSize="12"/>
+                            <TextBlock Text="{l:T 'Apply to an instance'}"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <Button Classes="icon" Content="{i:I E8AC}" FontSize="13" Width="32" Height="32" ToolTip.Tip="{l:T 'Rename preset'}" Command="{Binding RenameCommand}"/>
+                    <Button Classes="icon" Content="{i:I E8C8}" FontSize="13" Width="32" Height="32" ToolTip.Tip="{l:T 'Duplicate preset'}" Command="{Binding DuplicateCommand}"/>
+                    <Button Classes="icon" Content="{i:I E74D}" FontSize="13" Width="32" Height="32" ToolTip.Tip="{l:T 'Delete preset'}" Command="{Binding DeleteCommand}"/>
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Classes="h2" Text="{Binding Selected.Name}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Classes="faint" Text="{Binding Selected.CountText}" Margin="0,3,0,0"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Grid>
+                <!-- ===== Edit: contents + search ===== -->
+                <Grid ColumnDefinitions="*,360" IsVisible="{Binding IsEditMode}">
+                    <Border Classes="card" Padding="16,12" Margin="0,0,16,0">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Classes="muted" Text="{l:T 'Empty - add projects with the search on the right.'}" Margin="0,4,0,0"
+                                       IsVisible="{Binding !Selected.Items.Count, FallbackValue=False}"/>
+                            <ScrollViewer Padding="0,0,6,0">
+                                <ItemsControl ItemsSource="{Binding Selected.ItemsView}">
+                                    <ItemsControl.DataTemplates>
+                                        <DataTemplate DataType="core:GroupHeader">
+                                            <TextBlock Classes="overline" Text="{Binding Name}" Margin="2,8,0,6"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="vm:PresetItemVm">
+                                            <Border Classes="row presetItem" Padding="8,6" Margin="0,0,0,5">
+                                                <DockPanel>
+                                                    <Button DockPanel.Dock="Right" Classes="icon rm" Content="{i:I E711}" FontSize="11" Width="26" Height="26" ToolTip.Tip="{l:T 'Remove from preset'}"
+                                                            Command="{Binding $parent[UserControl].DataContext.RemoveItemCommand}" CommandParameter="{Binding}"/>
+                                                    <Border Width="30" Height="30" CornerRadius="6" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding Initials}" FontSize="10" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Image c:RemoteImage.DecodeWidth="60" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <StackPanel VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Classes="faint" Text="{Binding SourceText}" FontSize="11.5"/>
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.DataTemplates>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- search to add -->
+                    <DockPanel Grid.Column="1">
+                        <TextBlock DockPanel.Dock="Top" Classes="h3" Text="{l:T 'Add to preset'}" Margin="0,0,0,10"/>
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,8" ColumnDefinitions="*,8,*">
+                            <ComboBox ItemsSource="{Binding Types}" SelectedItem="{Binding SearchType}" ToolTip.Tip="{l:T 'What to search for'}"/>
+                            <ComboBox Grid.Column="2" ItemsSource="{Binding Platforms}" SelectedItem="{Binding Platform}" ToolTip.Tip="{l:T 'Where to search'}"/>
+                        </Grid>
+                        <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                            <TextBox Classes="search" Text="{Binding Query}" Watermark="{l:T 'Search projects'}"/>
+                            <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                        </Grid>
+                        <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="0,0,0,8" IsVisible="{Binding Searching}"/>
+                        <TextBlock DockPanel.Dock="Top" Text="{Binding SearchError}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" Margin="0,0,0,8"
+                                   IsVisible="{Binding SearchError, Converter={StaticResource VisibleIf}}"/>
+                        <ScrollViewer Padding="0,0,6,0">
+                            <ItemsControl ItemsSource="{Binding Results}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Classes="card" CornerRadius="8" Padding="8,7" Margin="0,0,0,6">
+                                            <DockPanel>
+                                                <Grid DockPanel.Dock="Right" VerticalAlignment="Center">
+                                                    <Button Content="{l:T 'Add'}" Padding="10,4" FontSize="12" IsVisible="{Binding !IsSelected}"
+                                                            Command="{Binding $parent[UserControl].DataContext.ToggleCommand}" CommandParameter="{Binding}"/>
+                                                    <Button Classes="primary" Content="{l:T 'Added'}" Padding="10,4" FontSize="12" IsVisible="{Binding IsSelected}"
+                                                            ToolTip.Tip="{l:T 'Click to remove from the preset'}"
+                                                            Command="{Binding $parent[UserControl].DataContext.ToggleCommand}" CommandParameter="{Binding}"/>
+                                                </Grid>
+                                                <Border Width="34" Height="34" CornerRadius="7" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
+                                                    <Grid>
+                                                        <TextBlock Text="{Binding Initials}" FontSize="10" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        <Image c:RemoteImage.DecodeWidth="68" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                                    </Grid>
+                                                </Border>
+                                                <StackPanel VerticalAlignment="Center" Margin="0,0,8,0">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Description}"/>
+                                                    <TextBlock Classes="faint" TextTrimming="CharacterEllipsis" FontSize="11.5">
+                                                        <Run Text="{Binding DownloadsText}"/><Run Text=" · "/><Run Text="{Binding Author}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </DockPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Grid>
+
+                <!-- ===== Apply: pick an instance, choose what to install ===== -->
+                <Border Classes="card" Padding="18,16" IsVisible="{Binding IsApplyMode}">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+                            <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E72C}" FontSize="13" Width="34" Height="34" Margin="8,0,0,0"
+                                    ToolTip.Tip="{l:T 'Check again'}" Command="{Binding RefreshApplyCommand}" VerticalAlignment="Center"/>
+                            <TextBlock DockPanel.Dock="Left" Text="{l:T 'Instance'}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                            <ComboBox ItemsSource="{Binding Instances}" SelectedItem="{Binding TargetInstance}" IsEnabled="{Binding HasInstances}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="22" Height="22" CornerRadius="5" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
+                                                <Grid>
+                                                    <TextBlock Text="{Binding Initial}" FontSize="10" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
+                                                </Grid>
+                                            </Border>
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding VersionText}" Foreground="{StaticResource Fg2}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </DockPanel>
+                        <Grid>
+                            <TextBlock Classes="muted" Text="{l:T 'There are no instances yet.'}" IsVisible="{Binding !HasInstances}"/>
+                            <TextBlock Classes="muted" Text="{l:T 'This preset is empty - add projects on the Edit tab first.'}" IsVisible="{Binding !Selected.Items.Count, FallbackValue=False}"/>
+                            <ContentControl Content="{Binding Apply}"/>
+                        </Grid>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</UserControl>

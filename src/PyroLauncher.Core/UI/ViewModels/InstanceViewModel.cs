@@ -79,6 +79,7 @@ public partial class InstanceViewModel : ObservableObject
     public ObservableCollection<SectionCard> Cards { get; } = [];
     public bool IsGridMenu => SettingsService.Current.InstanceMenuStyle == InstanceMenuStyle.Grid;
     public bool IsOverview => Tab == "overview";
+    public bool ShowBreadcrumb => IsGridMenu && !IsOverview;
     public bool ShowTabs => !IsGridMenu;
     public string SectionTitle => L.T(InstanceSections.FirstOrDefault(s => s.Key == Tab)?.Title ?? "");
     public bool ConsoleEnabled => SettingsService.Current.OpenConsoleOnLaunch;
@@ -106,6 +107,7 @@ public partial class InstanceViewModel : ObservableObject
     private void OnAppearanceChanged()
     {
         OnPropertyChanged(nameof(IsGridMenu));
+        OnPropertyChanged(nameof(ShowBreadcrumb));
         OnPropertyChanged(nameof(ShowTabs));
         OnPropertyChanged(nameof(ConsoleEnabled));
         foreach (var t in _tabs.Values.OfType<ContentTabViewModel>()) t.OnAppearanceChanged();
@@ -131,6 +133,7 @@ public partial class InstanceViewModel : ObservableObject
     {
         CurrentTab = value == "overview" ? null : GetTab(value);
         OnPropertyChanged(nameof(IsOverview));
+        OnPropertyChanged(nameof(ShowBreadcrumb));
         OnPropertyChanged(nameof(SectionTitle));
         if (value == "overview") RefreshCards();
     }

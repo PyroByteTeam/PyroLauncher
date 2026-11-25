@@ -1,0 +1,36 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.App"
+             RequestedThemeVariant="Dark"
+             Name="PyroLauncher">
+    <Application.DataTemplates>
+        <d:ViewLocator/>
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <d:VisibleIfConverter x:Key="VisibleIf"/>
+        <d:EqualsConverter x:Key="Eq"/>
+        <d:PercentConverter x:Key="Percent"/>
+        <d:IndeterminateConverter x:Key="Indeterminate"/>
+        <d:NullableIntConverter x:Key="NullableInt"/>
+        <d:IconConverter x:Key="Icon"/>
+        <d:FormatConverter x:Key="Format"/>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Dark" Accent="#FFFFFFFF" AltHigh="#FF080808" AltLow="#FF080808" AltMedium="#FF080808"
+                                       AltMediumHigh="#FF080808" AltMediumLow="#FF080808" BaseHigh="#FFF4F4F4" BaseLow="#FF262626"
+                                       BaseMedium="#FFA6A6A6" BaseMediumHigh="#FFC8C8C8" BaseMediumLow="#FF6E6E6E"
+                                       ChromeAltLow="#FFC8C8C8" ChromeBlackHigh="#FF000000" ChromeBlackLow="#FFC8C8C8"
+                                       ChromeBlackMedium="#FF000000" ChromeBlackMediumLow="#FF000000" ChromeDisabledHigh="#FF262626"
+                                       ChromeDisabledLow="#FF6E6E6E" ChromeGray="#FF6E6E6E" ChromeHigh="#FF3A3A3A" ChromeLow="#FF151515"
+                                       ChromeMedium="#FF1D1D1D" ChromeMediumLow="#FF151515" ChromeWhite="#FFFFFFFF"
+                                       ListLow="#FF1D1D1D" ListMedium="#FF262626" RegionColor="#FF080808"/>
+            </FluentTheme.Palettes>
+        </FluentTheme>
+        <StyleInclude Source="avares://PyroLauncher/Theme.axaml"/>
+    </Application.Styles>
+</Application>

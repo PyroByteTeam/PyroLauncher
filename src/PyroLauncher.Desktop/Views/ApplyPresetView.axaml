@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             xmlns:core="clr-namespace:PyroLauncher.Core;assembly=PyroLauncher.Core"
+             xmlns:vm="clr-namespace:PyroLauncher.UI.ViewModels;assembly=PyroLauncher.Core"
+             x:Class="PyroLauncher.Desktop.Views.ApplyPresetView">
+    <!-- Embedded on the Presets page: resolves a preset against one instance and installs the ticked items. -->
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Classes="ghost" Content="{l:T 'Select all'}" Padding="8,4" Command="{Binding SelectAllCommand}"/>
+                <Button Classes="ghost" Content="{l:T 'Select none'}" Padding="8,4" Command="{Binding SelectNoneCommand}"/>
+            </StackPanel>
+            <TextBlock Classes="faint" Text="{Binding Summary}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+        </DockPanel>
+        <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="0,0,0,10" IsVisible="{Binding IsResolving}"/>
+
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,14,0,0">
+            <Button DockPanel.Dock="Right" Classes="primary" Command="{Binding InstallCommand}" MinWidth="170" HorizontalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Classes="icon" Text="{i:I E896}"/>
+                    <TextBlock Text="{Binding InstallText}"/>
+                </StackPanel>
+            </Button>
+            <Button DockPanel.Dock="Right" Content="{l:T 'Cancel'}" Command="{Binding CancelInstallCommand}" Margin="0,0,8,0" IsVisible="{Binding IsInstalling}"/>
+            <Button DockPanel.Dock="Left" Classes="ghost" Command="{Binding OpenInstanceCommand}" Margin="-10,0,12,0" ToolTip.Tip="{l:T 'Open the instance page'}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Classes="icon" Text="{i:I E8A7}"/>
+                    <TextBlock Text="{l:T 'Open instance'}"/>
+                </StackPanel>
+            </Button>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0" IsVisible="{Binding IsInstalling}">
+                <TextBlock Classes="faint" Text="{Binding Status}" TextTrimming="CharacterEllipsis"/>
+                <ProgressBar Margin="0,4,0,0" Maximum="100" Value="{Binding Progress, Converter={StaticResource Percent}}"
+                             IsIndeterminate="{Binding Progress, Converter={StaticResource Indeterminate}}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <ScrollViewer Padding="0,0,6,0">
+            <ItemsControl ItemsSource="{Binding RowsView}">
+                <ItemsControl.DataTemplates>
+                    <DataTemplate DataType="core:GroupHeader">
+                        <TextBlock Classes="overline" Text="{Binding Name}" Margin="2,10,0,6"/>
+                    </DataTemplate>
+                    <DataTemplate DataType="vm:PresetApplyRow">
+                        <Border Classes="row" Padding="10,7" Margin="0,0,0,5" Opacity="{Binding State, Converter={x:Static l:PresetStateConverters.Opacity}}">
+                            <DockPanel>
+                                <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanSelect}" VerticalAlignment="Center" Margin="0,0,6,0" MinWidth="0"/>
+                                <Border DockPanel.Dock="Left" Width="30" Height="30" CornerRadius="6" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
+                                    <Grid>
+                                        <TextBlock Text="{Binding Initials}" FontSize="10" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Image c:RemoteImage.DecodeWidth="60" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                    </Grid>
+                                </Border>
+                                <TextBlock DockPanel.Dock="Right" Classes="icon" Margin="10,0,0,0"
+                                           Text="{Binding State, Converter={x:Static l:PresetStateConverters.Glyph}}"
+                                           ToolTip.Tip="{Binding State, Converter={x:Static l:PresetStateConverters.Tip}}"
+                                           Foreground="{StaticResource Fg3}"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Classes="faint" Text="{Binding StatusText}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding StatusText}"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.DataTemplates>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,177 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.HomeView">
+    <UserControl.Styles>
+        <Style Selector="Border.instanceCard">
+            <Setter Property="Background" Value="{StaticResource Bg2}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Border.instanceCard:pointerover"><Setter Property="BorderBrush" Value="{StaticResource Line2}"/></Style>
+        <Style Selector="Border.instanceCard Button.play"><Setter Property="IsVisible" Value="False"/></Style>
+        <Style Selector="Border.instanceCard:pointerover Button.play"><Setter Property="IsVisible" Value="True"/></Style>
+        <Style Selector="Border.instanceCard.active Button.play"><Setter Property="IsVisible" Value="True"/></Style>
+        <Style Selector="Button.play">
+            <Setter Property="Width" Value="42"/>
+            <Setter Property="Height" Value="42"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="21"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.play:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#FFDADADA"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+        <Style Selector="Border.group.dropTarget"><Setter Property="BorderBrush" Value="{StaticResource Line2}"/></Style>
+    </UserControl.Styles>
+
+    <Grid Margin="36,0,20,0" RowDefinitions="Auto,*">
+        <!-- Header -->
+        <DockPanel Margin="0,0,16,22">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom" Spacing="10">
+                <Grid Width="220">
+                    <TextBox Classes="search" Text="{Binding Filter}" Watermark="{l:T 'Search instances'}"/>
+                    <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                </Grid>
+                <Button Command="{Binding NewCategoryCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E8EC}"/>
+                        <TextBlock Text="{l:T 'New category'}"/>
+                    </StackPanel>
+                </Button>
+                <Button Classes="primary" Command="{Binding NewInstanceCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E710}"/>
+                        <TextBlock Text="{l:T 'New instance'}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Classes="h1" Text="{l:T 'Instances'}"/>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <TextBlock Classes="icon" Text="{i:I E823}" Foreground="{StaticResource Fg2}" Margin="0,0,7,0"/>
+                    <TextBlock VerticalAlignment="Center">
+                        <Run Text="{Binding TotalPlaytimeText}" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}"/><Run Text="{l:T '  total playtime'}" Foreground="{StaticResource Fg2}"/>
+                    </TextBlock>
+                    <TextBlock Classes="faint" Text="{l:T '  ·  drag instances between categories to organize them'}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Empty state -->
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,80" IsVisible="{Binding IsEmpty}">
+            <Border Width="72" Height="72" CornerRadius="18" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Classes="icon" Text="{i:I E7FC}" FontSize="28" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
+            </Border>
+            <TextBlock Classes="h2" Text="{l:T 'No instances yet'}" HorizontalAlignment="Center" Margin="0,18,0,6"/>
+            <TextBlock Classes="muted" Text="{l:T 'Create a fresh instance or import a Modrinth / CurseForge modpack.'}" HorizontalAlignment="Center"/>
+            <Button Classes="primary" Content="{l:T 'Create your first instance'}" Command="{Binding NewInstanceCommand}" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+        </StackPanel>
+
+        <!-- Groups -->
+        <ScrollViewer Grid.Row="1" Padding="0,0,16,24" IsVisible="{Binding !IsEmpty}">
+            <ItemsControl ItemsSource="{Binding Groups}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Classes="group" Background="Transparent" CornerRadius="12" BorderThickness="1" BorderBrush="Transparent" Margin="0,0,0,18" Padding="0,0,0,4"
+                                DragDrop.AllowDrop="True">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,12">
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" IsVisible="{Binding IsUser}">
+                                        <Button Classes="icon" Content="{i:I E70F}" ToolTip.Tip="{l:T 'Rename category'}" Width="30" Height="30" FontSize="12"
+                                                Command="{Binding $parent[UserControl].DataContext.RenameCategoryCommand}" CommandParameter="{Binding}"/>
+                                        <Button Classes="icon" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Delete category'}" Width="30" Height="30" FontSize="12"
+                                                Command="{Binding $parent[UserControl].DataContext.DeleteCategoryCommand}" CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                    <ToggleButton Classes="plain" IsChecked="{Binding IsExpanded}" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Classes="icon" Text="{i:I E70D}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,0,10,0"
+                                                       IsVisible="{Binding IsExpanded}"/>
+                                            <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,0,10,0"
+                                                       IsVisible="{Binding !IsExpanded}"/>
+                                            <TextBlock Classes="h2" Text="{Binding Name}" FontSize="16"/>
+                                            <Border Classes="badge" Margin="10,0,0,0">
+                                                <TextBlock Classes="badgeText" Text="{Binding Items.Count}"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </ToggleButton>
+                                </DockPanel>
+
+                                <TextBlock Classes="faint" Text="{l:T 'Empty - drag instances here.'}" Margin="22,0,0,14"
+                                           IsVisible="{Binding !Items.Count}"/>
+
+                                <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding IsExpanded}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Classes="instanceCard" Classes.active="{Binding IsRunning}" Width="204" Margin="0,0,14,14"
+                                                    PointerPressed="Card_PointerPressed" PointerMoved="Card_PointerMoved" PointerReleased="Card_PointerReleased">
+                                                <Border.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="{l:T 'Play / Install / Stop'}" Command="{Binding $parent[UserControl].DataContext.LaunchCommand}" CommandParameter="{Binding}"/>
+                                                        <MenuItem Header="{l:T 'Open'}" Command="{Binding $parent[UserControl].DataContext.OpenCommand}" CommandParameter="{Binding}"/>
+                                                        <MenuItem Header="{l:T 'Open folder'}" Command="{Binding $parent[UserControl].DataContext.OpenFolderCommand}" CommandParameter="{Binding}"/>
+                                                        <MenuItem Header="{l:T 'Move to category…'}" Command="{Binding $parent[UserControl].DataContext.MoveToCategoryCommand}" CommandParameter="{Binding}"/>
+                                                        <Separator/>
+                                                        <MenuItem Header="{l:T 'Delete'}" Command="{Binding $parent[UserControl].DataContext.DeleteCommand}" CommandParameter="{Binding}"/>
+                                                    </ContextMenu>
+                                                </Border.ContextMenu>
+                                                <Grid RowDefinitions="132,Auto">
+                                                    <!-- Art: blurred fill behind, whole icon on top, nothing cropped -->
+                                                    <Border CornerRadius="11,11,0,0" Background="{StaticResource Bg3}" ClipToBounds="True">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding Initial}" FontSize="56" FontWeight="Bold" Foreground="#FF3A3A3A"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Image Source="{Binding Icon}" Stretch="UniformToFill" Opacity="0.35">
+                                                                <Image.Effect><BlurEffect Radius="28"/></Image.Effect>
+                                                            </Image>
+                                                            <Image Source="{Binding Icon}" Stretch="Uniform" Margin="12" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                                                            <Border Classes="badge" Background="#E6000000" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"
+                                                                    IsVisible="{Binding IsRunning}">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <Ellipse Width="6" Height="6" Fill="White" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                                    <TextBlock Classes="badgeText" Text="{l:T 'Running'}" Foreground="White"/>
+                                                                </StackPanel>
+                                                            </Border>
+                                                            <Button Classes="play" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"
+                                                                    Command="{Binding $parent[UserControl].DataContext.LaunchCommand}" CommandParameter="{Binding}"
+                                                                    Content="{Binding PlayGlyph, Converter={StaticResource Icon}}" ToolTip.Tip="{Binding PlayTip}"/>
+                                                        </Grid>
+                                                    </Border>
+                                                    <!-- Info -->
+                                                    <StackPanel Grid.Row="1" Margin="14,12,14,13">
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Classes="muted" Text="{Binding VersionText}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
+                                                        <Grid Margin="0,8,0,0">
+                                                            <TextBlock Classes="faint" Text="{Binding PlayTimeText}" IsVisible="{Binding !IsBusy}"/>
+                                                            <StackPanel IsVisible="{Binding IsBusy}">
+                                                                <TextBlock Classes="faint" Text="{Binding Status}" TextTrimming="CharacterEllipsis"/>
+                                                                <ProgressBar Margin="0,6,0,0" Maximum="100" Value="{Binding Progress, Converter={StaticResource Percent}}"
+                                                                             IsIndeterminate="{Binding Progress, Converter={StaticResource Indeterminate}}"/>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
