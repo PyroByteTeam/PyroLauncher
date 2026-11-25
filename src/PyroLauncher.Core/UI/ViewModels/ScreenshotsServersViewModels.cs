@@ -172,6 +172,15 @@ public partial class ServersViewModel : ObservableObject
         if (Save(list)) Refresh();
     }
 
+    /// <summary>Starts the game and connects to the server right away, skipping the title screen.</summary>
+    [RelayCommand]
+    private async Task Join(ServerItem item)
+    {
+        if (Instance.IsRunning) { Dialogs.Toast(L.T("The game is already running."), true); return; }
+        if (Instance.IsBusy) return;
+        await LaunchService.LaunchAsync(Instance, item.Address);
+    }
+
     [RelayCommand]
     private void CopyAddress(ServerItem item)
     {

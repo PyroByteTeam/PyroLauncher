@@ -29,7 +29,9 @@ public class LogViewer : UserControl
     public bool AutoScroll { get => GetValue(AutoScrollProperty); set => SetValue(AutoScrollProperty, value); }
 
     private readonly ListBox _list;
-    private readonly ObservableCollection<LogLine> _shown = [];
+    private readonly RangeObservableCollection<LogLine> _shown = [];
+    private bool _scrollQueued;
+    private const int MaxShown = 10000;
     private INotifyCollectionChanged? _source;
 
     private static readonly IValueConverter LevelBrush = new FuncValueConverter<LogLevel, IBrush>(l => l switch
@@ -178,22 +180,30 @@ public class LogViewer : UserControl
 
     private void Rebuild()
     {
-        _shown.Clear();
-        if (Lines == null) return;
-        foreach (var l in Lines) if (Matches(l)) _shown.Add(l);
-        ScrollToEnd();
+        _shown.ReplaceAll(Lines == null ? [] : Lines.Where(Matches).TakeLast(MaxShown));
+        QueueScrollToEnd();
     }
 
-    // New lines are appended incrementally; anything else (clear, trimming) rebuilds.
+    // New lines are appended in one batch; anything else (clear) rebuilds. Trimming of the source is ignored - we trim ourselves.
     private void OnChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
         {
-            foreach (LogLine l in e.NewItems) if (Matches(l)) _shown.Add(l);
-            while (_shown.Count > 10000) _shown.RemoveAt(0);
-            if (AutoScroll) ScrollToEnd();
+            var added = e.NewItems.Cast<LogLine>().Where(Matches).ToList();
+            if (added.Count == 0) return;
+            _shown.AddRange(added);
+            if (_shown.Count > MaxShown) _shown.RemoveFirst(_shown.Count - MaxShown + MaxShown / 10);
+            if (AutoScroll) QueueScrollToEnd();
         }
         else if (e.Action != NotifyCollectionChangedAction.Remove) Rebuild();
+    }
+
+    /// <summary>Scrolls once after the current burst of lines instead of forcing a layout pass per line.</summary>
+    private void QueueScrollToEnd()
+    {
+        if (_scrollQueued) return;
+        _scrollQueued = true;
+        Avalonia.Threading.Dispatcher.UIThread.Post(() => { _scrollQueued = false; ScrollToEnd(); }, Avalonia.Threading.DispatcherPriority.Background);
     }
 
     public void ScrollToEnd()

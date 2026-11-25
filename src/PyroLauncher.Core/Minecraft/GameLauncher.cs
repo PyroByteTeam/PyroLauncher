@@ -37,7 +37,7 @@ public static class GameLauncher
     }
 
     /// <summary>Installs everything needed and starts the game. Returns the running process.</summary>
-    public static async Task<Process> LaunchAsync(Instance inst, Account account, IProgress<TaskProgress> progress, CancellationToken ct)
+    public static async Task<Process> LaunchAsync(Instance inst, Account account, IProgress<TaskProgress> progress, CancellationToken ct, string? joinServer = null)
     {
         void L(string s) => inst.AppendLog(s);
         L($"[PyroLauncher] Launching {inst.Config.Name} ({inst.VersionText}) as {account.Username}");
@@ -51,7 +51,8 @@ public static class GameLauncher
         GameInstaller.ExtractNatives(game, inst.NativesDir);
 
         progress.Report(new TaskProgress(UI.L.T("Starting game…")));
-        var args = BuildArguments(inst, version, game, account, settings);
+        var args = BuildArguments(inst, version, game, account, settings, joinServer);
+        if (joinServer != null) L($"[PyroLauncher] Joining server {joinServer} on start");
 
         var psi = new ProcessStartInfo(java)
         {
@@ -94,7 +95,7 @@ public static class GameLauncher
         return $"\"{escaped}\"";
     }
 
-    private static List<string> BuildArguments(Instance inst, ResolvedVersion v, PreparedGame game, Account account, GameSettings s)
+    private static List<string> BuildArguments(Instance inst, ResolvedVersion v, PreparedGame game, Account account, GameSettings s, string? joinServer)
     {
         var sep = Path.PathSeparator.ToString();
         var classpath = string.Join(sep, game.Classpath.Distinct(StringComparer.OrdinalIgnoreCase));
@@ -124,6 +125,12 @@ public static class GameLauncher
             ["resolution_height"] = s.WindowHeight?.ToString() ?? "480",
         };
         var features = new Dictionary<string, bool> { ["has_custom_resolution"] = true };
+        if (!string.IsNullOrWhiteSpace(joinServer))
+        {
+            // 1.20+ declares --quickPlayMultiplayer behind this feature; older versions get --server/--port below.
+            vars["quickPlayMultiplayer"] = joinServer.Trim();
+            features["is_quick_play_multiplayer"] = true;
+        }
 
         string Sub(string x)
         {
@@ -169,6 +176,12 @@ public static class GameLauncher
             args.Add("--height"); args.Add(vars["resolution_height"]);
         }
         if (s.Fullscreen == true) args.Add("--fullscreen");
+        if (!string.IsNullOrWhiteSpace(joinServer) && !args.Contains("--quickPlayMultiplayer"))
+        {
+            var (host, port) = SplitServerAddress(joinServer.Trim());
+            args.Add("--server"); args.Add(host);
+            args.Add("--port"); args.Add(port.ToString());
+        }
 
         // Drop feature args whose value placeholders were never substituted (quick play etc.)
         for (int i = args.Count - 1; i >= 0; i--)
@@ -200,6 +213,25 @@ public static class GameLauncher
                 else if (val.AsStr() is { } s) yield return s;
             }
         }
+    }
+
+    /// <summary>"host", "host:port", "[v6]:port" → host and port (25565 by default).</summary>
+    public static (string Host, int Port) SplitServerAddress(string address)
+    {
+        if (address.StartsWith('['))
+        {
+            var end = address.IndexOf(']');
+            if (end > 0)
+            {
+                var host6 = address[1..end];
+                var rest = address[(end + 1)..];
+                return (host6, rest.StartsWith(':') && int.TryParse(rest[1..], out var p6) ? p6 : 25565);
+            }
+        }
+        var colon = address.LastIndexOf(':');
+        if (colon > 0 && address.IndexOf(':') == colon && int.TryParse(address[(colon + 1)..], out var port))
+            return (address[..colon], port);
+        return (address, 25565);
     }
 
     public static List<string> SplitArgs(string input)

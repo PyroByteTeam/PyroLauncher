@@ -10,7 +10,8 @@ public static class LaunchService
 {
     private static readonly HashSet<Instance> Killed = [];
 
-    public static async Task LaunchAsync(Instance inst)
+    /// <param name="joinServer">Server address to connect to straight away, skipping the title screen.</param>
+    public static async Task LaunchAsync(Instance inst, string? joinServer = null)
     {
         if (inst.IsRunning || inst.IsBusy) return;
         var account = AccountManager.Selected;
@@ -38,7 +39,7 @@ public static class LaunchService
         try
         {
             System.Diagnostics.Process proc;
-            try { proc = await GameLauncher.LaunchAsync(inst, account, progress, cts.Token); }
+            try { proc = await GameLauncher.LaunchAsync(inst, account, progress, cts.Token, joinServer); }
             catch { job.Fail(); throw; }
             finally { job.Dispose(); }
 

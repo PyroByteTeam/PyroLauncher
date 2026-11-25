@@ -133,7 +133,7 @@ public static class JavaManager
         try { await Http.DownloadFileAsync(link, zipPath, ct, dlProgress); }
         finally { job?.FileDone(); }
 
-        if (checksum != null && !Hashing.Sha256File(zipPath).Equals(checksum, StringComparison.OrdinalIgnoreCase))
+        if (checksum != null && !(await Task.Run(() => Hashing.Sha256File(zipPath), ct)).Equals(checksum, StringComparison.OrdinalIgnoreCase))
         {
             File.Delete(zipPath);
             throw new IOException(L.T("Downloaded Java archive failed checksum verification."));
