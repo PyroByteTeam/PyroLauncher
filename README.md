@@ -12,6 +12,8 @@ Mojang or Microsoft)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-1f1f1f?style=flat-square)](#requirements)
 [![Latest release](https://img.shields.io/github/v/release/PyroByteTeam/PyroLauncher?style=flat-square&color=1f1f1f&label=release)](https://github.com/PyroByteTeam/PyroLauncher/releases/latest)
 
+**[Website](https://launcher.pyrobyte.top/)** · **[Roadmap](https://launcher.pyrobyte.top/roadmap)**
+
 <img src=".github/assets/home.png" width="860" alt="Instances on the home page">
 
 </div>
