@@ -1,3 +1,4 @@
+using Avalonia.Controls.Primitives;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -71,7 +72,8 @@ public class MemoryPicker : StackPanel
         _warning = new TextBlock { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0), IsVisible = false, Foreground = Res<IBrush>("LogWarn") };
         Children.Add(_warning);
 
-        _customToggle = new CheckBox { Content = L.T("Enter an exact amount"), Margin = new Thickness(0, 8, 0, 0), FontSize = 12.5 };
+        _customToggle = new CheckBox { Content = L.T("Enter an exact amount"), Margin = new Thickness(0, 8, 0, 0) };
+        _customToggle.Bind(TemplatedControl.FontSizeProperty, FontScale.For(13.5));
         _customPanel = new StackPanel { Margin = new Thickness(27, 8, 0, 0), IsVisible = false };
         _customBox = new TextBox { Width = 120 };
         _customToggle.IsCheckedChanged += (_, _) =>

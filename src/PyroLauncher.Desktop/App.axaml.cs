@@ -33,6 +33,7 @@ public partial class App : Application
 
         SettingsService.Load();
         Loc.Instance.SetLanguage(SettingsService.Current.Language);
+        ThemeService.Init();
         DownloadManager.Init();
         AccountManager.Load();
         InstanceManager.LoadAll();

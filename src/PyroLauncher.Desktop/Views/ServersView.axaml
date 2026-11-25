@@ -48,7 +48,7 @@
                             <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                                 <Border Width="48" Height="48" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,14,0">
                                     <Grid>
-                                        <TextBlock Classes="icon" Text="{i:I E774}" FontSize="18" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
+                                        <TextBlock Classes="icon" Text="{i:I E774}" FontSize="{l:F 18}" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
                                         <Image Source="{Binding Icon}" RenderOptions.BitmapInterpolationMode="None"/>
                                     </Grid>
                                 </Border>
@@ -61,16 +61,16 @@
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                         <Grid Margin="0,0,7,0" VerticalAlignment="Center">
                                             <Ellipse Width="7" Height="7" Fill="{StaticResource Fg3}" IsVisible="{Binding !IsOnline}"/>
-                                            <Ellipse Width="7" Height="7" Fill="White" IsVisible="{Binding IsOnline}"/>
+                                            <Ellipse Width="7" Height="7" Fill="{StaticResource Accent}" IsVisible="{Binding IsOnline}"/>
                                         </Grid>
                                         <TextBlock Classes="muted" Text="{Binding Status}"/>
                                     </StackPanel>
                                     <TextBlock Classes="faint" Text="{Binding Ping}" HorizontalAlignment="Right" Margin="0,2,0,0"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="3" Orientation="Horizontal">
-                                    <Button Classes="icon" Content="{i:I E8C8}" ToolTip.Tip="{l:T 'Copy address'}" FontSize="13"
+                                    <Button Classes="icon" Content="{i:I E8C8}" ToolTip.Tip="{l:T 'Copy address'}" FontSize="{l:F 14}"
                                             Command="{Binding $parent[UserControl].DataContext.CopyAddressCommand}" CommandParameter="{Binding}"/>
-                                    <Button Classes="icon" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Remove'}" FontSize="13"
+                                    <Button Classes="icon" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Remove'}" FontSize="{l:F 14}"
                                             Command="{Binding $parent[UserControl].DataContext.RemoveCommand}" CommandParameter="{Binding}"/>
                                 </StackPanel>
                             </Grid>

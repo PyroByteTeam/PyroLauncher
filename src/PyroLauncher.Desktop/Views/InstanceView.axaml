@@ -22,7 +22,7 @@
             <Button Classes="icon" Content="{i:I E72B}" Command="{Binding BackCommand}" ToolTip.Tip="{l:T 'Back to instances'}" VerticalAlignment="Top" Margin="-8,0,10,0"/>
             <Border Grid.Column="1" Width="84" Height="84" CornerRadius="14" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line}" BorderThickness="1" ClipToBounds="True">
                 <Grid>
-                    <TextBlock Text="{Binding Instance.Initial}" FontSize="38" FontWeight="Bold" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Instance.Initial}" FontSize="{l:F 38}" FontWeight="Bold" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     <Image Source="{Binding Instance.Icon}" Stretch="UniformToFill"/>
                 </Grid>
             </Border>
@@ -64,19 +64,19 @@
                                     </Button.ContextMenu>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Grid>
-                                            <TextBlock Classes="icon" Text="{i:I E968}" FontSize="15"/>
-                                            <Ellipse Width="7" Height="7" Fill="White" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-3,-4,0" IsVisible="{Binding IsRunning}"/>
+                                            <TextBlock Classes="icon" Text="{i:I E968}" FontSize="{l:F 16}"/>
+                                            <Ellipse Width="7" Height="7" Fill="{StaticResource Accent}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-3,-4,0" IsVisible="{Binding IsRunning}"/>
                                         </Grid>
-                                        <TextBlock Classes="icon" Text="{Binding ToggleGlyph, Converter={StaticResource Icon}}" FontSize="11"/>
+                                        <TextBlock Classes="icon" Text="{Binding ToggleGlyph, Converter={StaticResource Icon}}" FontSize="{l:F 12}"/>
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <Button Classes="primary" Command="{Binding LaunchCommand}" Padding="26,11" FontSize="15" MinWidth="140" ToolTip.Tip="{Binding LaunchTip}"
+                    <Button Classes="primary" Command="{Binding LaunchCommand}" Padding="26,11" FontSize="{l:F 16}" MinWidth="140" ToolTip.Tip="{Binding LaunchTip}"
                             HorizontalContentAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <TextBlock Classes="icon" Text="{Binding LaunchGlyph, Converter={StaticResource Icon}}" FontSize="14"/>
+                            <TextBlock Classes="icon" Text="{Binding LaunchGlyph, Converter={StaticResource Icon}}" FontSize="{l:F 15}"/>
                             <TextBlock Text="{Binding LaunchText}"/>
                         </StackPanel>
                     </Button>
@@ -110,7 +110,7 @@
             <StackPanel Orientation="Horizontal">
                 <Button Classes="ghost" Command="{Binding ShowOverviewCommand}" Padding="10,6" Margin="-10,0,4,0">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Classes="icon" Text="{i:I E72B}" FontSize="12"/>
+                        <TextBlock Classes="icon" Text="{i:I E72B}" FontSize="{l:F 13}"/>
                         <TextBlock Text="{l:T 'Overview'}"/>
                     </StackPanel>
                 </Button>
@@ -134,7 +134,7 @@
                             <DockPanel>
                                 <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0" Spacing="8">
                                     <TextBlock Classes="faint" Text="{l:T 'Open'}" VerticalAlignment="Center"/>
-                                    <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="10" Foreground="{StaticResource Fg3}"/>
+                                    <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="{l:F 11}" Foreground="{StaticResource Fg3}"/>
                                 </StackPanel>
                                 <DockPanel DockPanel.Dock="Top">
                                     <Border Classes="grip" DockPanel.Dock="Right" Width="30" Height="30" Margin="0,-6,-8,0" CornerRadius="6" Cursor="SizeAll"
@@ -142,8 +142,8 @@
                                         <TextBlock Classes="icon" Text="{i:I E76F}" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
                                     </Border>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Classes="icon" Text="{Binding Glyph, Converter={StaticResource Icon}}" FontSize="20" Margin="0,0,12,0"/>
-                                        <TextBlock Classes="h2" Text="{Binding Title}" FontSize="19" VerticalAlignment="Center"/>
+                                        <TextBlock Classes="icon" Text="{Binding Glyph, Converter={StaticResource Icon}}" FontSize="{l:F 20}" Margin="0,0,12,0"/>
+                                        <TextBlock Classes="h2" Text="{Binding Title}" FontSize="{l:F 19}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </DockPanel>
                                 <TextBlock DockPanel.Dock="Top" Classes="muted" Text="{Binding Description}" Margin="0,8,0,12" TextTrimming="CharacterEllipsis"/>
@@ -157,7 +157,7 @@
                                                 <Border Width="26" Height="26" Margin="0,0,4,4" CornerRadius="13" Background="{StaticResource Bg4}" ClipToBounds="True"
                                                         ToolTip.Tip="{Binding Name}" Opacity="{Binding IsEnabled, Converter={x:Static l:BoolToOpacity.Instance}}">
                                                     <Grid>
-                                                        <TextBlock Text="{Binding Initials}" FontSize="9.5" FontWeight="Bold" Foreground="{StaticResource Fg2}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding Initials}" FontSize="{l:F 10.5}" FontWeight="Bold" Foreground="{StaticResource Fg2}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                         <Image Source="{Binding Icon}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="None"/>
                                                     </Grid>
                                                 </Border>

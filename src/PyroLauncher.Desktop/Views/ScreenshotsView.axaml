@@ -38,11 +38,11 @@
                                     <Image Source="{Binding Thumb}" Stretch="UniformToFill"/>
                                 </Border>
                                 <DockPanel Margin="12,9">
-                                    <Button DockPanel.Dock="Right" Classes="icon" Width="26" Height="26" FontSize="12" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Delete'}"
+                                    <Button DockPanel.Dock="Right" Classes="icon" Width="26" Height="26" FontSize="{l:F 13}" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Delete'}"
                                             Command="{Binding $parent[UserControl].DataContext.DeleteCommand}" CommandParameter="{Binding}"/>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding DateText}" FontSize="12.5"/>
-                                        <TextBlock Classes="faint" Text="{Binding Name}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding DateText}" FontSize="{l:F 13.5}"/>
+                                        <TextBlock Classes="faint" Text="{Binding Name}" FontSize="{l:F 12}" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                 </DockPanel>
                             </StackPanel>

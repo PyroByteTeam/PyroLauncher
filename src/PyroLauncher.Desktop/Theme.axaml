@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:PyroLauncher.Desktop">
     <Styles.Resources>
         <ResourceDictionary>
             <Color x:Key="C.Bg0">#FF080808</Color>
@@ -13,17 +14,21 @@
             <SolidColorBrush x:Key="Bg3" Color="#FF1D1D1D"/>
             <SolidColorBrush x:Key="Bg4" Color="#FF262626"/>
             <SolidColorBrush x:Key="Line" Color="#FF262626"/>
-            <SolidColorBrush x:Key="Line2" Color="#FF3A3A3A"/>
+            <SolidColorBrush x:Key="Line2" Color="#FF404040"/>
             <SolidColorBrush x:Key="Fg" Color="#FFF4F4F4"/>
-            <SolidColorBrush x:Key="Fg2" Color="#FFA6A6A6"/>
-            <SolidColorBrush x:Key="Fg3" Color="#FF6E6E6E"/>
+            <SolidColorBrush x:Key="Fg2" Color="#FFC4C4C4"/>
+            <SolidColorBrush x:Key="Fg3" Color="#FF959595"/>
             <SolidColorBrush x:Key="Accent" Color="#FFFFFFFF"/>
             <SolidColorBrush x:Key="AccentFg" Color="#FF000000"/>
+            <SolidColorBrush x:Key="AccentHover" Color="#FFDADADA"/>
+            <!-- Layers over the optional background image (set by ThemeService) -->
+            <SolidColorBrush x:Key="WindowTint" Color="#00000000"/>
+            <SolidColorBrush x:Key="SidebarBg" Color="#FF0F0F0F"/>
             <SolidColorBrush x:Key="Scrim" Color="#CC000000"/>
             <SolidColorBrush x:Key="LogInfo" Color="#FFC4C4C4"/>
             <SolidColorBrush x:Key="LogWarn" Color="#FFE8C468"/>
             <SolidColorBrush x:Key="LogError" Color="#FFFF6B6B"/>
-            <SolidColorBrush x:Key="LogDebug" Color="#FF6A6A6A"/>
+            <SolidColorBrush x:Key="LogDebug" Color="#FF8A8A8A"/>
             <SolidColorBrush x:Key="LogLauncher" Color="#FFFFFFFF"/>
 
             <FontFamily x:Key="UiFont">fonts:Inter#Inter, $Default</FontFamily>
@@ -39,10 +44,10 @@
             <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#FF151515"/>
             <SolidColorBrush x:Key="TextControlBorderBrush" Color="#FF262626"/>
             <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#FF3A3A3A"/>
-            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#FF6E6E6E"/>
-            <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#FF6E6E6E"/>
-            <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#FF6E6E6E"/>
-            <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#FF6E6E6E"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#FF959595"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#FF959595"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#FF959595"/>
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#FF959595"/>
             <SolidColorBrush x:Key="ComboBoxBackground" Color="#FF151515"/>
             <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#FF1D1D1D"/>
             <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#FF262626"/>
@@ -57,7 +62,7 @@
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="#FF000000"/>
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver" Color="#FF000000"/>
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPressed" Color="#FF000000"/>
-            <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="#FFA6A6A6"/>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="#FFC4C4C4"/>
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOffPointerOver" Color="#FFF4F4F4"/>
             <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FF000000"/>
             <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="#FF000000"/>
@@ -67,14 +72,14 @@
         </ResourceDictionary>
     </Styles.Resources>
 
-    <Style Selector="TextBlock.h1"><Setter Property="FontSize" Value="28"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
-    <Style Selector="TextBlock.h2"><Setter Property="FontSize" Value="18"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
-    <Style Selector="TextBlock.h3"><Setter Property="FontSize" Value="14"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
-    <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="{StaticResource Fg2}"/><Setter Property="FontSize" Value="12.5"/></Style>
-    <Style Selector="TextBlock.faint"><Setter Property="Foreground" Value="{StaticResource Fg3}"/><Setter Property="FontSize" Value="12"/></Style>
+    <Style Selector="TextBlock.h1"><Setter Property="FontSize" Value="{l:F 28}"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="TextBlock.h2"><Setter Property="FontSize" Value="{l:F 18}"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="TextBlock.h3"><Setter Property="FontSize" Value="{l:F 15}"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="{StaticResource Fg2}"/><Setter Property="FontSize" Value="{l:F 13.5}"/></Style>
+    <Style Selector="TextBlock.faint"><Setter Property="Foreground" Value="{StaticResource Fg3}"/><Setter Property="FontSize" Value="{l:F 13}"/></Style>
     <Style Selector="TextBlock.overline">
         <Setter Property="Foreground" Value="{StaticResource Fg3}"/>
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="{l:F 12}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="LetterSpacing" Value="0.6"/>
     </Style>
@@ -105,7 +110,7 @@
         <Setter Property="Padding" Value="7,2"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
-    <Style Selector="TextBlock.badgeText"><Setter Property="FontSize" Value="11"/><Setter Property="Foreground" Value="{StaticResource Fg2}"/></Style>
+    <Style Selector="TextBlock.badgeText"><Setter Property="FontSize" Value="{l:F 12}"/><Setter Property="Foreground" Value="{StaticResource Fg2}"/></Style>
     <Style Selector="Border.settingRow">
         <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
         <Setter Property="BorderThickness" Value="0,0,0,1"/>
@@ -148,16 +153,34 @@
         <Setter Property="Height" Value="42"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="CornerRadius" Value="21"/>
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="White"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Background" Value="{StaticResource Accent}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentFg}"/>
         <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
-        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontSize" Value="{l:F 16}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
     </Style>
     <Style Selector="Button.play:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="#FFDADADA"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Background" Value="{StaticResource AccentHover}"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentFg}"/>
+    </Style>
+    <!-- Theme picker cards (Settings → Appearance) -->
+    <Style Selector="Button.themeCard">
+        <Setter Property="Background" Value="{StaticResource Bg2}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="Button.themeCard:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource Bg3}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Fg3}"/>
+    </Style>
+    <Style Selector="Button.themeCard.active /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+    </Style>
+    <Style Selector="Button.themeCard.active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
     </Style>
     <!-- Window caption buttons: Windows sets the arrow cursor over them itself; a hand here makes it flicker. -->
     <Style Selector="CaptionButtons /template/ Button">
@@ -176,20 +199,20 @@
     </Style>
 
     <Style Selector="Button.primary">
-        <Setter Property="Background" Value="#FFFFFFFF"/>
-        <Setter Property="BorderBrush" Value="#FFFFFFFF"/>
-        <Setter Property="Foreground" Value="#FF000000"/>
+        <Setter Property="Background" Value="{StaticResource Accent}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentFg}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
     <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="#FFDADADA"/>
-        <Setter Property="BorderBrush" Value="#FFDADADA"/>
-        <Setter Property="Foreground" Value="#FF000000"/>
+        <Setter Property="Background" Value="{StaticResource AccentHover}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource AccentHover}"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentFg}"/>
     </Style>
     <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="#FF5A5A5A"/>
-        <Setter Property="BorderBrush" Value="#FF5A5A5A"/>
-        <Setter Property="Foreground" Value="#FF1D1D1D"/>
+        <Setter Property="Background" Value="{StaticResource Bg4}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Line2}"/>
+        <Setter Property="Foreground" Value="{StaticResource Fg3}"/>
     </Style>
 
     <Style Selector="Button.ghost">
@@ -212,7 +235,7 @@
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource Fg2}"/>
         <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
-        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontSize" Value="{l:F 16}"/>
         <Setter Property="Width" Value="36"/>
         <Setter Property="Height" Value="36"/>
         <Setter Property="Padding" Value="0"/>
@@ -236,12 +259,12 @@
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid Height="60" Background="Transparent">
-                    <Border x:Name="pill" Width="4" Height="20" CornerRadius="0,2,2,0" Background="White" HorizontalAlignment="Left" IsVisible="False"/>
-                    <Border x:Name="bg" Width="56" Height="54" CornerRadius="10" HorizontalAlignment="Center">
+                <Grid Height="{l:S 62}" Background="Transparent">
+                    <Border x:Name="pill" Width="4" Height="{l:S 22}" CornerRadius="0,2,2,0" Background="{StaticResource Accent}" HorizontalAlignment="Left" IsVisible="False"/>
+                    <Border x:Name="bg" Width="{l:S 76}" Height="{l:S 56}" CornerRadius="10" HorizontalAlignment="Center">
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{TemplateBinding Tag}" FontFamily="{StaticResource IconFont}" FontSize="18" HorizontalAlignment="Center" Foreground="{TemplateBinding Foreground}"/>
-                            <TextBlock Text="{TemplateBinding Content}" FontSize="10" Margin="0,4,0,0" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="60" Foreground="{TemplateBinding Foreground}"/>
+                            <TextBlock Text="{TemplateBinding Tag}" FontFamily="{StaticResource IconFont}" FontSize="{l:S 19}" HorizontalAlignment="Center" Foreground="{TemplateBinding Foreground}"/>
+                            <TextBlock Text="{TemplateBinding Content}" FontSize="{l:S 11}" Margin="{l:S '0,4,0,0'}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="{l:S 72}" Foreground="{TemplateBinding Foreground}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -257,16 +280,17 @@
     <Style Selector="RadioButton.tab">
         <Setter Property="Foreground" Value="{StaticResource Fg2}"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Margin" Value="0,0,22,0"/>
+        <Setter Property="Margin" Value="{l:TM '0,0,22,0'}"/>
+        <Setter Property="FontSize" Value="{l:TF 14}"/>
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid Background="Transparent">
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,11">
-                        <TextBlock Text="{TemplateBinding Tag}" FontFamily="{StaticResource IconFont}" FontSize="13" Margin="0,0,7,0" VerticalAlignment="Center"
+                    <StackPanel Orientation="Horizontal" Margin="{l:TM '0,8,0,11'}">
+                        <TextBlock Text="{TemplateBinding Tag}" FontFamily="{StaticResource IconFont}" FontSize="{l:TF 14}" Margin="{l:TM '0,0,7,0'}" VerticalAlignment="Center"
                                    Foreground="{TemplateBinding Foreground}" IsVisible="{TemplateBinding Tag, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                         <ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}"/>
                     </StackPanel>
-                    <Border x:Name="line" Height="2" VerticalAlignment="Bottom" Background="White" CornerRadius="1" IsVisible="False"/>
+                    <Border x:Name="line" Height="2" VerticalAlignment="Bottom" Background="{StaticResource Accent}" CornerRadius="1" IsVisible="False"/>
                 </Grid>
             </ControlTemplate>
         </Setter>
@@ -291,9 +315,9 @@
     </Style>
     <Style Selector="RadioButton.segment:pointerover"><Setter Property="Foreground" Value="{StaticResource Fg}"/><Setter Property="Background" Value="{StaticResource Bg3}"/></Style>
     <Style Selector="RadioButton.segment:checked">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="BorderBrush" Value="White"/>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Background" Value="{StaticResource Accent}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+        <Setter Property="Foreground" Value="{StaticResource AccentFg}"/>
     </Style>
 
     <!-- Toggle without chrome (expanders, headers) -->
@@ -317,7 +341,7 @@
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
     </Style>
     <Style Selector="ProgressBar">
-        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Foreground" Value="{StaticResource Accent}"/>
         <Setter Property="Background" Value="{StaticResource Bg4}"/>
         <Setter Property="MinHeight" Value="4"/>
         <Setter Property="Height" Value="4"/>

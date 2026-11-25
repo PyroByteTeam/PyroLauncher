@@ -13,7 +13,7 @@
     <Border Classes="dialog" Width="880" Height="620">
         <DockPanel>
             <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
-                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="12" Command="{Binding CancelCommand}" VerticalAlignment="Top" ToolTip.Tip="{l:T 'Close'}"/>
+                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="{l:F 13}" Command="{Binding CancelCommand}" VerticalAlignment="Top" ToolTip.Tip="{l:T 'Close'}"/>
                 <StackPanel>
                     <TextBlock Classes="h2" Text="{l:T 'Export modpack'}"/>
                     <TextBlock Classes="muted" Margin="0,4,0,0"><Run Text="{l:T 'Share'}"/> <Run Text="{Binding Instance.Name}" FontWeight="SemiBold"/> <Run Text="{l:T 'as a modpack file.'}"/></TextBlock>
@@ -76,7 +76,7 @@
                         </StackPanel>
                         <Grid>
                             <TextBox Classes="search" Text="{Binding Search}" Watermark="{l:T 'Search files and folders'}"/>
-                            <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                            <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="{l:F 13}" Margin="12,0,0,0" IsHitTestVisible="False"/>
                         </Grid>
                     </DockPanel>
                     <TextBlock DockPanel.Dock="Bottom" Classes="faint" Text="{Binding SelectionText}" Margin="2,8,0,0"/>
@@ -87,7 +87,7 @@
                                     <DockPanel>
                                         <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{Binding SizeText}" Margin="10,0,6,0" VerticalAlignment="Center"/>
                                         <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Center" Margin="0,0,4,0" MinWidth="0" IsThreeState="False"/>
-                                        <TextBlock Classes="icon" Text="{Binding Glyph, Converter={StaticResource Icon}}" FontSize="13" Foreground="{StaticResource Fg2}" Margin="0,0,8,0"/>
+                                        <TextBlock Classes="icon" Text="{Binding Glyph, Converter={StaticResource Icon}}" FontSize="{l:F 14}" Foreground="{StaticResource Fg2}" Margin="0,0,8,0"/>
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding RelPath}"/>
                                     </DockPanel>
                                 </TreeDataTemplate>

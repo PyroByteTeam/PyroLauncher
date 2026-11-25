@@ -14,7 +14,7 @@
             <Setter Property="Margin" Value="0,0,12,0"/>
         </Style>
         <Style Selector="TextBlock.statValue">
-            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontSize" Value="{l:F 22}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
             <Setter Property="Margin" Value="0,4,0,0"/>
@@ -54,20 +54,20 @@
 
         <DockPanel Grid.Row="1" Margin="0,14,0,10">
             <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding ClearCommand}" ToolTip.Tip="{l:T 'Clear the console'}">
-                <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E74D}" FontSize="12"/><TextBlock Text="{l:T 'Clear'}"/></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E74D}" FontSize="{l:F 13}"/><TextBlock Text="{l:T 'Clear'}"/></StackPanel>
             </Button>
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <Button Classes="primary" Command="{Binding StartCommand}" IsVisible="{Binding !Pack.IsRunning}" IsEnabled="{Binding !Pack.IsBusy}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E768}" FontSize="12"/><TextBlock Text="{l:T 'Start'}"/></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E768}" FontSize="{l:F 13}"/><TextBlock Text="{l:T 'Start'}"/></StackPanel>
                 </Button>
                 <Button Command="{Binding StopCommand}" IsVisible="{Binding Pack.IsRunning}" ToolTip.Tip="{l:T 'Save the world and shut down'}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E71A}" FontSize="12"/><TextBlock Text="{l:T 'Stop'}"/></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E71A}" FontSize="{l:F 13}"/><TextBlock Text="{l:T 'Stop'}"/></StackPanel>
                 </Button>
                 <Button Command="{Binding RestartCommand}" IsVisible="{Binding Pack.IsRunning}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E72C}" FontSize="12"/><TextBlock Text="{l:T 'Restart'}"/></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E72C}" FontSize="{l:F 13}"/><TextBlock Text="{l:T 'Restart'}"/></StackPanel>
                 </Button>
                 <Button Command="{Binding KillCommand}" IsVisible="{Binding Pack.IsRunning}" ToolTip.Tip="{l:T 'End the process right away, without saving'}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E7BA}" FontSize="12"/><TextBlock Text="{l:T 'Kill'}"/></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E7BA}" FontSize="{l:F 13}"/><TextBlock Text="{l:T 'Kill'}"/></StackPanel>
                 </Button>
             </StackPanel>
         </DockPanel>
@@ -82,7 +82,7 @@
 
         <DockPanel Grid.Row="3" Margin="0,10,0,0">
             <Button DockPanel.Dock="Right" Classes="primary" Command="{Binding SendCommand}" Margin="8,0,0,0" IsEnabled="{Binding Pack.IsRunning}">
-                <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E76C}" FontSize="11"/><TextBlock Text="{l:T 'Send'}"/></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E76C}" FontSize="{l:F 12}"/><TextBlock Text="{l:T 'Send'}"/></StackPanel>
             </Button>
             <AutoCompleteBox x:Name="CommandBox" Text="{Binding Command, Mode=TwoWay}" ItemsSource="{Binding Completions}" FilterMode="StartsWith"
                              MinimumPrefixLength="1" MaxDropDownHeight="260" FontFamily="{StaticResource MonoFont}"

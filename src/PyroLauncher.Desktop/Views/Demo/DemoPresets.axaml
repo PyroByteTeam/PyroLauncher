@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:d="clr-namespace:PyroLauncher.Desktop.Views.Demo"
+             x:Class="PyroLauncher.Desktop.Views.Demo.DemoPresets">
+    <StackPanel Margin="36,0,28,0">
+        <DockPanel Margin="0,0,0,22">
+            <Button DockPanel.Dock="Right" Classes="primary" Content="{l:T 'New preset'}" VerticalAlignment="Top"/>
+            <TextBlock Classes="h1" Text="{l:T 'Presets'}"/>
+        </DockPanel>
+        <ItemsControl ItemsSource="{x:Static d:DemoData.Presets}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Classes="card" Padding="16,14" Margin="0,0,0,10">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="{Binding Tint}" Margin="0,0,14,0">
+                                <TextBlock Classes="icon" Text="{i:I E8FD}" FontSize="{l:F 18}" Foreground="#CCFFFFFF" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Button DockPanel.Dock="Right" Classes="primary" Content="{l:T 'Apply'}" VerticalAlignment="Center"/>
+                            <Border DockPanel.Dock="Right" Classes="badge" Margin="0,0,14,0"><TextBlock Classes="badgeText" Text="{Binding Extra}"/></Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="{l:F 15}"/>
+                                <TextBlock Classes="muted" Text="{Binding Sub}" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

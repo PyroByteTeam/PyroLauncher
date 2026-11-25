@@ -23,7 +23,7 @@
                                Text="{l:T 'To run a Minecraft server you have to accept the Minecraft End User License Agreement. Accepting writes eula=true to the server folder; cancelling leaves the server off.'}"/>
                     <Button Classes="ghost" Command="{Binding OpenEulaCommand}" Padding="0,6" Margin="0,6,0,0" HorizontalAlignment="Left">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Classes="icon" Text="{i:I E8A7}" FontSize="12"/>
+                            <TextBlock Classes="icon" Text="{i:I E8A7}" FontSize="{l:F 13}"/>
                             <TextBlock Text="{l:T 'Read the EULA'}"/>
                         </StackPanel>
                     </Button>
@@ -38,7 +38,7 @@
                 <Button DockPanel.Dock="Right" Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}" Margin="0,0,8,0" IsCancel="True"/>
                 <Button Classes="ghost" Command="{Binding OpenPropertiesCommand}" HorizontalAlignment="Left">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Classes="icon" Text="{i:I E713}" FontSize="12"/>
+                        <TextBlock Classes="icon" Text="{i:I E713}" FontSize="{l:F 13}"/>
                         <TextBlock Text="{l:T 'Accept and edit properties'}"/>
                     </StackPanel>
                 </Button>

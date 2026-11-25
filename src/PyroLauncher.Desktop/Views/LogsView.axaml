@@ -16,7 +16,7 @@
             </StackPanel>
             <Grid Margin="0,0,16,0">
                 <TextBox x:Name="FilterBox" Classes="search" Watermark="{l:T 'Filter lines…'}"/>
-                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="{l:F 13}" Margin="12,0,0,0" IsHitTestVisible="False"/>
             </Grid>
         </DockPanel>
         <c:LogViewer x:Name="Viewer" Grid.Row="1" Lines="{Binding Instance.LogLines}" Filter="{Binding #FilterBox.Text}"/>

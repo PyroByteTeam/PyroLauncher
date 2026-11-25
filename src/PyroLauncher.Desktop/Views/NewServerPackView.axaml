@@ -14,7 +14,7 @@
     <Border Classes="dialog" Width="820" Height="640">
         <DockPanel>
             <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
-                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="12" Command="{Binding CancelCommand}" VerticalAlignment="Top" ToolTip.Tip="{l:T 'Close'}"/>
+                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="{l:F 13}" Command="{Binding CancelCommand}" VerticalAlignment="Top" ToolTip.Tip="{l:T 'Close'}"/>
                 <StackPanel>
                     <TextBlock Classes="h2" Text="{l:T 'New server pack'}"/>
                     <TextBlock Classes="muted" Margin="0,4,0,0" Text="{l:T 'Pick the instance to base the server on.'}" IsVisible="{Binding IsPickStep}"/>
@@ -27,7 +27,7 @@
                         IsEnabled="{Binding SelectedInstance, Converter={x:Static ObjectConverters.IsNotNull}}" MinWidth="120" HorizontalContentAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <TextBlock Text="{l:T 'Next'}"/>
-                        <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="11"/>
+                        <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="{l:F 12}"/>
                     </StackPanel>
                 </Button>
                 <Button DockPanel.Dock="Right" Classes="primary" Command="{Binding CreateCommand}" IsVisible="{Binding !IsPickStep}"
@@ -41,7 +41,7 @@
                 <Button DockPanel.Dock="Left" Classes="ghost" Command="{Binding BackCommand}" IsVisible="{Binding !IsPickStep}">
                     <Button.IsEnabled><MultiBinding Converter="{x:Static BoolConverters.And}"><Binding Path="CanGoBack"/><Binding Path="!IsBusy"/></MultiBinding></Button.IsEnabled>
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Classes="icon" Text="{i:I E72B}" FontSize="11"/>
+                        <TextBlock Classes="icon" Text="{i:I E72B}" FontSize="{l:F 12}"/>
                         <TextBlock Text="{l:T 'Back'}"/>
                     </StackPanel>
                 </Button>
@@ -105,7 +105,7 @@
                             </StackPanel>
                             <Grid>
                                 <TextBox Classes="search" Text="{Binding Search}" Watermark="{l:T 'Search mods'}"/>
-                                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="{l:F 13}" Margin="12,0,0,0" IsHitTestVisible="False"/>
                             </Grid>
                         </DockPanel>
                         <DockPanel DockPanel.Dock="Bottom" Margin="2,8,0,0">
@@ -122,18 +122,18 @@
                                         <DockPanel Margin="2,2">
                                             <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsChecked}" MinWidth="0" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                             <Border DockPanel.Dock="Right" Classes="side" Classes.client="{Binding IsClientOnly}" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding SideText}" FontSize="11"/>
+                                                <TextBlock Text="{Binding SideText}" FontSize="{l:F 12}"/>
                                             </Border>
                                             <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{Binding SizeText}" Margin="10,0" VerticalAlignment="Center"/>
                                             <Border Width="28" Height="28" CornerRadius="6" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,10,0">
                                                 <Grid>
-                                                    <TextBlock Text="{Binding Initials}" FontSize="10" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Initials}" FontSize="{l:F 11}" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                     <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
                                                 </Grid>
                                             </Border>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Classes="faint" Text="{Binding FileName}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Classes="faint" Text="{Binding FileName}" FontSize="{l:F 12}" TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
                                         </DockPanel>
                                     </DataTemplate>

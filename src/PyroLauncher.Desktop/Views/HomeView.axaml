@@ -7,12 +7,12 @@
         <Style Selector="Border.group.dropTarget"><Setter Property="BorderBrush" Value="{StaticResource Line2}"/></Style>
     </UserControl.Styles>
 
-    <Grid Margin="36,0,20,0" RowDefinitions="Auto,*">
-        <DockPanel Margin="0,0,16,22">
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom" Spacing="10">
+    <Grid Margin="36,0,36,0" RowDefinitions="Auto,*">
+        <DockPanel Margin="0,0,0,20">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Spacing="10">
                 <Grid Width="220">
                     <TextBox Classes="search" Text="{Binding Filter}" Watermark="{l:T 'Search instances'}"/>
-                    <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                    <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="{l:F 13}" Margin="12,0,0,0" IsHitTestVisible="False"/>
                 </Grid>
                 <Button Command="{Binding NewCategoryCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -29,26 +29,26 @@
             </StackPanel>
             <StackPanel>
                 <TextBlock Classes="h1" Text="{l:T 'Instances'}"/>
-                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                    <TextBlock Classes="icon" Text="{i:I E823}" Foreground="{StaticResource Fg2}" Margin="0,0,7,0"/>
-                    <TextBlock VerticalAlignment="Center">
+                <DockPanel Margin="0,4,16,0">
+                    <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{i:I E823}" Foreground="{StaticResource Fg2}" Margin="0,0,7,0"/>
+                    <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center">
                         <Run Text="{Binding TotalPlaytimeText}" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}"/><Run Text="{l:T '  total playtime'}" Foreground="{StaticResource Fg2}"/>
                     </TextBlock>
-                    <TextBlock Classes="faint" Text="{l:T '  ·  drag instances between categories to organize them'}" VerticalAlignment="Center"/>
-                </StackPanel>
+                    <TextBlock Classes="faint" Text="{l:T '  ·  drag instances between categories to organize them'}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
             </StackPanel>
         </DockPanel>
 
-        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,80" IsVisible="{Binding IsEmpty}">
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,80" MaxWidth="480" IsVisible="{Binding IsEmpty}">
             <Border Width="72" Height="72" CornerRadius="18" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" HorizontalAlignment="Center">
-                <TextBlock Classes="icon" Text="{i:I E7FC}" FontSize="28" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
+                <TextBlock Classes="icon" Text="{i:I E7FC}" FontSize="{l:F 28}" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
             </Border>
             <TextBlock Classes="h2" Text="{l:T 'No instances yet'}" HorizontalAlignment="Center" Margin="0,18,0,6"/>
-            <TextBlock Classes="muted" Text="{l:T 'Create a fresh instance or import a Modrinth / CurseForge modpack.'}" HorizontalAlignment="Center"/>
+            <TextBlock Classes="muted" Text="{l:T 'Create a fresh instance or import a Modrinth / CurseForge modpack.'}" TextWrapping="Wrap" TextAlignment="Center"/>
             <Button Classes="primary" Content="{l:T 'Create your first instance'}" Command="{Binding NewInstanceCommand}" HorizontalAlignment="Center" Margin="0,20,0,0"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" Padding="0,0,16,24" IsVisible="{Binding !IsEmpty}">
+        <ScrollViewer Grid.Row="1" Padding="0,0,6,24" IsVisible="{Binding !IsEmpty}">
             <ItemsControl ItemsSource="{Binding Groups}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -57,18 +57,18 @@
                             <StackPanel>
                                 <DockPanel Margin="0,0,0,12">
                                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" IsVisible="{Binding IsUser}">
-                                        <Button Classes="icon" Content="{i:I E70F}" ToolTip.Tip="{l:T 'Rename category'}" Width="30" Height="30" FontSize="12"
+                                        <Button Classes="icon" Content="{i:I E70F}" ToolTip.Tip="{l:T 'Rename category'}" Width="30" Height="30" FontSize="{l:F 13}"
                                                 Command="{Binding $parent[UserControl].DataContext.RenameCategoryCommand}" CommandParameter="{Binding}"/>
-                                        <Button Classes="icon" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Delete category'}" Width="30" Height="30" FontSize="12"
+                                        <Button Classes="icon" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Delete category'}" Width="30" Height="30" FontSize="{l:F 13}"
                                                 Command="{Binding $parent[UserControl].DataContext.DeleteCategoryCommand}" CommandParameter="{Binding}"/>
                                     </StackPanel>
                                     <ToggleButton Classes="plain" IsChecked="{Binding IsExpanded}" HorizontalAlignment="Left">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Classes="icon" Text="{i:I E70D}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,0,10,0"
+                                            <TextBlock Classes="icon" Text="{i:I E70D}" FontSize="{l:F 12}" Foreground="{StaticResource Fg3}" Margin="0,0,10,0"
                                                        IsVisible="{Binding IsExpanded}"/>
-                                            <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,0,10,0"
+                                            <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="{l:F 12}" Foreground="{StaticResource Fg3}" Margin="0,0,10,0"
                                                        IsVisible="{Binding !IsExpanded}"/>
-                                            <TextBlock Classes="h2" Text="{Binding Name}" FontSize="16"/>
+                                            <TextBlock Classes="h2" Text="{Binding Name}" FontSize="{l:F 16}"/>
                                             <Border Classes="badge" Margin="10,0,0,0">
                                                 <TextBlock Classes="badgeText" Text="{Binding Items.Count}"/>
                                             </Border>
@@ -101,7 +101,7 @@
                                                     <!-- Art: blurred fill behind, whole icon on top, nothing cropped -->
                                                     <Border CornerRadius="11,11,0,0" Background="{StaticResource Bg3}" ClipToBounds="True">
                                                         <Grid>
-                                                            <TextBlock Text="{Binding Initial}" FontSize="56" FontWeight="Bold" Foreground="#FF3A3A3A"
+                                                            <TextBlock Text="{Binding Initial}" FontSize="{l:F 56}" FontWeight="Bold" Foreground="#FF3A3A3A"
                                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                             <Image Source="{Binding Icon}" Stretch="UniformToFill" Opacity="0.35">
                                                                 <Image.Effect><BlurEffect Radius="28"/></Image.Effect>
@@ -110,8 +110,8 @@
                                                             <Border Classes="badge" Background="#E6000000" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"
                                                                     IsVisible="{Binding IsRunning}">
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <Ellipse Width="6" Height="6" Fill="White" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                                                    <TextBlock Classes="badgeText" Text="{l:T 'Running'}" Foreground="White"/>
+                                                                    <Ellipse Width="6" Height="6" Fill="{StaticResource Accent}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                                    <TextBlock Classes="badgeText" Text="{l:T 'Running'}" Foreground="{StaticResource Fg}"/>
                                                                 </StackPanel>
                                                             </Border>
                                                             <Button Classes="play" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"
@@ -120,7 +120,7 @@
                                                         </Grid>
                                                     </Border>
                                                     <StackPanel Grid.Row="1" Margin="14,12,14,13">
-                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="{l:F 15}" TextTrimming="CharacterEllipsis"/>
                                                         <TextBlock Classes="muted" Text="{Binding VersionText}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
                                                         <Grid Margin="0,8,0,0">
                                                             <TextBlock Classes="faint" Text="{Binding PlayTimeText}" IsVisible="{Binding !IsBusy}"/>

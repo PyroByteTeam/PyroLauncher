@@ -24,7 +24,7 @@
                                 <Button Classes="account" Classes.active="{Binding IsSelected}" Command="{Binding $parent[ScrollViewer].DataContext.SelectCommand}" CommandParameter="{Binding}"
                                         Margin="0,0,0,8" Padding="10,9" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                                     <DockPanel>
-                                        <Button DockPanel.Dock="Right" Classes="icon" Width="28" Height="28" Content="{i:I E74D}" FontSize="12" ToolTip.Tip="{l:T 'Remove'}"
+                                        <Button DockPanel.Dock="Right" Classes="icon" Width="28" Height="28" Content="{i:I E74D}" FontSize="{l:F 13}" ToolTip.Tip="{l:T 'Remove'}"
                                                 Command="{Binding $parent[ScrollViewer].DataContext.RemoveCommand}" CommandParameter="{Binding}"/>
                                         <Border Width="34" Height="34" CornerRadius="7" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
                                             <Image c:RemoteImage.DecodeWidth="64" c:RemoteImage.Url="{Binding AvatarUrl}" RenderOptions.BitmapInterpolationMode="None"/>
@@ -53,11 +53,11 @@
                             <StackPanel IsVisible="{Binding DeviceCode, Converter={StaticResource VisibleIf}}" Margin="0,10,0,0">
                                 <WrapPanel>
                                     <TextBlock Classes="faint" Text="{l:T 'Enter this code at'}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                    <Button Classes="ghost" Padding="2,0" Foreground="White" Content="{Binding DeviceCode.VerificationUri}" Command="{Binding OpenVerificationCommand}"/>
+                                    <Button Classes="ghost" Padding="2,0" Foreground="{StaticResource Fg}" Content="{Binding DeviceCode.VerificationUri}" Command="{Binding OpenVerificationCommand}"/>
                                 </WrapPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                     <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="8" Padding="12,6">
-                                        <TextBlock Classes="mono" Text="{Binding DeviceCode.UserCode}" FontSize="18" FontWeight="Bold"/>
+                                        <TextBlock Classes="mono" Text="{Binding DeviceCode.UserCode}" FontSize="{l:F 18}" FontWeight="Bold"/>
                                     </Border>
                                     <Button Classes="icon" Content="{i:I E8C8}" ToolTip.Tip="{l:T 'Copy code'}" Command="{Binding CopyCodeCommand}" Margin="6,0,0,0"/>
                                 </StackPanel>
@@ -94,8 +94,8 @@
                         <TextBlock Classes="h2" Text="{Binding Account.Username, FallbackValue=''}"/>
                         <TextBlock Classes="muted" Margin="0,3,0,0"><Run Text="{Binding Account.TypeText}"/><Run Text="  ·  "/><Run Text="{Binding VariantText}"/></TextBlock>
                     </StackPanel>
-                    <Border Classes="badge" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,18,18,0" IsVisible="{Binding HasPending}" Background="White" BorderBrush="White">
-                        <TextBlock Classes="badgeText" Text="{l:T 'Preview - not uploaded'}" Foreground="Black" FontWeight="SemiBold"/>
+                    <Border Classes="badge" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,18,18,0" IsVisible="{Binding HasPending}" Background="{StaticResource Accent}" BorderBrush="{StaticResource Accent}">
+                        <TextBlock Classes="badgeText" Text="{l:T 'Preview - not uploaded'}" Foreground="{StaticResource AccentFg}" FontWeight="SemiBold"/>
                     </Border>
                     <TextBlock Classes="faint" Text="{l:T 'Drag to rotate'}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0,0,22" IsHitTestVisible="False"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,14" Spacing="6"
@@ -157,7 +157,7 @@
                                                 <Image Source="{Binding Preview}" Stretch="Fill" RenderOptions.BitmapInterpolationMode="None"/>
                                             </Grid>
                                         </Border>
-                                        <TextBlock Text="{Binding Name}" FontSize="11" Margin="0,6,0,0" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="{l:F 12}" Margin="0,6,0,0" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>

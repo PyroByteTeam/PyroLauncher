@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:d="clr-namespace:PyroLauncher.Desktop.Views.Demo"
+             x:Class="PyroLauncher.Desktop.Views.Demo.DemoDownloads">
+    <StackPanel Margin="36,0,28,0">
+        <TextBlock Classes="h1" Text="{l:T 'Downloads'}" Margin="0,0,0,22"/>
+        <ItemsControl ItemsSource="{x:Static d:DemoData.Downloads}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Classes="card" Padding="16,14" Margin="0,0,0,10">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="{Binding Tint}" Margin="0,0,14,0">
+                                <TextBlock Classes="icon" Text="{i:I E896}" FontSize="{l:F 18}" Foreground="#CCFFFFFF" HorizontalAlignment="Center"/>
+                            </Border>
+                            <TextBlock DockPanel.Dock="Right" Classes="mono" Foreground="{StaticResource Fg2}" Text="{Binding Extra, StringFormat='{}{0}%'}" VerticalAlignment="Center" Margin="16,0,0,0"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                <TextBlock Classes="faint" Text="{Binding Sub}" Margin="0,2,0,8"/>
+                                <ProgressBar Maximum="100" Value="{Binding Extra}"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

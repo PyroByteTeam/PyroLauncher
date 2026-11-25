@@ -48,7 +48,7 @@
                                             Command="{Binding $parent[UserControl].DataContext.OpenCommand}" CommandParameter="{Binding}" ToolTip.Tip="{l:T 'Open the download page'}">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock Text="{l:T 'Open page'}"/>
-                                            <TextBlock Classes="icon" Text="{i:I E8A7}" FontSize="11"/>
+                                            <TextBlock Classes="icon" Text="{i:I E8A7}" FontSize="{l:F 12}"/>
                                         </StackPanel>
                                     </Button>
                                     <Grid DockPanel.Dock="Left" Margin="0,0,12,0">

@@ -9,7 +9,9 @@
     </UserControl.Styles>
     <Grid RowDefinitions="*,Auto">
         <ScrollViewer Padding="0,0,16,0">
-            <StackPanel Width="820" HorizontalAlignment="Left">
+            <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="820"/></Grid.ColumnDefinitions>
+            <StackPanel>
                 <TextBlock Classes="h2" Text="{l:T 'General'}" Margin="0,0,0,4"/>
                 <Border Classes="settingRow">
                     <Grid ColumnDefinitions="240,*">
@@ -38,7 +40,7 @@
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                             <Border Width="40" Height="40" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,4,0">
                                 <Grid>
-                                    <TextBlock Text="{Binding Instance.Initial}" FontWeight="Bold" FontSize="18" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Instance.Initial}" FontWeight="Bold" FontSize="{l:F 18}" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     <Image Source="{Binding Instance.Icon}" Stretch="UniformToFill"/>
                                 </Grid>
                             </Border>
@@ -93,7 +95,7 @@
                                 <TextBlock Classes="faint" Text="{Binding DefaultJvm}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
                             </StackPanel>
                         </DockPanel>
-                        <TextBox Margin="0,10,0,0" Text="{Binding JvmArgs}" FontFamily="{StaticResource MonoFont}" FontSize="12" TextWrapping="Wrap" MinHeight="60"
+                        <TextBox Margin="0,10,0,0" Text="{Binding JvmArgs}" FontFamily="{StaticResource MonoFont}" FontSize="{l:F 13}" TextWrapping="Wrap" MinHeight="60"
                                  VerticalContentAlignment="Top" IsVisible="{Binding UseJvmArgs}"/>
                     </StackPanel>
                 </Border>
@@ -187,6 +189,7 @@
                 </Border>
                 <Border Height="24"/>
             </StackPanel>
+            </Grid>
         </ScrollViewer>
 
         <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,12,0,16">

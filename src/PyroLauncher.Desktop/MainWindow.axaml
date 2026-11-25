@@ -6,13 +6,18 @@
         x:Class="PyroLauncher.Desktop.MainWindow"
         Title="PyroLauncher" Icon="avares://PyroLauncher/Assets/pyro.ico"
         Width="1280" Height="800" MinWidth="980" MinHeight="640" WindowStartupLocation="CenterScreen"
-        Background="{StaticResource Bg0}" Foreground="{StaticResource Fg}" FontSize="13"
+        Background="{StaticResource Bg0}" Foreground="{StaticResource Fg}" FontSize="{l:F 14}"
         ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="44">
-    <Grid x:Name="Root" ColumnDefinitions="76,*">
-        <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
+    <Grid x:Name="Root" ColumnDefinitions="Auto,*">
+        <!-- Theme background: optional image, then a tint whose opacity is the theme's background transparency -->
+        <Image x:Name="BackdropImage" Grid.ColumnSpan="2" Stretch="UniformToFill" IsVisible="False" IsHitTestVisible="False"
+               RenderOptions.BitmapInterpolationMode="HighQuality"/>
+        <Border Grid.ColumnSpan="2" Background="{StaticResource WindowTint}" IsHitTestVisible="False"/>
+
+        <Border Background="{StaticResource SidebarBg}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0" Width="{l:S 88}">
             <DockPanel LastChildFill="False" x:Name="Sidebar">
                 <Border DockPanel.Dock="Top" Height="64" Background="Transparent" PointerPressed="TitleBar_PointerPressed">
-                    <Border Width="40" Height="40" CornerRadius="10" ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip.Tip="PyroLauncher">
+                    <Border Width="{l:S 42}" Height="{l:S 42}" CornerRadius="10" ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTip.Tip="PyroLauncher">
                         <Image Source="avares://PyroLauncher/Assets/logo.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
                     </Border>
                 </Border>
@@ -35,22 +40,22 @@
                 </StackPanel>
 
                 <Button DockPanel.Dock="Bottom" Classes="ghost" Margin="0,0,0,14" Command="{Binding OpenAccountsCommand}"
-                        Width="56" Height="56" Padding="0" HorizontalAlignment="Center" HorizontalContentAlignment="Center" ToolTip.Tip="{l:T 'Accounts'}">
-                    <Border Width="34" Height="34" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True">
+                        Width="{l:S 58}" Height="{l:S 58}" Padding="0" HorizontalAlignment="Center" HorizontalContentAlignment="Center" ToolTip.Tip="{l:T 'Accounts'}">
+                    <Border Width="{l:S 36}" Height="{l:S 36}" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True">
                         <Grid>
-                            <TextBlock Classes="icon" Text="{i:I E77B}" FontSize="15" Foreground="{StaticResource Fg2}" HorizontalAlignment="Center"/>
+                            <TextBlock Classes="icon" Text="{i:I E77B}" FontSize="{l:F 16}" Foreground="{StaticResource Fg2}" HorizontalAlignment="Center"/>
                             <Image c:RemoteImage.DecodeWidth="64" c:RemoteImage.Url="{Binding Account.AvatarUrl}" RenderOptions.BitmapInterpolationMode="None"/>
                         </Grid>
                     </Border>
                 </Button>
-                <TextBlock DockPanel.Dock="Bottom" Text="{Binding AccountLabel}" FontSize="10" Foreground="{StaticResource Fg3}"
-                           HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="68" Margin="0,0,0,2"/>
-                <Button DockPanel.Dock="Bottom" Classes="primary" Margin="0,0,0,12" Width="48" Height="48" Padding="0" CornerRadius="12"
+                <TextBlock DockPanel.Dock="Bottom" Text="{Binding AccountLabel}" FontSize="{l:S 11}" Foreground="{StaticResource Fg3}"
+                           HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="{l:S 80}" Margin="0,0,0,2"/>
+                <Button DockPanel.Dock="Bottom" Classes="primary" Margin="0,0,0,12" Width="{l:S 50}" Height="{l:S 50}" Padding="0" CornerRadius="12"
                         HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                         IsVisible="{Binding UpdateAvailable}" IsEnabled="{Binding !IsUpdating}"
                         Command="{Binding UpdateLauncherCommand}" ToolTip.Tip="{Binding UpdateTip}">
                     <Grid>
-                        <TextBlock Classes="icon" Text="{i:I E777}" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        <TextBlock Classes="icon" Text="{i:I E777}" FontSize="{l:F 18}" HorizontalAlignment="Center" VerticalAlignment="Center"
                                    IsVisible="{Binding !IsUpdating}"/>
                         <ProgressBar Width="34" MinWidth="0" Maximum="1" Value="{Binding UpdateProgress}" IsVisible="{Binding IsUpdating}" VerticalAlignment="Center"/>
                     </Grid>
@@ -66,14 +71,14 @@
             <Button HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding GoDownloadsCommand}" Padding="14,4"
                     ToolTip.Tip="{l:T 'Open downloads'}" IsVisible="{Binding Downloads.IsActive}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="icon" Text="{i:I E896}" FontSize="12" Margin="0,0,9,0"/>
+                    <TextBlock Classes="icon" Text="{i:I E896}" FontSize="{l:F 13}" Margin="0,0,9,0"/>
                     <TextBlock VerticalAlignment="Center">
                         <Run Text="{l:T 'Downloading'}"/><Run Text="{Binding Downloads.ActiveCount, StringFormat=' ({0})'}" Foreground="{StaticResource Fg2}"/>
                     </TextBlock>
                     <ProgressBar Width="120" Margin="12,0" VerticalAlignment="Center" Maximum="100"
                                  Value="{Binding Downloads.Progress, Converter={StaticResource Percent}}"
                                  IsIndeterminate="{Binding Downloads.Progress, Converter={StaticResource Indeterminate}}"/>
-                    <TextBlock Classes="mono" Text="{Binding Downloads.Text}" FontSize="12" VerticalAlignment="Center" MinWidth="110"/>
+                    <TextBlock Classes="mono" Text="{Binding Downloads.Text}" FontSize="{l:F 13}" VerticalAlignment="Center" MinWidth="110"/>
                 </StackPanel>
             </Button>
 
@@ -87,15 +92,18 @@
             </Viewbox>
         </Grid>
 
+        <!-- First-run welcome screens cover the whole window -->
+        <ContentControl Grid.ColumnSpan="2" Content="{Binding Onboarding}" IsVisible="{Binding Onboarding, Converter={StaticResource VisibleIf}}" Focusable="False"/>
+
         <ItemsControl Grid.ColumnSpan="2" ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,20" Width="380">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="10" Padding="14,11" Margin="0,8,0,0"
                             BoxShadow="0 4 24 0 #99000000">
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Classes="icon" Width="24" Height="24" FontSize="11" Content="{i:I E8BB}" VerticalAlignment="Top" ToolTip.Tip="{l:T 'Dismiss'}"
+                            <Button DockPanel.Dock="Right" Classes="icon" Width="24" Height="24" FontSize="{l:F 12}" Content="{i:I E8BB}" VerticalAlignment="Top" ToolTip.Tip="{l:T 'Dismiss'}"
                                     Command="{Binding $parent[Window].DataContext.DismissToastCommand}" CommandParameter="{Binding}"/>
-                            <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{Binding Glyph, Converter={StaticResource Icon}}" FontSize="15" Margin="0,1,12,0" VerticalAlignment="Top"/>
+                            <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{Binding Glyph, Converter={StaticResource Icon}}" FontSize="{l:F 16}" Margin="0,1,12,0" VerticalAlignment="Top"/>
                             <TextBlock Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Border>

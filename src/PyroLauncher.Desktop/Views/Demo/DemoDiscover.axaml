@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:d="clr-namespace:PyroLauncher.Desktop.Views.Demo"
+             x:Class="PyroLauncher.Desktop.Views.Demo.DemoDiscover">
+    <StackPanel Margin="36,0,28,0">
+        <TextBlock Classes="h1" Text="{l:T 'Discover'}"/>
+        <DockPanel Margin="0,16,0,16">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
+                <RadioButton Classes="segment" Content="Modrinth" IsChecked="True"/>
+                <RadioButton Classes="segment" Content="CurseForge"/>
+            </StackPanel>
+            <Border Classes="row" Width="320" Padding="10,8" HorizontalAlignment="Left" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1">
+                <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}"/><TextBlock Classes="faint" Text="{l:T 'Search modpacks'}"/></StackPanel>
+            </Border>
+        </DockPanel>
+        <ItemsControl x:Name="Cards" ItemsSource="{x:Static d:DemoData.Projects}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="3"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Classes="card" Margin="0,0,12,12" ClipToBounds="True">
+                        <StackPanel>
+                            <Border Height="104" Background="{Binding Tint}" CornerRadius="11,11,0,0">
+                                <TextBlock Text="{Binding Initial}" FontSize="{l:F 44}" FontWeight="Bold" Foreground="#66FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Margin="14,10,14,12">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Classes="faint" Text="{Binding Sub}" TextWrapping="Wrap" MaxLines="2" Height="34" Margin="0,3,0,6"/>
+                                <StackPanel Orientation="Horizontal" Spacing="6"><TextBlock Classes="icon" Text="{i:I E896}" FontSize="{l:F 12}" Foreground="{StaticResource Fg3}"/><TextBlock Classes="faint" Text="{Binding Extra}"/></StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <ItemsControl x:Name="Rows" ItemsSource="{x:Static d:DemoData.Projects}" IsVisible="False">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Classes="card" Padding="12" Margin="0,0,0,8">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left" Width="56" Height="56" CornerRadius="10" Background="{Binding Tint}" Margin="0,0,14,0">
+                                <TextBlock Text="{Binding Initial}" FontSize="{l:F 22}" FontWeight="Bold" Foreground="#66FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Button DockPanel.Dock="Right" Classes="primary" Content="{l:T 'Install'}" VerticalAlignment="Center"/>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Margin="12,0,16,0">
+                                <TextBlock Classes="icon" Text="{i:I E896}" FontSize="{l:F 12}" Foreground="{StaticResource Fg3}"/><TextBlock Classes="faint" Text="{Binding Extra}"/>
+                            </StackPanel>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                <TextBlock Classes="muted" Text="{Binding Sub}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

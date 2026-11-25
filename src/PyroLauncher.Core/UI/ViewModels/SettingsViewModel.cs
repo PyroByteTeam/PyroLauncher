@@ -21,6 +21,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly DispatcherTimer _saveTimer;
 
     [ObservableProperty] private string _section = "launcher";
+    public ThemesViewModel Themes { get; } = new();
     public ObservableCollection<JavaRuntime> JavaRuntimes { get; } = [];
     [ObservableProperty] private string? _javaStatus;
     [ObservableProperty] private bool _installingJava;

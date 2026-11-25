@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.Demo.DemoSettings">
+    <StackPanel Margin="36,0,28,0">
+        <TextBlock Classes="h1" Text="{l:T 'Settings'}"/>
+        <TextBlock Classes="muted" Text="{l:T 'Changes are saved automatically.'}" Margin="0,4,0,18"/>
+        <Border BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,18">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Classes="tab" Content="{l:T 'Launcher'}" Tag="{i:I E8B7}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Appearance'}" Tag="{i:I E790}" IsChecked="True"/>
+                <RadioButton Classes="tab" Content="{l:T 'Minecraft (all instances)'}" Tag="{i:I E7FC}"/>
+                <RadioButton Classes="tab" Content="{l:T 'About'}" Tag="{i:I E946}"/>
+            </StackPanel>
+        </Border>
+        <TextBlock Classes="h2" Text="{l:T 'Theme'}" Margin="0,0,0,10"/>
+        <StackPanel Orientation="Horizontal" Spacing="10">
+            <Border Classes="card" Width="130" Height="70" BorderBrush="{StaticResource Accent}" BorderThickness="2"><Ellipse Width="16" Height="16" Fill="{StaticResource Accent}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"/></Border>
+            <Border Classes="card" Width="130" Height="70" Background="#FF1A1410"><Ellipse Width="16" Height="16" Fill="#FFFF8A3D" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"/></Border>
+            <Border Classes="card" Width="130" Height="70" Background="#FF111926"><Ellipse Width="16" Height="16" Fill="#FF5AB0FF" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"/></Border>
+            <Border Classes="card" Width="130" Height="70" Background="#FF121A14"><Ellipse Width="16" Height="16" Fill="#FF6BD68A" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"/></Border>
+        </StackPanel>
+        <Border Classes="settingRow" Margin="0,8,0,0">
+            <Grid ColumnDefinitions="*,280">
+                <StackPanel><TextBlock FontWeight="SemiBold" Text="{l:T 'Font size'}"/><TextBlock Classes="faint" Text="{l:T 'Scales all text in the launcher.'}"/></StackPanel>
+                <Slider Grid.Column="1" Minimum="80" Maximum="150" Value="100" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+        <Border Classes="settingRow">
+            <Grid ColumnDefinitions="*,280">
+                <StackPanel><TextBlock FontWeight="SemiBold" Text="{l:T 'Side menu size'}"/><TextBlock Classes="faint" Text="{l:T 'The page selector on the left: icons, labels and width.'}"/></StackPanel>
+                <Slider Grid.Column="1" Minimum="80" Maximum="150" Value="100" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+        <Border Classes="settingRow">
+            <DockPanel>
+                <ToggleSwitch DockPanel.Dock="Right" IsChecked="True"/>
+                <TextBlock FontWeight="SemiBold" Text="{l:T 'Separate game console window'}" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

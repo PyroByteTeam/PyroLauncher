@@ -13,11 +13,11 @@
         </Style>
         <Style Selector="ToggleButton.flag:checked /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="{StaticResource Fg}"/>
-            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Foreground" Value="{StaticResource Bg0}"/>
         </Style>
         <Style Selector="ToggleButton.flag:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#FFDADADA"/>
-            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="{StaticResource Fg2}"/>
+            <Setter Property="Foreground" Value="{StaticResource Bg0}"/>
         </Style>
     </UserControl.Styles>
     <Grid RowDefinitions="Auto,*" Margin="0,0,0,20">
@@ -27,14 +27,14 @@
                     <TextBox.KeyBindings><KeyBinding Gesture="Enter" Command="{Binding AddToWhitelistCommand}"/></TextBox.KeyBindings>
                 </TextBox>
                 <Button Classes="primary" Command="{Binding AddToWhitelistCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E710}" FontSize="12"/><TextBlock Text="{l:T 'Add to whitelist'}"/></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E710}" FontSize="{l:F 13}"/><TextBlock Text="{l:T 'Add to whitelist'}"/></StackPanel>
                 </Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <TextBlock Classes="h3" Text="{Binding OnlineText}" VerticalAlignment="Center"/>
                 <CheckBox IsChecked="{Binding OnlineOnly}" Content="{l:T 'Online only'}"/>
                 <Button Classes="ghost" Command="{Binding RefreshListCommand}" ToolTip.Tip="{l:T 'Refresh'}">
-                    <TextBlock Classes="icon" Text="{i:I E72C}" FontSize="12"/>
+                    <TextBlock Classes="icon" Text="{i:I E72C}" FontSize="{l:F 13}"/>
                 </Button>
             </StackPanel>
         </DockPanel>
@@ -67,12 +67,12 @@
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
                                         <Border Classes="badge" IsVisible="{Binding IsOnline}">
                                             <StackPanel Orientation="Horizontal">
-                                                <Ellipse Width="6" Height="6" Fill="White" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                <Ellipse Width="6" Height="6" Fill="{StaticResource Accent}" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                                 <TextBlock Classes="badgeText" Text="{l:T 'Online'}"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>
-                                    <TextBlock Classes="faint" Text="{Binding Uuid}" FontFamily="{StaticResource MonoFont}" FontSize="11" Margin="0,2,0,0"/>
+                                    <TextBlock Classes="faint" Text="{Binding Uuid}" FontFamily="{StaticResource MonoFont}" FontSize="{l:F 12}" Margin="0,2,0,0"/>
                                 </StackPanel>
                             </DockPanel>
                         </Border>

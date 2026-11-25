@@ -16,6 +16,7 @@
         <d:NullableIntConverter x:Key="NullableInt"/>
         <d:IconConverter x:Key="Icon"/>
         <d:FormatConverter x:Key="Format"/>
+        <d:HexColorConverter x:Key="HexColor"/>
     </Application.Resources>
 
     <Application.Styles>
@@ -31,6 +32,7 @@
                                        ListLow="#FF1D1D1D" ListMedium="#FF262626" RegionColor="#FF080808"/>
             </FluentTheme.Palettes>
         </FluentTheme>
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml"/>
         <StyleInclude Source="avares://PyroLauncher/Theme.axaml"/>
     </Application.Styles>
 </Application>

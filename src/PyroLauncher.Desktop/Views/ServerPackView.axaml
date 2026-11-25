@@ -8,7 +8,7 @@
             <Button Classes="icon" Content="{i:I E72B}" Command="{Binding BackCommand}" ToolTip.Tip="{l:T 'Back to server packs'}" VerticalAlignment="Top" Margin="-8,0,10,0"/>
             <Border Grid.Column="1" Width="84" Height="84" CornerRadius="14" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line}" BorderThickness="1" ClipToBounds="True">
                 <Grid>
-                    <TextBlock Text="{Binding Pack.Initial}" FontSize="38" FontWeight="Bold" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Pack.Initial}" FontSize="{l:F 38}" FontWeight="Bold" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     <Image Source="{Binding Pack.Instance.Icon}" Stretch="UniformToFill"/>
                 </Grid>
             </Border>
@@ -21,7 +21,7 @@
                     </Border>
                     <Border Classes="badge">
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="White" Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{Binding Pack.IsRunning}"/>
+                            <Ellipse Width="6" Height="6" Fill="{StaticResource Accent}" Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{Binding Pack.IsRunning}"/>
                             <TextBlock Classes="badgeText" Text="{Binding Pack.StateText}"/>
                         </StackPanel>
                     </Border>
@@ -30,10 +30,10 @@
             <StackPanel Grid.Column="3" VerticalAlignment="Center" Width="240">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Classes="icon" Content="{i:I E838}" ToolTip.Tip="{l:T 'Open server folder'}" Command="{Binding OpenFolderCommand}" Margin="0,0,8,0" Width="44" Height="44"/>
-                    <Button Classes="primary" Command="{Binding ToggleCommand}" Padding="26,11" FontSize="15" MinWidth="140" HorizontalContentAlignment="Center"
+                    <Button Classes="primary" Command="{Binding ToggleCommand}" Padding="26,11" FontSize="{l:F 16}" MinWidth="140" HorizontalContentAlignment="Center"
                             IsEnabled="{Binding !Pack.IsBusy}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <TextBlock Classes="icon" Text="{Binding ToggleGlyph, Converter={StaticResource Icon}}" FontSize="14"/>
+                            <TextBlock Classes="icon" Text="{Binding ToggleGlyph, Converter={StaticResource Icon}}" FontSize="{l:F 15}"/>
                             <TextBlock Text="{Binding ToggleText}"/>
                         </StackPanel>
                     </Button>

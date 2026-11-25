@@ -7,15 +7,15 @@
         <DockPanel Margin="0,0,0,12">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" Margin="10,0,0,0">
                 <Button Classes="ghost" Command="{Binding OpenFileCommand}" ToolTip.Tip="{l:T 'Open server.properties in your editor'}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E8A5}" FontSize="12"/><TextBlock Text="{l:T 'Open file'}"/></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E8A5}" FontSize="{l:F 13}"/><TextBlock Text="{l:T 'Open file'}"/></StackPanel>
                 </Button>
                 <Button Classes="ghost" Command="{Binding LoadCommand}" ToolTip.Tip="{l:T 'Discard changes and reload the file'}">
-                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E72C}" FontSize="12"/><TextBlock Text="{l:T 'Reload'}"/></StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E72C}" FontSize="{l:F 13}"/><TextBlock Text="{l:T 'Reload'}"/></StackPanel>
                 </Button>
             </StackPanel>
             <Grid MaxWidth="420" HorizontalAlignment="Left">
                 <TextBox Classes="search" Text="{Binding Search}" Watermark="{l:T 'Search settings'}" Width="420"/>
-                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="{l:F 13}" Margin="12,0,0,0" IsHitTestVisible="False"/>
             </Grid>
         </DockPanel>
 

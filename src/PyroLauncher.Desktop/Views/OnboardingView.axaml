@@ -1,0 +1,160 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:demo="clr-namespace:PyroLauncher.Desktop.Views.Demo"
+             x:Class="PyroLauncher.Desktop.Views.OnboardingView"
+             Background="{StaticResource Bg0}">
+    <UserControl.Styles>
+        <!-- Step indicator -->
+        <Style Selector="Border.stepPill">
+            <Setter Property="Height" Value="4"/><Setter Property="Width" Value="56"/><Setter Property="CornerRadius" Value="2"/>
+            <Setter Property="Background" Value="{StaticResource Bg4}"/>
+        </Style>
+        <Style Selector="Border.stepPill.on"><Setter Property="Background" Value="{StaticResource Accent}"/></Style>
+
+        <!-- Big selectable option (language, layout) -->
+        <Style Selector="Button.choice">
+            <Setter Property="Background" Value="{StaticResource Bg2}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        </Style>
+        <Style Selector="Button.choice:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Bg3}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Fg3}"/>
+        </Style>
+        <Style Selector="Button.choice.active /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+        </Style>
+        <Style Selector="Button.choice.active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+        </Style>
+
+        <!-- Demo UI frame -->
+        <Style Selector="Border.demoFrame">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BoxShadow" Value="0 10 40 0 #80000000"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="56,*">
+        <!-- Drag strip with the step indicator (the window's caption buttons sit on the right) -->
+        <Border Background="Transparent" PointerPressed="Drag_PointerPressed">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                <Border Classes="stepPill on"/>
+                <Border Classes="stepPill" Classes.on="{Binding ReachedTour}"/>
+                <Border Classes="stepPill" Classes.on="{Binding ReachedLayout}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 1. Language -->
+        <StackPanel Grid.Row="1" Width="460" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,56"
+                    IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=language}">
+            <Border Width="72" Height="72" CornerRadius="16" ClipToBounds="True" HorizontalAlignment="Center">
+                <Image Source="avares://PyroLauncher/Assets/logo.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+            </Border>
+            <TextBlock Classes="h1" Text="{l:T 'Welcome to PyroLauncher'}" HorizontalAlignment="Center" Margin="0,20,0,6"/>
+            <TextBlock Classes="muted" Text="{l:T 'Choose your language to get started.'}" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+            <ItemsControl ItemsSource="{Binding LanguageOptions}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Classes="choice" Margin="0,0,0,8" Padding="18,14"
+                                Classes.active="{Binding IsSelected}"
+                                Command="{Binding $parent[ItemsControl].DataContext.ChooseLanguageCommand}" CommandParameter="{Binding Value}">
+                            <TextBlock Text="{Binding Label}" FontSize="{l:F 15}" FontWeight="SemiBold"/>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Classes="primary" Content="{l:T 'Continue'}" HorizontalAlignment="Center" Padding="28,9" Margin="0,16,0,0"
+                    Command="{Binding ContinueFromLanguageCommand}"/>
+        </StackPanel>
+
+        <!-- 2. Tour: the real-looking demo UI on the left, the explanation on the right -->
+        <Grid Grid.Row="1" RowDefinitions="*,Auto" Margin="40,0,40,32" MaxWidth="1240"
+              IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=tour}">
+            <Grid ColumnDefinitions="3*,2*">
+                <Border Classes="demoFrame" VerticalAlignment="Center">
+                    <Viewbox Stretch="Uniform">
+                        <demo:DemoWindow Page="{Binding Slide.DemoPage}"/>
+                    </Viewbox>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="36,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Classes="overline" Text="{l:T 'QUICK TOUR'}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,14,0,0">
+                        <Border Width="44" Height="44" CornerRadius="12" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line2}" BorderThickness="1">
+                            <TextBlock Classes="icon" Text="{Binding Slide.Glyph, Converter={StaticResource Icon}}" FontSize="{l:F 20}"
+                                       Foreground="{StaticResource Accent}" HorizontalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Classes="h1" Text="{Binding Slide.Title}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Slide.Text}" Foreground="{StaticResource Fg2}" FontSize="{l:F 15}" TextWrapping="Wrap"
+                               LineHeight="24" Margin="0,16,0,0"/>
+                    <TextBlock Classes="faint" Text="{Binding SlidePosition}" Margin="0,14,0,0"/>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="0,20,0,0">
+                <Button Classes="ghost" Content="{Binding SkipText}" IsEnabled="{Binding CanSkip}" Command="{Binding SkipTourCommand}" HorizontalAlignment="Left"/>
+                <Button Grid.Column="1" Content="{l:T 'Back'}" Command="{Binding PreviousSlideCommand}" IsEnabled="{Binding CanGoBack}" Margin="0,0,8,0"/>
+                <Button Grid.Column="2" Classes="primary" Command="{Binding NextSlideCommand}" Padding="24,7">
+                    <Panel>
+                        <TextBlock Text="{l:T 'Next'}" IsVisible="{Binding !IsLastSlide}"/>
+                        <TextBlock Text="{l:T 'Continue'}" IsVisible="{Binding IsLastSlide}"/>
+                    </Panel>
+                </Button>
+            </Grid>
+        </Grid>
+
+        <!-- 3. Layout preferences: the same demo UI in both variants, pick one for each setting -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*,Auto" Margin="40,0,40,28" MaxWidth="1320"
+              IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=layout}">
+            <StackPanel HorizontalAlignment="Center">
+                <TextBlock Classes="overline" Text="{Binding QuestionPosition}" HorizontalAlignment="Center"/>
+                <TextBlock Classes="h1" Text="{Binding Question.Title}" HorizontalAlignment="Center" Margin="0,8,0,4"/>
+                <TextBlock Classes="muted" Text="{l:T 'Click the one you like more. You can change it later in Settings.'}" HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1" ColumnDefinitions="*,24,*" VerticalAlignment="Center" Margin="0,20">
+                <Button Classes="choice" Padding="12" Classes.active="{Binding Question.IsA}" Command="{Binding PickCommand}" CommandParameter="A">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Bottom" Margin="4,12,4,2">
+                            <TextBlock Classes="h3" Text="{Binding Question.LabelA}" FontSize="{l:F 16}"/>
+                            <TextBlock Classes="faint" Text="{Binding Question.TextA}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Viewbox Stretch="Uniform"><demo:DemoWindow Page="{Binding Question.DemoA}"/></Viewbox>
+                    </DockPanel>
+                </Button>
+                <Button Grid.Column="2" Classes="choice" Padding="12" Classes.active="{Binding Question.IsB}" Command="{Binding PickCommand}" CommandParameter="B">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Bottom" Margin="4,12,4,2">
+                            <TextBlock Classes="h3" Text="{Binding Question.LabelB}" FontSize="{l:F 16}"/>
+                            <TextBlock Classes="faint" Text="{Binding Question.TextB}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Viewbox Stretch="Uniform"><demo:DemoWindow Page="{Binding Question.DemoB}"/></Viewbox>
+                    </DockPanel>
+                </Button>
+            </Grid>
+
+            <Button Grid.Row="2" Content="{l:T 'Back'}" HorizontalAlignment="Center" Command="{Binding PreviousQuestionCommand}" IsVisible="{Binding CanGoBackQuestion}"/>
+        </Grid>
+
+        <!-- 4. Done -->
+        <StackPanel Grid.Row="1" Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,56"
+                    IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=done}">
+            <Border Width="80" Height="80" CornerRadius="40" Background="{StaticResource Accent}" HorizontalAlignment="Center">
+                <TextBlock Classes="icon" Text="{i:I E73E}" FontSize="{l:F 34}" Foreground="{StaticResource AccentFg}" HorizontalAlignment="Center"/>
+            </Border>
+            <TextBlock Classes="h1" Text="{l:T 'You are all set'}" HorizontalAlignment="Center" Margin="0,22,0,8"/>
+            <TextBlock Classes="muted" Text="{l:T 'Layout, themes, font and menu sizes can be changed any time in Settings → Appearance.'}"
+                       TextWrapping="Wrap" TextAlignment="Center" FontSize="{l:F 14}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" Margin="0,26,0,0">
+                <Button Content="{l:T 'Back'}" Command="{Binding BackToLayoutCommand}"/>
+                <Button Classes="primary" Content="{l:T 'Start using PyroLauncher'}" Padding="22,8" Command="{Binding FinishCommand}"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
