@@ -65,6 +65,20 @@ public partial class Instance : ObservableObject
     public string CurrentKey => $"{Config.MinecraftVersion}|{Config.Loader}|{Config.LoaderVersion}";
     /// <summary>False for fresh instances and after the game or loader version changed - the UI then offers Install instead of Play.</summary>
     public bool IsInstalled => Config.PreparedKey == CurrentKey;
+
+    /// <summary>Glyph of the play button on home cards: cancel while busy, stop while running, install until installed.</summary>
+    public string PlayGlyph => IsBusy ? "" : IsRunning ? "" : IsInstalled ? "" : "";
+    public string PlayTip => IsBusy ? UI.L.T("Cancel") : IsRunning ? UI.L.T("Stop") : IsInstalled ? UI.L.T("Play") : UI.L.T("Install");
+
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.PropertyName is nameof(IsBusy) or nameof(IsRunning) or nameof(IsInstalled))
+        {
+            base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(PlayGlyph)));
+            base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(PlayTip)));
+        }
+    }
     public bool IsModpack => Config.Modpack != null;
 
     public void MarkInstalled()

@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.NewInstanceView">
+    <Border Classes="dialog" Width="580">
+        <StackPanel>
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="12" Command="{Binding CancelCommand}" ToolTip.Tip="{l:T 'Close'}" VerticalAlignment="Top"/>
+                <TextBlock Classes="h2" Text="{l:T 'New instance'}" FontSize="20"/>
+            </DockPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,14,0,18">
+                <RadioButton Classes="tab" Content="{l:T 'Create'}" Tag="{i:I E710}" GroupName="newmode" IsEnabled="{Binding !IsBusy}"
+                             IsChecked="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=create}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Import modpack'}" Tag="{i:I E8B5}" GroupName="newmode" IsEnabled="{Binding !IsBusy}"
+                             IsChecked="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=import}"/>
+            </StackPanel>
+
+            <!-- ================= Create ================= -->
+            <StackPanel IsVisible="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=create}">
+                <TextBlock Classes="overline" Text="{l:T 'NAME'}" Margin="0,0,0,6"/>
+                <TextBox Text="{Binding Name}" Watermark="{Binding NamePlaceholder}"/>
+
+                <TextBlock Classes="overline" Text="{l:T 'MINECRAFT VERSION'}" Margin="0,18,0,6"/>
+                <Grid ColumnDefinitions="*,8,130,Auto">
+                    <ComboBox ItemsSource="{Binding VersionsView}" SelectedItem="{Binding SelectedVersion}" PlaceholderText="{l:T 'Loading versions…'}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Id}"/>
+                                    <TextBlock Classes="faint" Text="{Binding Type}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox Grid.Column="2" Text="{Binding VersionQuery}" Watermark="{l:T 'Filter'}" ToolTip.Tip="{l:T 'Filter the version list'}"/>
+                    <CheckBox Grid.Column="3" Content="{l:T 'Show snapshots'}" IsChecked="{Binding ShowSnapshots}" Margin="14,0,0,0"/>
+                </Grid>
+
+                <TextBlock Classes="overline" Text="{l:T 'MOD LOADER'}" Margin="0,18,0,6"/>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <RadioButton Classes="segment" Content="{l:T 'Vanilla'}" GroupName="loader" IsChecked="{Binding Loader, Converter={StaticResource Eq}, ConverterParameter=Vanilla}"/>
+                    <RadioButton Classes="segment" Content="Fabric" GroupName="loader" IsChecked="{Binding Loader, Converter={StaticResource Eq}, ConverterParameter=Fabric}"/>
+                    <RadioButton Classes="segment" Content="Forge" GroupName="loader" IsChecked="{Binding Loader, Converter={StaticResource Eq}, ConverterParameter=Forge}"/>
+                    <RadioButton Classes="segment" Content="NeoForge" GroupName="loader" IsChecked="{Binding Loader, Converter={StaticResource Eq}, ConverterParameter=NeoForge}"/>
+                </StackPanel>
+
+                <StackPanel IsVisible="{Binding !IsVanilla}">
+                    <TextBlock Classes="overline" Text="{l:T 'LOADER VERSION'}" Margin="0,18,0,6"/>
+                    <Grid ColumnDefinitions="*,8,130">
+                        <ComboBox ItemsSource="{Binding LoaderVersionsView}" SelectedItem="{Binding SelectedLoaderVersion}" PlaceholderText="{l:T 'Loading…'}"/>
+                        <TextBox Grid.Column="2" Text="{Binding LoaderQuery}" Watermark="{l:T 'Filter'}"/>
+                    </Grid>
+                    <TextBlock Classes="muted" Text="{Binding LoaderMessage}" TextWrapping="Wrap" Margin="0,6,0,0" IsVisible="{Binding LoaderMessage, Converter={StaticResource VisibleIf}}"/>
+                </StackPanel>
+
+                <TextBlock Classes="overline" Text="{l:T 'CATEGORY'}" Margin="0,18,0,6"/>
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}"/>
+
+                <DockPanel Margin="0,26,0,0">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Button Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}"/>
+                        <Button Classes="primary" Content="{l:T 'Create instance'}" Command="{Binding CreateCommand}" IsDefault="True"/>
+                    </StackPanel>
+                    <TextBlock Classes="faint" Text="{l:T 'The instance is created empty; game files download on first launch.'}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,16,0"/>
+                </DockPanel>
+            </StackPanel>
+
+            <!-- ================= Import ================= -->
+            <StackPanel IsVisible="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=import}">
+                <Border x:Name="DropZone" DragDrop.AllowDrop="True" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="10" Padding="20,26">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Classes="icon" Text="{i:I E896}" FontSize="26" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
+                        <TextBlock Text="{l:T 'Drop a .mrpack (Modrinth), .zip (CurseForge) or .pyropack (PyroLauncher) here'}" HorizontalAlignment="Center" Margin="0,12,0,4" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Classes="faint" Text="{l:T 'or'}" HorizontalAlignment="Center"/>
+                        <Button Content="{l:T 'Choose file…'}" Command="{Binding BrowseImportCommand}" HorizontalAlignment="Center" Margin="0,8,0,0" IsEnabled="{Binding !IsBusy}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card" Padding="16,14" Margin="0,14,0,0" IsVisible="{Binding ImportInfo, Converter={StaticResource VisibleIf}}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Classes="h3" Text="{Binding ImportInfo.Name}"/>
+                            <Border Classes="badge" Margin="10,0,0,0"><TextBlock Classes="badgeText" Text="{Binding ImportInfo.Format}"/></Border>
+                        </StackPanel>
+                        <TextBlock Classes="muted" Margin="0,6,0,0">
+                            <Run Text="Minecraft"/> <Run Text="{Binding ImportInfo.MinecraftVersion}"/>
+                            <Run Text=" · "/><Run Text="{Binding ImportInfo.Loader}"/> <Run Text="{Binding ImportInfo.LoaderVersion}"/>
+                        </TextBlock>
+                        <TextBlock Classes="faint" Text="{Binding ImportPath}" TextTrimming="CharacterEllipsis" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel IsVisible="{Binding ImportInfo, Converter={StaticResource VisibleIf}}">
+                    <TextBlock Classes="overline" Text="{l:T 'NAME'}" Margin="0,16,0,6"/>
+                    <TextBox Text="{Binding ImportName}" IsEnabled="{Binding !IsBusy}"/>
+                    <TextBlock Classes="overline" Text="{l:T 'CATEGORY'}" Margin="0,16,0,6"/>
+                    <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}" IsEnabled="{Binding !IsBusy}"/>
+                </StackPanel>
+
+                <TextBlock Text="{Binding ImportError}" TextWrapping="Wrap" Margin="0,12,0,0" IsVisible="{Binding ImportError, Converter={StaticResource VisibleIf}}"/>
+
+                <StackPanel Margin="0,16,0,0" IsVisible="{Binding IsBusy}">
+                    <TextBlock Classes="muted" Text="{Binding Status}" TextTrimming="CharacterEllipsis"/>
+                    <ProgressBar Margin="0,8,0,0" Maximum="100" Value="{Binding Progress, Converter={StaticResource Percent}}"
+                                 IsIndeterminate="{Binding Progress, Converter={StaticResource Indeterminate}}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0" Spacing="10">
+                    <Button Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}"/>
+                    <Button Classes="primary" Content="{l:T 'Import'}" Command="{Binding ImportCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

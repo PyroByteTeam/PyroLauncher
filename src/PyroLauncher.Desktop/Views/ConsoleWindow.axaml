@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:PyroLauncher.Desktop"
+        xmlns:i="clr-namespace:PyroLauncher.Desktop"
+        xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+        x:Class="PyroLauncher.Desktop.Views.ConsoleWindow"
+        Icon="avares://PyroLauncher/Assets/pyro.ico"
+        Width="1000" Height="640" MinWidth="560" MinHeight="320"
+        Background="{StaticResource Bg0}" Foreground="{StaticResource Fg}" FontSize="13">
+    <Grid RowDefinitions="Auto,*">
+        <DockPanel Margin="14,12,14,10">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
+                <CheckBox Content="{l:T 'Errors &amp; warnings'}" IsChecked="{Binding #Viewer.ErrorsOnly}" Margin="0,0,10,0"/>
+                <CheckBox Content="{l:T 'Auto-scroll'}" IsChecked="{Binding #Viewer.AutoScroll}" Margin="0,0,10,0"/>
+                <Button Content="{l:T 'Copy'}" Click="Copy_Click" ToolTip.Tip="{l:T 'Copy selected lines (or everything if nothing is selected)'}"/>
+                <Button Content="{l:T 'Clear'}" Click="Clear_Click"/>
+                <Button Content="{l:T 'Logs folder'}" Click="Folder_Click"/>
+                <Button Classes="primary" Content="{l:T 'Kill game'}" Click="Kill_Click" IsVisible="{Binding IsRunning}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Classes="icon" Text="{i:I E756}" Margin="0,0,10,0"/>
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <Border Classes="badge" Margin="12,0,0,0" IsVisible="{Binding IsRunning}">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="6" Height="6" Fill="White" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Classes="badgeText" Text="{l:T 'Running'}" Foreground="White"/>
+                    </StackPanel>
+                </Border>
+                <TextBlock Classes="faint" Text="{Binding Status}" Margin="12,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+        </DockPanel>
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="14,0,14,14">
+            <Grid Margin="0,0,0,10">
+                <TextBox x:Name="FilterBox" Classes="search" Watermark="{l:T 'Filter lines…'}"/>
+                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="12" Margin="12,0,0,0" IsHitTestVisible="False"/>
+            </Grid>
+            <c:LogViewer x:Name="Viewer" Grid.Row="1" Lines="{Binding LogLines}" Filter="{Binding #FilterBox.Text}"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,183 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.DiscoverView">
+    <UserControl.Styles>
+        <Style Selector="Border.platform">
+            <Setter Property="Background" Value="#E6000000"/>
+            <Setter Property="BorderBrush" Value="#33FFFFFF"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Margin="36,0,20,0" RowDefinitions="Auto,Auto,Auto,*">
+        <StackPanel Margin="0,0,16,18">
+            <TextBlock Classes="h1" Text="{l:T 'Discover'}"/>
+            <TextBlock Classes="muted" Text="{l:T 'Find modpacks on Modrinth and CurseForge and install them as new instances.'}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Search + platform -->
+        <DockPanel Grid.Row="1" Margin="0,0,16,10">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="6">
+                <RadioButton Classes="segment" Content="{l:T 'All'}" Padding="14,7" GroupName="platform" IsChecked="{Binding Platform, Converter={StaticResource Eq}, ConverterParameter=All}"/>
+                <RadioButton Classes="segment" Content="Modrinth" Padding="14,7" GroupName="platform" IsChecked="{Binding Platform, Converter={StaticResource Eq}, ConverterParameter=Modrinth}"/>
+                <RadioButton Classes="segment" Content="CurseForge" Padding="14,7" GroupName="platform" IsChecked="{Binding Platform, Converter={StaticResource Eq}, ConverterParameter=CurseForge}"/>
+            </StackPanel>
+            <Grid>
+                <TextBox Classes="search" Text="{Binding Query}" Watermark="{l:T 'Search modpacks'}" Padding="34,9,10,9" FontSize="14"/>
+                <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="13" Margin="13,0,0,0" IsHitTestVisible="False"/>
+            </Grid>
+        </DockPanel>
+
+        <!-- Filters -->
+        <DockPanel Grid.Row="2" Margin="0,0,16,14">
+            <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding ClearFiltersCommand}" Padding="10,6" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="7">
+                    <TextBlock Classes="icon" Text="{i:I E894}" FontSize="12"/>
+                    <TextBlock Text="{l:T 'Reset filters'}"/>
+                </StackPanel>
+            </Button>
+            <WrapPanel>
+                <ComboBox ItemsSource="{Binding GameVersions}" SelectedItem="{Binding GameVersion}" Width="160" Margin="0,0,8,0" ToolTip.Tip="{l:T 'Minecraft version'}"/>
+                <ComboBox ItemsSource="{Binding Loaders}" SelectedItem="{Binding Loader}" Width="175" Margin="0,0,8,0" ToolTip.Tip="{l:T 'Mod loader'}"/>
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}" Width="180" Margin="0,0,8,0" ToolTip.Tip="{l:T 'Category'}"/>
+                <ComboBox ItemsSource="{Binding Sorts}" SelectedItem="{Binding Sort}" Width="200" Margin="0,0,8,0" ToolTip.Tip="{l:T 'Sort by'}"/>
+            </WrapPanel>
+        </DockPanel>
+
+        <ScrollViewer x:Name="Scroller" Grid.Row="3" Padding="0,0,16,24">
+            <StackPanel>
+                <Border Background="{StaticResource Bg2}" CornerRadius="8" Padding="12,8" Margin="0,0,0,12" IsVisible="{Binding Warning, Converter={StaticResource VisibleIf}}">
+                    <DockPanel>
+                        <TextBlock Classes="icon" Text="{i:I E7BA}" Foreground="{StaticResource Fg2}" Margin="0,0,10,0" VerticalAlignment="Top"/>
+                        <TextBlock Text="{Binding Warning}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap"/>
+                    </DockPanel>
+                </Border>
+                <ProgressBar IsIndeterminate="True" Margin="0,0,0,12" IsVisible="{Binding IsLoading}"/>
+                <TextBlock Text="{Binding Error}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" IsVisible="{Binding Error, Converter={StaticResource VisibleIf}}"/>
+                <TextBlock Classes="muted" Text="{l:T 'No modpacks match your search.'}" Margin="0,20,0,0" HorizontalAlignment="Center" IsVisible="{Binding IsEmpty}"/>
+
+                <!-- grid -->
+                <ItemsControl ItemsSource="{Binding Results}" IsVisible="{Binding IsGrid}">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Classes="card clickable" Width="268" Margin="0,0,16,16" c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenCommand}">
+                                <StackPanel>
+                                    <Grid Height="140">
+                                        <Border CornerRadius="11,11,0,0" Background="{StaticResource Bg3}" ClipToBounds="True">
+                                            <Grid>
+                                                <!-- blurred fill + the whole picture on top, so nothing is cropped -->
+                                                <Image c:RemoteImage.DecodeWidth="200" c:RemoteImage.Url="{Binding BackdropUrl}" Stretch="UniformToFill" Opacity="0.35">
+                                                    <Image.Effect><BlurEffect Radius="24"/></Image.Effect>
+                                                </Image>
+                                                <Image c:RemoteImage.DecodeWidth="1000" c:RemoteImage.Url="{Binding ImageUrl}" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="HighQuality"
+                                                       IsVisible="{Binding HasBanner}"/>
+                                                <Border Width="84" Height="84" CornerRadius="16" ClipToBounds="True" Background="{StaticResource Bg3}" IsVisible="{Binding !HasBanner}">
+                                                    <Image c:RemoteImage.DecodeWidth="192" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                        <Border Classes="badge platform" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10">
+                                            <TextBlock Classes="badgeText" Text="{Binding SourceText}" Foreground="White"/>
+                                        </Border>
+                                    </Grid>
+                                    <DockPanel Margin="14,12,14,0">
+                                        <Border DockPanel.Dock="Left" Width="40" Height="40" CornerRadius="9" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0">
+                                            <Grid>
+                                                <TextBlock Text="{Binding Initials}" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Image c:RemoteImage.DecodeWidth="96" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Title}"/>
+                                            <TextBlock Classes="faint" Text="{Binding Author, Converter={StaticResource Format}, ConverterParameter='by #'}" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                    <TextBlock Classes="muted" Text="{Binding Description}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" Height="38" Margin="14,8,14,0"
+                                               ToolTip.Tip="{Binding Description}"/>
+                                    <WrapPanel Margin="14,8,14,0">
+                                        <TextBlock Classes="faint" Text="{Binding GameVersionsText}" Margin="0,0,8,0"/>
+                                        <TextBlock Classes="faint" Text="{Binding LoadersText}"/>
+                                    </WrapPanel>
+                                    <Border BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Margin="0,10,0,0" Padding="14,9">
+                                        <UniformGrid Columns="3">
+                                            <StackPanel ToolTip.Tip="{l:T 'Downloads'}">
+                                                <TextBlock Classes="overline" Text="{l:T 'DOWNLOADS'}" FontSize="9.5"/>
+                                                <TextBlock Text="{Binding DownloadsText}" FontWeight="SemiBold" FontSize="12"/>
+                                            </StackPanel>
+                                            <StackPanel ToolTip.Tip="{l:T 'Last update'}">
+                                                <TextBlock Classes="overline" Text="{l:T 'UPDATED'}" FontSize="9.5"/>
+                                                <TextBlock Text="{Binding UpdatedText}" FontWeight="SemiBold" FontSize="12"/>
+                                            </StackPanel>
+                                            <StackPanel ToolTip.Tip="{l:T 'First release'}">
+                                                <TextBlock Classes="overline" Text="{l:T 'RELEASED'}" FontSize="9.5"/>
+                                                <TextBlock Text="{Binding CreatedText}" FontWeight="SemiBold" FontSize="12"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- list -->
+                <ItemsControl ItemsSource="{Binding Results}" IsVisible="{Binding !IsGrid}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Classes="card clickable" Padding="14" Margin="0,0,0,10" c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenCommand}">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Border Width="72" Height="72" CornerRadius="12" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,16,0" VerticalAlignment="Top">
+                                        <Grid>
+                                            <TextBlock Text="{Binding Initials}" FontWeight="Bold" FontSize="18" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Image c:RemoteImage.DecodeWidth="144" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                        </Grid>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="15" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Classes="faint" Text="{Binding Author, Converter={StaticResource Format}, ConverterParameter='by #'}" Margin="10,0,0,0" VerticalAlignment="Bottom"/>
+                                        </StackPanel>
+                                        <TextBlock Classes="muted" Text="{Binding Description}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <Border Classes="badge" Margin="0,0,6,0"><TextBlock Classes="badgeText" Text="{Binding SourceText}"/></Border>
+                                            <Border Classes="badge" Margin="0,0,6,0" IsVisible="{Binding GameVersionsText, Converter={StaticResource VisibleIf}}">
+                                                <TextBlock Classes="badgeText" Text="{Binding GameVersionsText}"/>
+                                            </Border>
+                                            <Border Classes="badge" Margin="0,0,6,0" IsVisible="{Binding LoadersText, Converter={StaticResource VisibleIf}}">
+                                                <TextBlock Classes="badgeText" Text="{Binding LoadersText}"/>
+                                            </Border>
+                                            <TextBlock Classes="faint" Text="{Binding CategoriesText}" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Margin="20,0,4,0" VerticalAlignment="Center" MinWidth="170" Spacing="4">
+                                        <StackPanel Orientation="Horizontal" ToolTip.Tip="{l:T 'Downloads'}" Spacing="5">
+                                            <TextBlock Classes="icon" Text="{i:I E896}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,0,3,0"/>
+                                            <TextBlock Text="{Binding DownloadsText}" FontWeight="SemiBold"/>
+                                            <TextBlock Classes="faint" Text="{l:T 'downloads'}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" ToolTip.Tip="{l:T 'Last update'}" Spacing="5">
+                                            <TextBlock Classes="icon" Text="{i:I E895}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,0,3,0"/>
+                                            <TextBlock Classes="faint" Text="{l:T 'Updated'}"/>
+                                            <TextBlock Text="{Binding UpdatedText}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" ToolTip.Tip="{l:T 'First release'}" Spacing="5">
+                                            <TextBlock Classes="icon" Text="{i:I E787}" FontSize="11" Foreground="{StaticResource Fg3}" Margin="0,0,3,0"/>
+                                            <TextBlock Classes="faint" Text="{l:T 'Released'}"/>
+                                            <TextBlock Text="{Binding CreatedText}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Button Content="{l:T 'Load more'}" Command="{Binding LoadMoreCommand}" HorizontalAlignment="Center" Margin="0,6,0,0" Padding="20,8" IsVisible="{Binding CanLoadMore}"/>
+                <ProgressBar IsIndeterminate="True" Width="200" Margin="0,10,0,0" IsVisible="{Binding IsLoadingMore}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

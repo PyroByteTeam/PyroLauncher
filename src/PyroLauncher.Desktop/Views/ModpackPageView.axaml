@@ -1,0 +1,238 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ModpackPageView">
+    <UserControl.Styles>
+        <Style Selector="TextBlock.key"><Setter Property="Foreground" Value="{StaticResource Fg3}"/><Setter Property="FontSize" Value="12"/><Setter Property="Width" Value="96"/></Style>
+        <Style Selector="TextBlock.val"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+        <Style Selector="DockPanel.info"><Setter Property="Margin" Value="0,0,0,9"/></Style>
+        <Style Selector="Button.shot"><Setter Property="Padding" Value="0"/><Setter Property="Background" Value="{StaticResource Bg2}"/></Style>
+        <Style Selector="Button.shot:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="BorderBrush" Value="{StaticResource Fg2}"/></Style>
+    </UserControl.Styles>
+
+    <Grid x:Name="Root" RowDefinitions="Auto,*" ColumnDefinitions="*,320">
+        <!-- ===== Header (Discover only) ===== -->
+        <Grid Grid.ColumnSpan="2" Margin="0,0,0,18" ColumnDefinitions="Auto,Auto,*,Auto" IsVisible="{Binding IsDiscoverMode}">
+            <Button Classes="icon" Content="{i:I E72B}" Command="{Binding BackCommand}" ToolTip.Tip="{l:T 'Back to Discover'}" VerticalAlignment="Top" Margin="-8,0,10,0"/>
+            <Border Grid.Column="1" Width="84" Height="84" CornerRadius="14" Background="{StaticResource Bg3}" ClipToBounds="True">
+                <Image c:RemoteImage.DecodeWidth="168" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+            </Border>
+            <StackPanel Grid.Column="2" Margin="20,2,20,0" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Classes="h1" Text="{Binding Title}" TextTrimming="CharacterEllipsis"/>
+                    <Border Classes="badge" Margin="12,4,0,0"><TextBlock Classes="badgeText" Text="{Binding SourceText}"/></Border>
+                </StackPanel>
+                <TextBlock Classes="muted" Margin="0,4,0,0" Text="{Binding Author, Converter={StaticResource Format}, ConverterParameter='by #'}"
+                           IsVisible="{Binding Author, Converter={StaticResource VisibleIf}}"/>
+                <TextBlock Text="{Binding Summary}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Margin="0,6,0,0"/>
+            </StackPanel>
+            <Button Grid.Column="3" Classes="icon" Content="{i:I E8A7}" ToolTip.Tip="{l:T 'Open website'}" Command="{Binding OpenWebCommand}" VerticalAlignment="Top"/>
+        </Grid>
+
+        <!-- ===== Main: tabs ===== -->
+        <Grid Grid.Row="1" Margin="0,0,20,0" RowDefinitions="Auto,*">
+            <Border BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,14">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Classes="tab" Content="{l:T 'Description'}" Tag="{i:I E8A5}" GroupName="mptab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=description}"/>
+                    <RadioButton Classes="tab" Content="{Binding GalleryTabText}" Tag="{i:I EB9F}" GroupName="mptab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=gallery}"/>
+                    <RadioButton Classes="tab" Content="{l:T 'Versions'}" Tag="{i:I E81C}" GroupName="mptab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=versions}"/>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <ProgressBar IsIndeterminate="True" VerticalAlignment="Top" IsVisible="{Binding IsLoading}"/>
+                <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Foreground="{StaticResource Fg2}" VerticalAlignment="Top" IsVisible="{Binding Error, Converter={StaticResource VisibleIf}}"/>
+
+                <!-- Description -->
+                <Border Background="{StaticResource Bg2}" CornerRadius="10" Padding="16,10,4,0" Margin="0,0,0,16">
+                    <Border.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="Tab" Converter="{StaticResource Eq}" ConverterParameter="description"/>
+                            <Binding Path="Details" Converter="{x:Static ObjectConverters.IsNotNull}"/>
+                        </MultiBinding>
+                    </Border.IsVisible>
+                    <c:HtmlView Html="{Binding Details.BodyHtml}"/>
+                </Border>
+
+                <!-- Gallery -->
+                <ScrollViewer IsVisible="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=gallery}">
+                    <StackPanel>
+                        <TextBlock Classes="muted" Text="{l:T 'This modpack has no gallery images.'}" IsVisible="{Binding !Details.Gallery.Count}"/>
+                        <ItemsControl ItemsSource="{Binding Details.Gallery}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Classes="shot" Command="{Binding $parent[UserControl].DataContext.OpenImageCommand}" CommandParameter="{Binding}" Margin="0,0,12,12" Width="300"
+                                            CornerRadius="10" ClipToBounds="True" ToolTip.Tip="{Binding Title}">
+                                        <StackPanel>
+                                            <Border Height="168" Background="{StaticResource Bg3}" CornerRadius="9,9,0,0" ClipToBounds="True">
+                                                <Image c:RemoteImage.DecodeWidth="600" c:RemoteImage.Url="{Binding Url}" Stretch="UniformToFill"/>
+                                            </Border>
+                                            <TextBlock Classes="muted" Text="{Binding Title}" Margin="12,8" TextTrimming="CharacterEllipsis" IsVisible="{Binding Title, Converter={StaticResource VisibleIf}}"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Versions -->
+                <Grid Margin="0,0,0,16" RowDefinitions="2*,3*" IsVisible="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=versions}">
+                    <DockPanel Margin="0,0,0,12" MinHeight="140">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding ReleasesOnly}" Content="{l:T 'Releases only (hide betas and alphas)'}" Margin="2,0,0,10"/>
+                        <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="0,0,0,8" IsVisible="{Binding LoadingVersions}"/>
+                        <ListBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}" Background="Transparent">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Right" Classes="badge" Background="White" BorderBrush="White" VerticalAlignment="Top" IsVisible="{Binding IsInstalled}">
+                                            <TextBlock Classes="badgeText" Text="{l:T 'Installed'}" Foreground="Black" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Version.Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Classes="faint" TextTrimming="CharacterEllipsis" Margin="0,3,0,0">
+                                                <Run Text="{Binding Version.ReleaseType}"/><Run Text=" · "/><Run Text="{Binding Version.DateText}"/><Run Text=" · "/><Run Text="{Binding Version.GameVersionsText}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+
+                    <Border Grid.Row="1" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10"
+                            IsVisible="{Binding SelectedVersion, Converter={StaticResource VisibleIf}}">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Top" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="18,14">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Classes="primary" Content="{Binding ActionText}" Command="{Binding ActCommand}" IsEnabled="{Binding CanAct}"
+                                            MinWidth="150" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                                    <Button DockPanel.Dock="Right" Margin="0,0,8,0" VerticalAlignment="Center" Command="{Binding ServerPackCommand}" IsEnabled="{Binding HasServerPack}"
+                                            ToolTip.Tip="{Binding ServerPackTip}" ToolTip.ShowOnDisabled="True">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Classes="icon" Text="{i:I E968}"/>
+                                            <TextBlock Text="{l:T 'Server pack'}"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <StackPanel Margin="0,0,16,0">
+                                        <TextBlock Classes="h3" Text="{Binding SelectedVersion.Version.Name}" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Classes="muted" Margin="0,4,0,0" TextWrapping="Wrap">
+                                            <Run Text="{Binding SelectedVersion.Version.VersionNumber}"/><Run Text="  ·  "/><Run Text="{Binding SelectedVersion.Version.GameVersionsText}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                            <TextBlock DockPanel.Dock="Top" Classes="overline" Text="{l:T 'CHANGELOG'}" Margin="18,14,0,6"/>
+                            <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="18,0,18,6" IsVisible="{Binding LoadingChangelog}"/>
+                            <c:HtmlView Html="{Binding ChangelogHtml}" Margin="18,0,4,4"/>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ===== Sidebar ===== -->
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="0,0,0,20">
+            <StackPanel>
+                <!-- Install (Discover) -->
+                <Border Classes="card" Padding="18,16" Margin="0,0,0,14" IsVisible="{Binding IsDiscoverMode}">
+                    <StackPanel>
+                        <TextBlock Classes="h3" Text="{l:T 'Install'}" Margin="0,0,0,12"/>
+                        <TextBlock Classes="overline" Text="{l:T 'INSTANCE NAME'}" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding InstanceName}" Watermark="{l:T 'Instance name'}"/>
+                        <TextBlock Classes="overline" Text="{l:T 'CATEGORY'}" Margin="0,12,0,5"/>
+                        <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}"/>
+                        <TextBlock Classes="overline" Text="{l:T 'VERSION'}" Margin="0,12,0,5"/>
+                        <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock TextTrimming="CharacterEllipsis">
+                                        <Run Text="{Binding Version.VersionNumber}"/><Run Text="  ·  " Foreground="{StaticResource Fg3}"/><Run Text="{Binding Version.GameVersionsText}" Foreground="{StaticResource Fg2}"/>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button Classes="primary" Command="{Binding ActCommand}" IsEnabled="{Binding CanAct}" Margin="0,16,0,0" Padding="16,10" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Classes="icon" Text="{i:I E896}"/>
+                                <TextBlock Text="{Binding ActionText}"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ServerPackCommand}" IsEnabled="{Binding HasServerPack}" ToolTip.Tip="{Binding ServerPackTip}" ToolTip.ShowOnDisabled="True"
+                                Margin="0,8,0,0" Padding="16,9" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Classes="icon" Text="{i:I E968}"/>
+                                <TextBlock Text="{l:T 'Server pack'}"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Version control (instance) -->
+                <Border Classes="card" Padding="18,16" Margin="0,0,0,14" IsVisible="{Binding IsInstanceMode}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,12">
+                            <Border Width="44" Height="44" CornerRadius="10" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0">
+                                <Image c:RemoteImage.DecodeWidth="96" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                            </Border>
+                            <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8A7}" ToolTip.Tip="{l:T 'Open website'}" Command="{Binding OpenWebCommand}" Width="32" Height="32" FontSize="13"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Classes="faint"><Run Text="{Binding SourceText}"/><Run Text=" · "/><Run Text="{Binding Author}"/></TextBlock>
+                            </StackPanel>
+                        </DockPanel>
+                        <TextBlock Classes="overline" Text="{l:T 'INSTALLED VERSION'}" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding InstalledVersionText}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        <TextBlock Classes="muted" Text="{Binding LatestText}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                        <Button Classes="primary" Command="{Binding UpdateToLatestCommand}" Margin="0,14,0,0" Padding="16,9" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                IsVisible="{Binding HasUpdate}">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Classes="icon" Text="{i:I E777}"/>
+                                <TextBlock Text="{l:T 'Update to latest'}"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ServerPackCommand}" IsEnabled="{Binding HasServerPack}" ToolTip.Tip="{Binding ServerPackTip}" ToolTip.ShowOnDisabled="True"
+                                Margin="0,8,0,0" Padding="16,9" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Classes="icon" Text="{i:I E968}"/>
+                                <TextBlock Text="{l:T 'Server pack'}"/>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Classes="faint" Text="{l:T 'Pick any version on the Versions tab to switch to it. Worlds, screenshots and files you added are kept.'}"
+                                   TextWrapping="Wrap" Margin="0,12,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Progress -->
+                <Border Classes="card" Padding="18,14" Margin="0,0,0,14" IsVisible="{Binding IsBusy}">
+                    <StackPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Classes="ghost" Content="{l:T 'Cancel'}" Padding="10,4" Command="{Binding CancelBusyCommand}"/>
+                            <TextBlock Classes="muted" Text="{Binding Status}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <ProgressBar Margin="0,8,0,0" Maximum="100" Value="{Binding Progress, Converter={StaticResource Percent}}"
+                                     IsIndeterminate="{Binding Progress, Converter={StaticResource Indeterminate}}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Info -->
+                <Border Classes="card" Padding="18,16">
+                    <StackPanel>
+                        <TextBlock Classes="h3" Text="{l:T 'Details'}" Margin="0,0,0,12"/>
+                        <DockPanel Classes="info"><TextBlock Classes="key" Text="{l:T 'Platform'}"/><TextBlock Classes="val" Text="{Binding SourceText}"/></DockPanel>
+                        <DockPanel Classes="info"><TextBlock Classes="key" Text="{l:T 'Downloads'}"/><TextBlock Classes="val" Text="{Binding Details.DownloadsText, FallbackValue='-'}"/></DockPanel>
+                        <DockPanel Classes="info"><TextBlock Classes="key" Text="{l:T 'Updated'}"/><TextBlock Classes="val" Text="{Binding UpdatedText}"/></DockPanel>
+                        <DockPanel Classes="info" IsVisible="{Binding IsDiscoverMode}"><TextBlock Classes="key" Text="{l:T 'Released'}"/><TextBlock Classes="val" Text="{Binding CreatedText}"/></DockPanel>
+                        <DockPanel Classes="info"><TextBlock Classes="key" Text="Minecraft"/><TextBlock Classes="val" Text="{Binding GameVersionsText}"/></DockPanel>
+                        <DockPanel Classes="info"><TextBlock Classes="key" Text="{l:T 'Loaders'}"/><TextBlock Classes="val" Text="{Binding Details.LoadersText, FallbackValue='-'}"/></DockPanel>
+                        <DockPanel Classes="info"><TextBlock Classes="key" Text="{l:T 'License'}"/><TextBlock Classes="val" Text="{Binding Details.License, FallbackValue='-'}"/></DockPanel>
+                        <DockPanel Classes="info" Margin="0"><TextBlock Classes="key" Text="{l:T 'Categories'}"/><TextBlock Classes="val" Text="{Binding Details.CategoriesText, FallbackValue='-'}"/></DockPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

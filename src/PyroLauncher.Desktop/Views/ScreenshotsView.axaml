@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ScreenshotsView">
+    <Grid RowDefinitions="Auto,*">
+        <DockPanel Margin="0,0,0,14">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Classes="icon" Content="{i:I E838}" ToolTip.Tip="{l:T 'Open screenshots folder'}" Command="{Binding OpenFolderCommand}"/>
+                <Button Classes="icon" Content="{i:I E72C}" ToolTip.Tip="{l:T 'Refresh'}" Command="{Binding LoadCommand}"/>
+            </StackPanel>
+            <TextBlock Classes="muted" VerticalAlignment="Center">
+                <Run Text="{Binding Items.Count}"/><Run Text="{l:T ' screenshots · press F2 in game to take one'}"/>
+            </TextBlock>
+        </DockPanel>
+
+        <TextBlock Grid.Row="1" Classes="muted" Text="{l:T 'No screenshots yet.'}" IsVisible="{Binding IsEmpty}"/>
+
+        <ScrollViewer Grid.Row="1" Padding="0,0,0,20">
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Classes="card clickable" Width="272" Margin="0,0,12,12" CornerRadius="10"
+                                c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenCommand}">
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{l:T 'View'}" Command="{Binding $parent[UserControl].DataContext.OpenCommand}" CommandParameter="{Binding}"/>
+                                    <MenuItem Header="{l:T 'Copy image'}" Command="{Binding $parent[UserControl].DataContext.CopyCommand}" CommandParameter="{Binding}"/>
+                                    <MenuItem Header="{l:T 'Show in Explorer'}" Command="{Binding $parent[UserControl].DataContext.RevealCommand}" CommandParameter="{Binding}"/>
+                                    <Separator/>
+                                    <MenuItem Header="{l:T 'Delete'}" Command="{Binding $parent[UserControl].DataContext.DeleteCommand}" CommandParameter="{Binding}"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
+                            <StackPanel>
+                                <Border Height="153" CornerRadius="9,9,0,0" Background="{StaticResource Bg3}" ClipToBounds="True">
+                                    <Image Source="{Binding Thumb}" Stretch="UniformToFill"/>
+                                </Border>
+                                <DockPanel Margin="12,9">
+                                    <Button DockPanel.Dock="Right" Classes="icon" Width="26" Height="26" FontSize="12" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Delete'}"
+                                            Command="{Binding $parent[UserControl].DataContext.DeleteCommand}" CommandParameter="{Binding}"/>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding DateText}" FontSize="12.5"/>
+                                        <TextBlock Classes="faint" Text="{Binding Name}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

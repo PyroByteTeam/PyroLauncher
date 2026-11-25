@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ImageViewerView"
+             Focusable="True">
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Left" Command="{Binding PreviousCommand}"/>
+        <KeyBinding Gesture="Right" Command="{Binding NextCommand}"/>
+        <KeyBinding Gesture="Escape" Command="{Binding CloseCommand}"/>
+    </UserControl.KeyBindings>
+    <UserControl.Styles>
+        <Style Selector="Button.arrow">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="#B0000000"/>
+            <Setter Property="BorderBrush" Value="#40FFFFFF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.arrow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#E6000000"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Styles>
+    <Grid MaxWidth="1400" RowDefinitions="Auto,*">
+        <DockPanel Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                <Border Classes="badge" Margin="0,0,6,0" IsVisible="{Binding HasMany}">
+                    <TextBlock Classes="badgeText mono" Text="{Binding PositionText}"/>
+                </Border>
+                <Button Content="{l:T 'Open externally'}" Command="{Binding OpenExternalCommand}"/>
+                <Button Classes="primary" Command="{Binding CloseCommand}" IsCancel="True">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="icon" Text="{i:I E8BB}" FontSize="11"/>
+                        <TextBlock Text="{l:T 'Close'}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <TextBlock Classes="h3" Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+        </DockPanel>
+        <Border Grid.Row="1" CornerRadius="10" ClipToBounds="True" Background="{StaticResource Bg1}">
+            <Grid>
+                <Image x:Name="Local" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                <Image c:RemoteImage.DecodeWidth="1920" c:RemoteImage.Url="{Binding Url}" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                <Button Classes="arrow" HorizontalAlignment="Left" Margin="14,0,0,0" Content="{i:I E76B}" Command="{Binding PreviousCommand}"
+                        ToolTip.Tip="{l:T 'Previous (Left arrow)'}" IsVisible="{Binding HasMany}"/>
+                <Button Classes="arrow" HorizontalAlignment="Right" Margin="0,0,14,0" Content="{i:I E76C}" Command="{Binding NextCommand}"
+                        ToolTip.Tip="{l:T 'Next (Right arrow)'}" IsVisible="{Binding HasMany}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

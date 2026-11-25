@@ -77,6 +77,46 @@ public class IconConverter : IValueConverter
 public class FormatConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        UI.L.F(parameter as string ?? "{0}", value);
+        UI.L.F((parameter as string ?? "{0}").Replace("#", "{0}"), value); // "#" stands in for "{0}" where XAML would read a leading brace as markup
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
+}
+
+/// <summary>false → dimmed (0.3), true → 1.</summary>
+public class BoolToOpacity : IValueConverter
+{
+    public static readonly BoolToOpacity Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value is false ? 0.3 : 1.0;
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
+}
+
+/// <summary>0 → faint (0.25), anything else → 1.</summary>
+public class CountToOpacity : IValueConverter
+{
+    public static readonly CountToOpacity Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value is 0 ? 0.25 : 1.0;
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
+}
+
+/// <summary>Icon, tooltip and dimming for a preset row's state (Checking / Available / AlreadyInstalled / Unavailable / Failed).</summary>
+public static class PresetStateConverters
+{
+    public static readonly IValueConverter Glyph = new FuncValueConverter<Content.PresetItemState, string>(s => Icons.Convert(s switch
+    {
+        Content.PresetItemState.Available => "\uE896",
+        Content.PresetItemState.AlreadyInstalled => "\uE73E",
+        Content.PresetItemState.Unavailable => "\uE711",
+        Content.PresetItemState.Failed => "\uE783",
+        _ => "\uE895",
+    }));
+
+    public static readonly IValueConverter Tip = new FuncValueConverter<Content.PresetItemState, string>(s => s switch
+    {
+        Content.PresetItemState.Available => UI.L.T("Can be installed"),
+        Content.PresetItemState.AlreadyInstalled => UI.L.T("Already in this instance"),
+        Content.PresetItemState.Unavailable => UI.L.T("Not available for this version"),
+        Content.PresetItemState.Failed => UI.L.T("Something went wrong"),
+        _ => UI.L.T("Checking…"),
+    });
+
+    public static readonly IValueConverter Opacity = new FuncValueConverter<Content.PresetItemState, double>(s => s == Content.PresetItemState.Unavailable ? 0.55 : 1);
 }

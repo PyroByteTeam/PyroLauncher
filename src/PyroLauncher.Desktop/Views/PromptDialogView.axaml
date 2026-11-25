@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.PromptDialogView">
+    <Border Classes="dialog" Width="420">
+        <StackPanel>
+            <TextBlock Classes="h2" Text="{Binding Title}"/>
+            <TextBlock Classes="overline" Text="{Binding Label}" Margin="0,18,0,6"/>
+            <TextBox x:Name="Input" Text="{Binding Text}" AttachedToVisualTree="Input_Attached"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0" Spacing="10">
+                <Button Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}" IsCancel="True"/>
+                <Button Classes="primary" Content="{Binding ConfirmText}" Command="{Binding ConfirmCommand}" IsDefault="True"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

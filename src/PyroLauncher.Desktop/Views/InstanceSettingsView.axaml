@@ -1,0 +1,191 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.InstanceSettingsView">
+    <UserControl.Styles>
+        <Style Selector="ToggleSwitch.custom"><Setter Property="OnContent" Value="{l:T 'Custom'}"/><Setter Property="OffContent" Value="{l:T 'Custom'}"/></Style>
+    </UserControl.Styles>
+    <Grid RowDefinitions="*,Auto">
+        <ScrollViewer Padding="0,0,16,0">
+            <StackPanel Width="820" HorizontalAlignment="Left">
+                <!-- General -->
+                <TextBlock Classes="h2" Text="{l:T 'General'}" Margin="0,0,0,4"/>
+                <Border Classes="settingRow">
+                    <Grid ColumnDefinitions="240,*">
+                        <TextBlock Text="{l:T 'Name'}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBox Grid.Column="1" Text="{Binding Name}"/>
+                    </Grid>
+                </Border>
+                <Border Classes="settingRow">
+                    <Grid ColumnDefinitions="240,*">
+                        <TextBlock Text="{l:T 'Category'}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}"/>
+                    </Grid>
+                </Border>
+                <Border Classes="settingRow" IsVisible="{Binding HasLoader}">
+                    <Grid ColumnDefinitions="240,*">
+                        <StackPanel>
+                            <TextBlock Text="{Binding LoaderLabel}" FontWeight="SemiBold"/>
+                            <TextBlock Classes="faint" Text="{l:T 'Installed on next launch'}" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding LoaderVersions}" SelectedItem="{Binding LoaderVersion}" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+                <Border Classes="settingRow">
+                    <Grid ColumnDefinitions="240,*">
+                        <TextBlock Text="{l:T 'Icon'}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <Border Width="40" Height="40" CornerRadius="8" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,4,0">
+                                <Grid>
+                                    <TextBlock Text="{Binding Instance.Initial}" FontWeight="Bold" FontSize="18" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Image Source="{Binding Instance.Icon}" Stretch="UniformToFill"/>
+                                </Grid>
+                            </Border>
+                            <Button Content="{l:T 'Change…'}" Command="{Binding ChangeIconCommand}" VerticalAlignment="Center"/>
+                            <Button Classes="ghost" Content="{l:T 'Remove'}" Command="{Binding RemoveIconCommand}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Game overrides -->
+                <TextBlock Classes="h2" Text="{l:T 'Game settings'}" Margin="0,28,0,2"/>
+                <TextBlock Classes="muted" Text="{l:T 'Turn a setting on to override the global default from Settings → Minecraft for this instance only.'}" Margin="0,0,0,4" TextWrapping="Wrap"/>
+                <Border Classes="settingRow">
+                    <StackPanel>
+                        <DockPanel>
+                            <ToggleSwitch DockPanel.Dock="Right" Classes="custom" IsChecked="{Binding UseJava}"/>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'Java executable'}" FontWeight="SemiBold"/>
+                                <TextBlock Classes="faint" Text="{Binding DefaultJava}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0" IsVisible="{Binding UseJava}">
+                            <Button DockPanel.Dock="Right" Content="{l:T 'Browse…'}" Command="{Binding BrowseJavaCommand}" Margin="8,0,0,0"/>
+                            <TextBox Text="{Binding JavaPath}" Watermark="{l:T 'Path to the Java executable'}"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                <Border Classes="settingRow">
+                    <StackPanel>
+                        <DockPanel>
+                            <ToggleSwitch DockPanel.Dock="Right" Classes="custom" IsChecked="{Binding UseMemory}"/>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'Memory (RAM)'}" FontWeight="SemiBold"/>
+                                <TextBlock Classes="faint" Text="{Binding DefaultMemory}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <StackPanel Margin="0,12,0,0" IsVisible="{Binding UseMemory}">
+                            <TextBlock Classes="overline" Text="{l:T 'MAXIMUM'}" Margin="0,0,0,6"/>
+                            <c:MemoryPicker Value="{Binding MaxMemory}"/>
+                            <TextBlock Classes="overline" Text="{l:T 'MINIMUM'}" Margin="0,16,0,6"/>
+                            <c:MemoryPicker Value="{Binding MinMemory}"/>
+                            <TextBlock Text="{l:T '⚠  The minimum is higher than the maximum. The launcher will use the maximum for both when starting the game.'}" Foreground="{StaticResource LogWarn}"
+                                       TextWrapping="Wrap" Margin="0,8,0,0" IsVisible="{Binding MinAboveMax}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border Classes="settingRow">
+                    <StackPanel>
+                        <DockPanel>
+                            <ToggleSwitch DockPanel.Dock="Right" Classes="custom" IsChecked="{Binding UseJvmArgs}"/>
+                            <StackPanel Margin="0,0,16,0">
+                                <TextBlock Text="{l:T 'JVM arguments'}" FontWeight="SemiBold"/>
+                                <TextBlock Classes="faint" Text="{Binding DefaultJvm}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <TextBox Margin="0,10,0,0" Text="{Binding JvmArgs}" FontFamily="{StaticResource MonoFont}" FontSize="12" TextWrapping="Wrap" MinHeight="60"
+                                 VerticalContentAlignment="Top" IsVisible="{Binding UseJvmArgs}"/>
+                    </StackPanel>
+                </Border>
+                <Border Classes="settingRow">
+                    <StackPanel>
+                        <DockPanel>
+                            <ToggleSwitch DockPanel.Dock="Right" Classes="custom" IsChecked="{Binding UseResolution}"/>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'Window size'}" FontWeight="SemiBold"/>
+                                <TextBlock Classes="faint" Text="{Binding DefaultResolution}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" IsVisible="{Binding UseResolution}">
+                            <TextBox Width="100" Text="{Binding Width, Converter={StaticResource NullableInt}}"/>
+                            <TextBlock Classes="muted" Text="×" VerticalAlignment="Center" Margin="10,0"/>
+                            <TextBox Width="100" Text="{Binding Height, Converter={StaticResource NullableInt}}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border Classes="settingRow">
+                    <StackPanel>
+                        <DockPanel>
+                            <ToggleSwitch DockPanel.Dock="Right" Classes="custom" IsChecked="{Binding UseFullscreen}"/>
+                            <StackPanel>
+                                <TextBlock Text="{l:T 'Start in fullscreen'}" FontWeight="SemiBold"/>
+                                <TextBlock Classes="faint" Text="{Binding DefaultFullscreen}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <CheckBox Margin="0,10,0,0" Content="{l:T 'Fullscreen'}" IsChecked="{Binding Fullscreen}" IsVisible="{Binding UseFullscreen}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Presets -->
+                <TextBlock Classes="h2" Text="{l:T 'Presets'}" Margin="0,28,0,4"/>
+                <Border Classes="settingRow">
+                    <Grid ColumnDefinitions="240,*">
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="{l:T 'Apply a preset'}" FontWeight="SemiBold"/>
+                            <TextBlock Classes="faint" Margin="0,2,0,0" TextWrapping="Wrap"><TextBlock.Text><l:T Key="Find the preset's mods, resource packs and shaders for this version and choose what to install."/></TextBlock.Text></TextBlock>
+                        </StackPanel>
+                        <DockPanel Grid.Column="1" VerticalAlignment="Center">
+                            <Button DockPanel.Dock="Right" Classes="ghost" Content="{l:T 'Manage presets'}" Command="{Binding ManagePresetsCommand}" Margin="8,0,0,0"/>
+                            <Button DockPanel.Dock="Right" Command="{Binding ApplyPresetCommand}" Margin="8,0,0,0" IsEnabled="{Binding HasPresets}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Classes="icon" Text="{i:I E896}"/>
+                                    <TextBlock Text="{l:T 'Apply…'}"/>
+                                </StackPanel>
+                            </Button>
+                            <ComboBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}" IsEnabled="{Binding HasPresets}">
+                                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </DockPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Share -->
+                <TextBlock Classes="h2" Text="{l:T 'Share'}" Margin="0,28,0,4"/>
+                <Border Classes="settingRow">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Command="{Binding ExportCommand}" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="icon" Text="{i:I EDE1}"/>
+                                <TextBlock Text="{l:T 'Export modpack…'}"/>
+                            </StackPanel>
+                        </Button>
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="{l:T 'Export as modpack'}" FontWeight="SemiBold"/>
+                            <TextBlock Classes="faint" Text="{l:T 'Save this instance as a Modrinth, CurseForge or PyroLauncher modpack and pick which files to include.'}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Manage -->
+                <TextBlock Classes="h2" Text="{l:T 'Manage'}" Margin="0,28,0,4"/>
+                <Border Classes="settingRow" BorderThickness="0">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button Content="{l:T 'Open instance folder'}" Command="{Binding OpenFolderCommand}"/>
+                        <Button Content="{l:T 'Delete instance…'}" Command="{Binding DeleteCommand}"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="24"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Save bar -->
+        <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,12,0,16">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="primary" Content="{l:T 'Save changes'}" Command="{Binding SaveCommand}" IsEnabled="{Binding IsDirty}"/>
+                <TextBlock Classes="muted" Text="{l:T 'You have unsaved changes.'}" VerticalAlignment="Center" IsVisible="{Binding IsDirty}"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

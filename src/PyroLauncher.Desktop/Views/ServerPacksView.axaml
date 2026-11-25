@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.ServerPacksView">
+    <Grid Margin="36,0,36,24" RowDefinitions="Auto,*">
+        <StackPanel Margin="0,0,0,18">
+            <TextBlock Classes="h1" Text="{l:T 'Server packs'}"/>
+            <TextBlock Classes="muted" Text="{l:T 'Set up and run Minecraft servers from your modpacks.'}" Margin="0,4,0,0"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,80" MaxWidth="460">
+            <Border Width="72" Height="72" CornerRadius="18" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" HorizontalAlignment="Center">
+                <TextBlock Classes="icon" Text="{i:I E968}" FontSize="28" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
+            </Border>
+            <TextBlock Classes="h2" Text="{l:T 'Server packs - coming soon'}" HorizontalAlignment="Center" Margin="0,18,0,6"/>
+            <TextBlock Classes="muted" Text="{l:T 'Download, configure and start servers for your modpacks right from the launcher. Until then, server files for a modpack are available on its page in Discover.'}"
+                       TextWrapping="Wrap" TextAlignment="Center"/>
+            <Button Command="{Binding OpenDiscoverCommand}" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Classes="icon" Text="{i:I E909}"/>
+                    <TextBlock Text="{l:T 'Open Discover'}"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,234 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ProjectDetailView">
+    <UserControl.Styles>
+        <Style Selector="Border.chip">
+            <Setter Property="Background" Value="{StaticResource Bg2}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,7"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+        </Style>
+        <Style Selector="Border.dep"><Setter Property="Background" Value="{StaticResource Bg3}"/></Style>
+        <Style Selector="Border.dep:pointerover"><Setter Property="Background" Value="{StaticResource Bg4}"/></Style>
+        <Style Selector="Button.shot"><Setter Property="Padding" Value="0"/><Setter Property="Background" Value="{StaticResource Bg2}"/></Style>
+        <Style Selector="Button.shot:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="BorderBrush" Value="{StaticResource Fg2}"/></Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
+        <!-- Header -->
+        <Grid Margin="0,0,0,14" ColumnDefinitions="Auto,*,Auto">
+            <Border Width="56" Height="56" CornerRadius="12" Background="{StaticResource Bg3}" ClipToBounds="True">
+                <Grid>
+                    <TextBlock Classes="icon" Text="{i:I EA86}" FontSize="24" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
+                    <Image c:RemoteImage.DecodeWidth="144" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                    <Image Source="{Binding LocalIcon}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="None"/>
+                </Grid>
+            </Border>
+            <StackPanel Grid.Column="1" Margin="14,0,8,0" VerticalAlignment="Center">
+                <DockPanel>
+                    <Border DockPanel.Dock="Right" Classes="badge" Margin="10,2,0,0"><TextBlock Classes="badgeText" Text="{Binding SourceText}"/></Border>
+                    <TextBlock Classes="h2" Text="{Binding Title}" FontSize="20" TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+                <TextBlock Classes="muted" Text="{Binding Author, Converter={StaticResource Format}, ConverterParameter='by {0}'}" Margin="0,3,0,0"
+                           IsVisible="{Binding Author, Converter={StaticResource VisibleIf}}"/>
+                <TextBlock Text="{Binding Summary}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Margin="0,6,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" VerticalAlignment="Top" Orientation="Horizontal">
+                <Button Classes="icon" Content="{i:I E8A7}" ToolTip.Tip="{l:T 'Open website'}" Command="{Binding OpenWebCommand}" IsVisible="{Binding Details, Converter={StaticResource VisibleIf}}"/>
+                <Button Classes="icon" Content="{i:I E8BB}" FontSize="12" ToolTip.Tip="{l:T 'Close'}" Command="{Binding BackCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Info chips -->
+        <WrapPanel Grid.Row="1" Margin="0,0,0,2">
+            <Border Classes="chip" IsVisible="{Binding Details, Converter={StaticResource VisibleIf}}">
+                <TextBlock><Run Text="{l:T 'Side  '}" Foreground="{StaticResource Fg3}"/><Run Text="{Binding Details.Side}"/></TextBlock>
+            </Border>
+            <Border Classes="chip" IsVisible="{Binding Details, Converter={StaticResource VisibleIf}}">
+                <TextBlock><Run Text="{l:T 'Loaders  '}" Foreground="{StaticResource Fg3}"/><Run Text="{Binding Details.LoadersText}"/></TextBlock>
+            </Border>
+            <Border Classes="chip" IsVisible="{Binding Details, Converter={StaticResource VisibleIf}}">
+                <TextBlock><Run Text="{l:T 'License  '}" Foreground="{StaticResource Fg3}"/><Run Text="{Binding Details.License}"/></TextBlock>
+            </Border>
+            <Border Classes="chip" IsVisible="{Binding Details, Converter={StaticResource VisibleIf}}">
+                <TextBlock><Run Text="{l:T 'Downloads  '}" Foreground="{StaticResource Fg3}"/><Run Text="{Binding Details.DownloadsText}"/></TextBlock>
+            </Border>
+            <Border Classes="chip" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line2}" IsVisible="{Binding Installed, Converter={StaticResource VisibleIf}}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <ToggleSwitch IsChecked="{Binding Installed.IsEnabled}" OnContent="{Binding ActiveLabel}" OffContent="{Binding ActiveLabel}" Margin="0,-6"/>
+                    <TextBlock VerticalAlignment="Center"><Run Text="{l:T 'Installed  '}" Foreground="{StaticResource Fg3}"/><Run Text="{Binding Installed.Version}"/></TextBlock>
+                    <Button Content="{l:T 'Remove'}" Padding="8,2" FontSize="11.5" Command="{Binding UninstallCommand}"/>
+                </StackPanel>
+            </Border>
+        </WrapPanel>
+
+        <!-- Tabs -->
+        <Border Grid.Row="2" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Classes="tab" Content="{l:T 'Description'}" GroupName="ptab" IsVisible="{Binding !IsLocalOnly}"
+                             IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=description}"/>
+                <RadioButton Classes="tab" Content="{Binding GalleryTabText}" GroupName="ptab" IsVisible="{Binding !IsLocalOnly}"
+                             IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=gallery}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Versions'}" GroupName="ptab" IsVisible="{Binding !IsLocalOnly}"
+                             IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=versions}"/>
+                <RadioButton Classes="tab" Content="{l:T 'File info'}" GroupName="ptab" IsVisible="{Binding Installed, Converter={StaticResource VisibleIf}}"
+                             IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=info}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Body -->
+        <Grid Grid.Row="3">
+            <ProgressBar IsIndeterminate="True" VerticalAlignment="Top" IsVisible="{Binding IsLoading}"/>
+            <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Foreground="{StaticResource Fg2}" VerticalAlignment="Top" IsVisible="{Binding Error, Converter={StaticResource VisibleIf}}"/>
+
+            <!-- Description -->
+            <Border Background="{StaticResource Bg2}" CornerRadius="10" Padding="16,10,4,0" Margin="0,0,0,16">
+                <Border.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="Tab" Converter="{StaticResource Eq}" ConverterParameter="description"/>
+                        <Binding Path="Details" Converter="{x:Static ObjectConverters.IsNotNull}"/>
+                    </MultiBinding>
+                </Border.IsVisible>
+                <DockPanel>
+                    <!-- Dependencies dropdown -->
+                    <Border DockPanel.Dock="Top" Margin="0,0,12,10" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="0,0,0,8">
+                        <StackPanel>
+                            <ToggleButton Classes="plain" IsChecked="{Binding DependenciesExpanded}" IsEnabled="{Binding HasDependencies}" HorizontalAlignment="Stretch">
+                                <DockPanel>
+                                    <Grid DockPanel.Dock="Left" Margin="0,0,10,0">
+                                        <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="10" Foreground="{StaticResource Fg2}" IsVisible="{Binding !DependenciesExpanded}"/>
+                                        <TextBlock Classes="icon" Text="{i:I E70D}" FontSize="10" Foreground="{StaticResource Fg2}" IsVisible="{Binding DependenciesExpanded}"/>
+                                    </Grid>
+                                    <ProgressBar DockPanel.Dock="Right" Width="60" IsIndeterminate="True" VerticalAlignment="Center" IsVisible="{Binding LoadingDependencies}"/>
+                                    <TextBlock Text="{Binding DependenciesHeader}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                            </ToggleButton>
+                            <ItemsControl ItemsSource="{Binding Dependencies}" Margin="0,10,0,0" IsVisible="{Binding DependenciesExpanded}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Classes="dep" CornerRadius="8" Padding="8,6" Margin="0,0,0,5" Cursor="Hand"
+                                                c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenDependencyCommand}">
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Right" Content="{l:T 'Install'}" Padding="10,3" FontSize="12" IsVisible="{Binding CanInstall}"
+                                                        Command="{Binding $parent[UserControl].DataContext.InstallDependencyCommand}" CommandParameter="{Binding}"/>
+                                                <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{l:T 'Installed'}" VerticalAlignment="Center" Margin="0,0,4,0" IsVisible="{Binding IsInstalled}"/>
+                                                <Border Width="28" Height="28" CornerRadius="6" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
+                                                    <Image c:RemoteImage.DecodeWidth="56" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
+                                                </Border>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Classes="faint" Text="{Binding KindText}"/>
+                                                </StackPanel>
+                                            </DockPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                    <c:HtmlView Html="{Binding Details.BodyHtml}"/>
+                </DockPanel>
+            </Border>
+
+            <!-- Gallery -->
+            <ScrollViewer IsVisible="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=gallery}">
+                <StackPanel>
+                    <TextBlock Classes="muted" Text="{l:T 'This project has no gallery images.'}" IsVisible="{Binding !Details.Gallery.Count}"/>
+                    <ItemsControl ItemsSource="{Binding Details.Gallery}">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Classes="shot" Command="{Binding $parent[UserControl].DataContext.OpenImageCommand}" CommandParameter="{Binding}" Margin="0,0,12,12" Width="300"
+                                        CornerRadius="10" ClipToBounds="True" ToolTip.Tip="{Binding Title}">
+                                    <StackPanel>
+                                        <Border Height="168" Background="{StaticResource Bg3}" CornerRadius="9,9,0,0" ClipToBounds="True">
+                                            <Image c:RemoteImage.DecodeWidth="600" c:RemoteImage.Url="{Binding Url}" Stretch="UniformToFill"/>
+                                        </Border>
+                                        <TextBlock Classes="muted" Text="{Binding Title}" Margin="12,8" TextTrimming="CharacterEllipsis" IsVisible="{Binding Title, Converter={StaticResource VisibleIf}}"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Versions -->
+            <Grid Margin="0,0,0,16" RowDefinitions="2*,3*" IsVisible="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=versions}">
+                <DockPanel Margin="0,0,0,12" MinHeight="140">
+                    <CheckBox DockPanel.Dock="Top" IsChecked="{Binding CompatibleOnly}" Content="{Binding CompatText}" Margin="2,0,0,10"/>
+                    <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="0,0,0,8" IsVisible="{Binding LoadingVersions}"/>
+                    <TextBlock DockPanel.Dock="Top" Classes="muted" Text="{l:T 'No versions match this instance. Untick the filter to see all versions.'}" TextWrapping="Wrap"
+                               IsVisible="{Binding !Versions.Count}" Margin="2,0,0,0"/>
+                    <ListBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}" Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Right" Classes="badge" Background="White" BorderBrush="White" VerticalAlignment="Top" IsVisible="{Binding IsInstalled}">
+                                        <TextBlock Classes="badgeText" Text="{l:T 'Installed'}" Foreground="Black" FontWeight="SemiBold"/>
+                                    </Border>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Version.Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Classes="faint" TextTrimming="CharacterEllipsis" Margin="0,3,0,0">
+                                            <Run Text="{Binding Version.ReleaseType}"/><Run Text=" · "/><Run Text="{Binding Version.DateText}"/><Run Text=" · "/><Run Text="{Binding Version.GameVersionsText}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+
+                <Border Grid.Row="1" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10"
+                        IsVisible="{Binding SelectedVersion, Converter={StaticResource VisibleIf}}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="18,14">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Right" VerticalAlignment="Center">
+                                    <Button Classes="primary" Content="{Binding InstallText}" Command="{Binding InstallCommand}" IsEnabled="{Binding CanInstall}" MinWidth="150" HorizontalContentAlignment="Center"/>
+                                    <TextBlock Classes="faint" Text="{Binding InstallStatus}" Margin="0,6,0,0" HorizontalAlignment="Right" MaxWidth="240" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,16,0">
+                                    <TextBlock Classes="h3" Text="{Binding SelectedVersion.Version.Name}" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Classes="muted" Margin="0,4,0,0" TextWrapping="Wrap">
+                                        <Run Text="{Binding SelectedVersion.Version.VersionNumber}"/><Run Text="  ·  "/><Run Text="{Binding SelectedVersion.Version.LoadersText}"/>
+                                    </TextBlock>
+                                    <TextBlock Classes="faint" Text="{Binding SelectedVersion.Version.FileName}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                        <TextBlock DockPanel.Dock="Top" Classes="overline" Text="{l:T 'CHANGELOG'}" Margin="18,14,0,6"/>
+                        <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="18,0,18,6" IsVisible="{Binding LoadingChangelog}"/>
+                        <c:HtmlView Html="{Binding ChangelogHtml}" Margin="18,0,4,4"/>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- Local file info -->
+            <StackPanel IsVisible="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=info}">
+                <Border Classes="card" Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Classes="overline" Text="{l:T 'FILE'}"/>
+                        <TextBlock Text="{Binding Installed.FileName}" Margin="0,4,0,12"/>
+                        <TextBlock Classes="overline" Text="{l:T 'VERSION'}"/>
+                        <TextBlock Text="{Binding Installed.Version, TargetNullValue='-'}" Margin="0,4,0,12"/>
+                        <TextBlock Classes="overline" Text="{l:T 'MOD ID'}"/>
+                        <TextBlock Text="{Binding Installed.ModId, TargetNullValue='-'}" Margin="0,4,0,12"/>
+                        <TextBlock Classes="overline" Text="{l:T 'DESCRIPTION'}"/>
+                        <TextBlock Text="{Binding Installed.Description, TargetNullValue='-'}" TextWrapping="Wrap" Margin="0,4,0,12" Foreground="{StaticResource Fg2}"/>
+                        <TextBlock Classes="overline" Text="{l:T 'LOCATION'}"/>
+                        <TextBlock Classes="faint" Text="{Binding Installed.FilePath}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+                <TextBlock Classes="muted" TextWrapping="Wrap" Margin="2,12,0,0" IsVisible="{Binding IsLocalOnly}">
+                           <TextBlock.Text><l:T Key="This file wasn't found on Modrinth or CurseForge, so there's no project page or version list for it."/></TextBlock.Text>
+                           </TextBlock>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
