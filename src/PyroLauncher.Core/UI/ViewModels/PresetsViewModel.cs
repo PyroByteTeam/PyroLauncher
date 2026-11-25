@@ -78,6 +78,13 @@ public partial class PresetsViewModel : ObservableObject
     [ObservableProperty] private Choice<ContentType> _searchType;
     public List<Choice<ContentSource>> Platforms { get; } = [new(ContentSource.Modrinth, "Modrinth"), new(ContentSource.CurseForge, "CurseForge")];
     [ObservableProperty] private Choice<ContentSource> _platform;
+    /// <summary>Mod loader filter for mod searches; Vanilla means any loader.</summary>
+    public List<Choice<ModLoader>> Loaders { get; } =
+    [
+        new(ModLoader.Vanilla, L.T("Any loader")), new(ModLoader.Fabric, "Fabric"), new(ModLoader.Forge, "Forge"), new(ModLoader.NeoForge, "NeoForge"),
+    ];
+    [ObservableProperty] private Choice<ModLoader> _loader;
+    public bool IsModSearch => SearchType.Value == ContentType.Mod;
     [ObservableProperty] private string _query = "";
     [ObservableProperty] private bool _searching;
     [ObservableProperty] private string? _searchError;
@@ -98,6 +105,7 @@ public partial class PresetsViewModel : ObservableObject
     {
         _searchType = Types[0];
         _platform = Platforms[0];
+        _loader = Loaders[0];
         foreach (var p in PresetService.All) Presets.Add(new PresetVm(p));
         Selected = Presets.FirstOrDefault();
         _debounce = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(350) };
@@ -154,8 +162,13 @@ public partial class PresetsViewModel : ObservableObject
     [RelayCommand] private void RefreshApply() => RebuildApply();
 
     partial void OnQueryChanged(string value) { _debounce.Stop(); _debounce.Start(); }
-    partial void OnSearchTypeChanged(Choice<ContentType> value) => _ = SearchAsync();
+    partial void OnSearchTypeChanged(Choice<ContentType> value)
+    {
+        OnPropertyChanged(nameof(IsModSearch));
+        _ = SearchAsync();
+    }
     partial void OnPlatformChanged(Choice<ContentSource> value) => _ = SearchAsync();
+    partial void OnLoaderChanged(Choice<ModLoader> value) { if (IsModSearch) _ = SearchAsync(); }
 
     private async Task SearchAsync()
     {
@@ -166,10 +179,11 @@ public partial class PresetsViewModel : ObservableObject
         try
         {
             var type = SearchType.Value;
+            var loader = type == ContentType.Mod ? Loader.Value : ModLoader.Vanilla;
             var list = Platform.Value == ContentSource.Modrinth
-                ? await ModrinthApi.SearchAsync(Query.Trim(), type, "", ModLoader.Vanilla, 0, cts.Token)
+                ? await ModrinthApi.SearchAsync(Query.Trim(), type, "", loader, 0, cts.Token)
                 : CurseForgeApi.HasKey
-                    ? await CurseForgeApi.SearchAsync(Query.Trim(), type, "", ModLoader.Vanilla, 0, cts.Token)
+                    ? await CurseForgeApi.SearchAsync(Query.Trim(), type, "", loader, 0, cts.Token)
                     : throw new InvalidOperationException(L.T("CurseForge search needs an API key (Settings → Launcher)."));
             if (cts.IsCancellationRequested) return;
             Results.Clear();

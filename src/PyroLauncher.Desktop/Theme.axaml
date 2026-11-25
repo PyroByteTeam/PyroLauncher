@@ -334,6 +334,26 @@
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="10,7"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <!-- Fluent paints the selection with the accent (white) under white text -->
+        <Setter Property="SelectionBrush" Value="{StaticResource Accent}"/>
+        <Setter Property="SelectionForegroundBrush" Value="{StaticResource AccentFg}"/>
+    </Style>
+    <Style Selector="SelectableTextBlock">
+        <Setter Property="SelectionBrush" Value="{StaticResource Accent}"/>
+        <Setter Property="SelectionForegroundBrush" Value="{StaticResource AccentFg}"/>
+    </Style>
+    <!-- List rows: rounded, and no accent fill while pressed or freshly selected -->
+    <Style Selector="ListBoxItem"><Setter Property="CornerRadius" Value="8"/></Style>
+    <Style Selector="ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource Bg4}"/>
+        <Setter Property="Foreground" Value="{StaticResource Fg}"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource Bg4}"/>
+        <Setter Property="Foreground" Value="{StaticResource Fg}"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ListBoxItemBackgroundSelectedPointerOver}"/>
     </Style>
     <Style Selector="TextBox.search"><Setter Property="Padding" Value="32,7,10,7"/></Style>
     <Style Selector="ComboBox">

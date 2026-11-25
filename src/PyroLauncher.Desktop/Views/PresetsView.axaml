@@ -123,6 +123,8 @@
                             <ComboBox ItemsSource="{Binding Types}" SelectedItem="{Binding SearchType}" ToolTip.Tip="{l:T 'What to search for'}"/>
                             <ComboBox Grid.Column="2" ItemsSource="{Binding Platforms}" SelectedItem="{Binding Platform}" ToolTip.Tip="{l:T 'Where to search'}"/>
                         </Grid>
+                        <ComboBox DockPanel.Dock="Top" Margin="0,0,0,8" ItemsSource="{Binding Loaders}" SelectedItem="{Binding Loader}"
+                                  ToolTip.Tip="{l:T 'Mod loader'}" IsVisible="{Binding IsModSearch}"/>
                         <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                             <TextBox Classes="search" Text="{Binding Query}" Watermark="{l:T 'Search projects'}"/>
                             <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="{l:F 13}" Margin="12,0,0,0" IsHitTestVisible="False"/>

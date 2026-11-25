@@ -103,7 +103,8 @@ public class LogViewer : UserControl
         };
         _list.Styles.Add(new Avalonia.Styling.Style(x => Avalonia.Styling.Selectors.OfType<ListBoxItem>(x))
         {
-            Setters = { new Avalonia.Styling.Setter(PaddingProperty, new Thickness(8, 1)), new Avalonia.Styling.Setter(MinHeightProperty, 0d) },
+            Setters = { new Avalonia.Styling.Setter(PaddingProperty, new Thickness(8, 1)), new Avalonia.Styling.Setter(MinHeightProperty, 0d),
+                        new Avalonia.Styling.Setter(ListBoxItem.CornerRadiusProperty, new CornerRadius(0)) },
         });
         _list.Bind(FontSizeProperty, FontScale.For(13));
         ScrollViewer.SetHorizontalScrollBarVisibility(_list,Avalonia.Controls.Primitives.ScrollBarVisibility.Auto);
