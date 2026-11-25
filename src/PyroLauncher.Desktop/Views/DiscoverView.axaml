@@ -44,8 +44,8 @@
             </WrapPanel>
         </DockPanel>
 
-        <ScrollViewer x:Name="Scroller" Grid.Row="3" Padding="0,0,16,24">
-            <StackPanel>
+        <ScrollViewer x:Name="Scroller" Grid.Row="3">
+            <StackPanel Margin="0,0,16,24">
                 <Border Background="{StaticResource Bg2}" CornerRadius="8" Padding="12,8" Margin="0,0,0,12" IsVisible="{Binding Warning, Converter={StaticResource VisibleIf}}">
                     <DockPanel>
                         <TextBlock Classes="icon" Text="{i:I E7BA}" Foreground="{StaticResource Fg2}" Margin="0,0,10,0" VerticalAlignment="Top"/>

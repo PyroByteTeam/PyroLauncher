@@ -36,8 +36,8 @@
 
             <Grid ColumnDefinitions="300,*">
                 <!-- Left: pack details -->
-                <ScrollViewer Margin="0,0,20,0" Padding="0,0,6,0">
-                    <StackPanel>
+                <ScrollViewer Margin="0,0,20,0">
+                    <StackPanel Margin="0,0,6,0">
                         <TextBlock Classes="overline" Text="{l:T 'FORMAT'}" Margin="0,0,0,5"/>
                         <ComboBox ItemsSource="{Binding Formats}" SelectedItem="{Binding Format}"/>
                         <TextBlock Classes="faint" Text="{Binding FormatHint}" TextWrapping="Wrap" Margin="0,6,0,0"/>

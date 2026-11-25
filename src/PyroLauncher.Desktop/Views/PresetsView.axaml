@@ -87,8 +87,8 @@
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Classes="muted" Text="{l:T 'Empty - add projects with the search on the right.'}" Margin="0,4,0,0"
                                        IsVisible="{Binding !Selected.Items.Count, FallbackValue=False}"/>
-                            <ScrollViewer Padding="0,0,6,0">
-                                <ItemsControl ItemsSource="{Binding Selected.ItemsView}">
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding Selected.ItemsView}" Margin="0,0,6,0">
                                     <ItemsControl.DataTemplates>
                                         <DataTemplate DataType="core:GroupHeader">
                                             <TextBlock Classes="overline" Text="{Binding Name}" Margin="2,8,0,6"/>
@@ -130,8 +130,8 @@
                         <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="0,0,0,8" IsVisible="{Binding Searching}"/>
                         <TextBlock DockPanel.Dock="Top" Text="{Binding SearchError}" Foreground="{StaticResource Fg2}" TextWrapping="Wrap" Margin="0,0,0,8"
                                    IsVisible="{Binding SearchError, Converter={StaticResource VisibleIf}}"/>
-                        <ScrollViewer Padding="0,0,6,0">
-                            <ItemsControl ItemsSource="{Binding Results}">
+                        <ScrollViewer>
+                            <ItemsControl ItemsSource="{Binding Results}" Margin="0,0,6,0">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Classes="card" CornerRadius="8" Padding="8,7" Margin="0,0,0,6">

@@ -8,8 +8,8 @@
         <Style Selector="ToggleSwitch.custom"><Setter Property="OnContent" Value="{l:T 'Custom'}"/><Setter Property="OffContent" Value="{l:T 'Custom'}"/></Style>
     </UserControl.Styles>
     <Grid RowDefinitions="*,Auto">
-        <ScrollViewer Padding="0,0,16,0">
-            <Grid>
+        <ScrollViewer>
+            <Grid Margin="0,0,16,0">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="820"/></Grid.ColumnDefinitions>
             <StackPanel>
                 <TextBlock Classes="h2" Text="{l:T 'General'}" Margin="0,0,0,4"/>

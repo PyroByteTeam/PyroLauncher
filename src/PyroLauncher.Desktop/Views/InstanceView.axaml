@@ -122,8 +122,8 @@
         <ContentControl Grid.Row="2" Content="{Binding CurrentTab}" IsVisible="{Binding !IsOverview}"/>
 
         <!-- Grid menu: overview cards (drag the corner grip to rearrange) -->
-        <ScrollViewer Grid.Row="2" Padding="0,0,6,24" IsVisible="{Binding IsOverview}">
-            <ItemsControl ItemsSource="{Binding Cards}">
+        <ScrollViewer Grid.Row="2" IsVisible="{Binding IsOverview}">
+            <ItemsControl ItemsSource="{Binding Cards}" Margin="0,0,6,24">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate><UniformGrid Columns="3"/></ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>

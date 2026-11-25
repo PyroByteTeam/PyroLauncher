@@ -4,8 +4,8 @@
              xmlns:i="clr-namespace:PyroLauncher.Desktop"
              xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
              x:Class="PyroLauncher.Desktop.Views.ServerSettingsView">
-    <ScrollViewer Padding="0,0,8,24">
-        <StackPanel MaxWidth="860" HorizontalAlignment="Left">
+    <ScrollViewer>
+        <StackPanel MaxWidth="860" HorizontalAlignment="Left" Margin="0,0,8,24">
             <TextBlock Classes="h2" Text="{l:T 'General'}" Margin="0,0,0,4"/>
             <Border Classes="settingRow">
                 <Grid ColumnDefinitions="*,320">

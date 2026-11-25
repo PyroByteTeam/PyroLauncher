@@ -43,8 +43,8 @@
                    Text="{l:T 'No players yet. Everyone who joins the server shows up here, and you can whitelist players by name before they ever join.'}"
                    IsVisible="{Binding IsEmpty}"/>
 
-        <ScrollViewer Grid.Row="1" Padding="0,0,8,0" IsVisible="{Binding !IsEmpty}">
-            <ItemsControl ItemsSource="{Binding Players}">
+        <ScrollViewer Grid.Row="1" IsVisible="{Binding !IsEmpty}">
+            <ItemsControl ItemsSource="{Binding Players}" Margin="0,0,8,0">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Classes="settingRow">

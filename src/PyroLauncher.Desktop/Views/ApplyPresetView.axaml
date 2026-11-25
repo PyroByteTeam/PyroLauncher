@@ -38,8 +38,8 @@
             </StackPanel>
         </DockPanel>
 
-        <ScrollViewer Padding="0,0,6,0">
-            <ItemsControl ItemsSource="{Binding RowsView}">
+        <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding RowsView}" Margin="0,0,6,0">
                 <ItemsControl.DataTemplates>
                     <DataTemplate DataType="core:GroupHeader">
                         <TextBlock Classes="overline" Text="{Binding Name}" Margin="2,10,0,6"/>

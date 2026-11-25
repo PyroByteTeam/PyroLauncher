@@ -40,8 +40,8 @@
 
         <TextBlock Grid.Row="2" Classes="muted" Text="{l:T 'No servers saved yet.'}" IsVisible="{Binding IsEmpty}"/>
 
-        <ScrollViewer Grid.Row="2" Padding="0,0,8,20">
-            <ItemsControl ItemsSource="{Binding Items}">
+        <ScrollViewer Grid.Row="2">
+            <ItemsControl ItemsSource="{Binding Items}" Margin="0,0,8,20">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Classes="card" CornerRadius="10" Padding="12,10" Margin="0,0,0,6">

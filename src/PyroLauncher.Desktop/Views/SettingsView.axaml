@@ -36,9 +36,10 @@
             </StackPanel>
         </Border>
 
-        <ScrollViewer Grid.Row="2" Padding="0,0,16,24">
-            <!-- Up to 820px wide, narrower in small windows (never cropped), always left-aligned -->
-            <Grid>
+        <ScrollViewer Grid.Row="2">
+            <!-- Up to 820px wide, narrower in small windows (never cropped), always left-aligned.
+                 The spacing is a Margin on the content: ScrollViewer Padding is not part of the scrollable extent. -->
+            <Grid Margin="0,0,16,24">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="820"/></Grid.ColumnDefinitions>
                 <StackPanel Classes="section" IsVisible="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=launcher}">
                     <TextBlock Classes="h2" Text="{l:T 'Services'}" Margin="0,0,0,4"/>

@@ -17,8 +17,8 @@
 
         <TextBlock Grid.Row="1" Classes="muted" Text="{l:T 'No screenshots yet.'}" IsVisible="{Binding IsEmpty}"/>
 
-        <ScrollViewer Grid.Row="1" Padding="0,0,0,20">
-            <ItemsControl ItemsSource="{Binding Items}">
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Items}" Margin="0,0,0,20">
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

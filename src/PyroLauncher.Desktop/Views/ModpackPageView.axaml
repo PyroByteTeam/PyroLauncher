@@ -131,8 +131,8 @@
             </Grid>
         </Grid>
 
-        <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="0,0,0,20">
-            <StackPanel>
+        <ScrollViewer Grid.Row="1" Grid.Column="1">
+            <StackPanel Margin="0,0,0,20">
                 <Border Classes="card" Padding="18,16" Margin="0,0,0,14" IsVisible="{Binding IsDiscoverMode}">
                     <StackPanel>
                         <TextBlock Classes="h3" Text="{l:T 'Install'}" Margin="0,0,0,12"/>
