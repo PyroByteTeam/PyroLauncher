@@ -67,7 +67,14 @@
                                     </StackPanel>
                                     <TextBlock Classes="faint" Text="{Binding Ping}" HorizontalAlignment="Right" Margin="0,2,0,0"/>
                                 </StackPanel>
-                                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2">
+                                    <Button Classes="primary" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip.Tip="{l:T 'Launch the game and connect to this server'}"
+                                            Command="{Binding $parent[UserControl].DataContext.JoinCommand}" CommandParameter="{Binding}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Classes="icon" Text="{i:I E768}"/>
+                                            <TextBlock Text="{l:T 'Join'}"/>
+                                        </StackPanel>
+                                    </Button>
                                     <Button Classes="icon" Content="{i:I E8C8}" ToolTip.Tip="{l:T 'Copy address'}" FontSize="{l:F 14}"
                                             Command="{Binding $parent[UserControl].DataContext.CopyAddressCommand}" CommandParameter="{Binding}"/>
                                     <Button Classes="icon" Content="{i:I E74D}" ToolTip.Tip="{l:T 'Remove'}" FontSize="{l:F 14}"

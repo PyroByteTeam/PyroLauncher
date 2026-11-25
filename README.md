@@ -34,7 +34,12 @@ play time (nothing special there). Group them into categories by dragging cards 
 descriptions, galleries and changelogs, pick a version, and install with dependencies. Files
 you already have are recognised by hash, so updates work for mods you dropped in by hand.
 Turn resource packs on and pick a shader pack before you start the game (or don't :3).
-You can easilly update mods, filter them by update availability and much more!
+Check every mod for updates in one click, update them one by one or all at once, and filter
+the list by what's enabled, disabled or out of date.
+
+<p align="center">
+  <img src=".github/assets/instance.png" width="80%" alt="Mods of a modpack instance, with available updates">
+</p>
 
 **Modpacks.** Browse packs on the Discover page, install one as a new instance, and update or
 roll it back later from its Modpack tab. Your worlds, screenshots and anything you added
@@ -42,8 +47,8 @@ yourself are left alone. Import `.mrpack` and CurseForge `.zip` files, or downlo
 server files.
 
 <p align="center">
-  <img src=".github/assets/discover.png" width="49%" alt="Discover page">
-  <img src=".github/assets/instance.png" width="49%" alt="Mods of an instance">
+  <img src=".github/assets/discover.png" width="49%" alt="Discover page with popular modpacks">
+  <img src=".github/assets/modpack.png" width="49%" alt="Modpack tab of an installed pack">
 </p>
 
 **Export.** Share an instance as a Modrinth pack, a CurseForge pack or a `.pyropack`
@@ -68,10 +73,10 @@ instances get a start/stop button right next to Play.
 
 **Everything else.** Screenshot and server-list managers.
 A downloads page with pause, cancel and a list of every domain the launcher talked to. English
-and Russian interface (for now). And much more (more features coming)
+and Russian interface (for now). And much more (more features coming).
 
 <p align="center">
-  <img src=".github/assets/presets.png" width="70%" alt="Applying a preset to an instance">
+  <img src=".github/assets/presets.png" width="80%" alt="Applying a preset to an instance: mods already there are skipped">
 </p>
 
 ### AI usage

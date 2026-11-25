@@ -100,7 +100,6 @@
                 <RadioButton Classes="tab" Content="{l:T 'Screenshots'}" Tag="{i:I EB9F}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=screenshots}"/>
                 <RadioButton Classes="tab" Content="{l:T 'Servers'}" Tag="{i:I E774}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=servers}"/>
                 <RadioButton Classes="tab" Content="{l:T 'Logs'}" Tag="{i:I E9D9}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=logs}"/>
-                <RadioButton Classes="tab" Content="{l:T 'Configs'}" Tag="{i:I E90F}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=configs}"/>
                 <RadioButton Classes="tab" Content="{l:T 'Settings'}" Tag="{i:I E713}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=settings}"/>
             </StackPanel>
         </Border>

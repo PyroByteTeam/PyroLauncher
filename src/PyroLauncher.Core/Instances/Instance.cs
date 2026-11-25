@@ -46,7 +46,7 @@ public partial class Instance : ObservableObject
     public string IconPath => Path.Combine(Dir, "icon.png");
     public InstanceConfig Config { get; }
 
-    public ObservableCollection<LogLine> LogLines { get; } = [];
+    public RangeObservableCollection<LogLine> LogLines { get; } = [];
 
     [ObservableProperty] private bool _isRunning;
     [ObservableProperty] private bool _isBusy;
@@ -189,6 +189,7 @@ public partial class Instance : ObservableObject
     private readonly GameLogParser _parser = new();
     private readonly System.Collections.Concurrent.ConcurrentQueue<LogLine> _pendingLog = new();
     private int _flushScheduled;
+    private const int MaxLogLines = 10000;
 
     public void ClearLog()
     {
@@ -213,8 +214,11 @@ public partial class Instance : ObservableObject
     private void FlushLog()
     {
         Interlocked.Exchange(ref _flushScheduled, 0);
-        while (_pendingLog.TryDequeue(out var l)) LogLines.Add(l);
-        while (LogLines.Count > 10000) LogLines.RemoveAt(0);
+        var batch = new List<LogLine>();
+        while (_pendingLog.TryDequeue(out var l)) batch.Add(l);
+        LogLines.AddRange(batch);
+        // Trim in chunks so a busy log doesn't shift 10k items on every new line.
+        if (LogLines.Count > MaxLogLines) LogLines.RemoveFirst(LogLines.Count - MaxLogLines + MaxLogLines / 10);
     }
 }
 

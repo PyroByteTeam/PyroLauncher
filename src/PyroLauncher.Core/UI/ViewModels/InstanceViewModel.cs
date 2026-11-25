@@ -60,7 +60,6 @@ public partial class InstanceViewModel : ObservableObject
         new("screenshots", "Screenshots", ""),
         new("servers", "Servers", ""),
         new("logs", "Logs", ""),
-        new("configs", "Configs", ""),
         new("settings", "Settings", ""),
     ];
 
@@ -158,7 +157,6 @@ public partial class InstanceViewModel : ObservableObject
             "screenshots" => new ScreenshotsViewModel(Instance),
             "servers" => new ServersViewModel(Instance),
             "logs" => new LogsViewModel(Instance),
-            "configs" => new ConfigsViewModel(Instance),
             "settings" => new InstanceSettingsViewModel(Instance),
             _ => new LogsViewModel(Instance),
         };
@@ -233,9 +231,6 @@ public partial class InstanceViewModel : ObservableObject
                     break;
                 case "logs":
                     card.Description = Instance.IsRunning ? L.T("Game is running - live output") : Instance.LogLines.Count > 0 ? L.F("{0:N0} lines from the last session", Instance.LogLines.Count) : L.T("Game output appears here after launch");
-                    break;
-                case "configs":
-                    card.Description = L.T("Edit mod config files - coming soon");
                     break;
                 case "settings":
                     card.Description = L.T("Name, category, loader version, memory, Java and export");
@@ -322,19 +317,5 @@ public partial class LogsViewModel(Instance inst) : ObservableObject
         var dir = Path.Combine(Instance.GameDir, "crash-reports");
         if (Directory.Exists(dir)) Dialogs.OpenPath(dir);
         else Dialogs.Toast(L.T("No crash reports yet."));
-    }
-}
-
-/// <summary>Placeholder for the upcoming config editor.</summary>
-public partial class ConfigsViewModel(Instance inst) : ObservableObject
-{
-    public Instance Instance { get; } = inst;
-
-    [RelayCommand]
-    private void OpenConfigFolder()
-    {
-        var dir = Path.Combine(Instance.GameDir, "config");
-        Directory.CreateDirectory(dir);
-        Dialogs.OpenPath(dir);
     }
 }

@@ -106,8 +106,12 @@ public static class ServerInstaller
             lock (tail) msg = string.Join("\n", tail);
             throw new InvalidOperationException(L.F("{0} installer failed (exit code {1}).\n{2}", label, proc.ExitCode, msg));
         }
-        foreach (var junk in Directory.GetFiles(pack.ServerDir, "*installer*.jar.log")) File.Delete(junk);
-        return DetectForgeLaunch(pack.ServerDir) ?? throw new InvalidOperationException(L.F("Couldn't find how to start the {0} server.", label));
+        var launch = await Task.Run(() =>
+        {
+            foreach (var junk in Directory.GetFiles(pack.ServerDir, "*installer*.jar.log")) File.Delete(junk);
+            return DetectForgeLaunch(pack.ServerDir);
+        }, ct);
+        return launch ?? throw new InvalidOperationException(L.F("Couldn't find how to start the {0} server.", label));
     }
 
     /// <summary>Modern Forge/NeoForge start through an @args file; old Forge through a single jar.</summary>
