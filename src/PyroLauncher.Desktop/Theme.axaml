@@ -130,6 +130,35 @@
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
+    <!-- Instance and server cards -->
+    <Style Selector="Border.instanceCard">
+        <Setter Property="Background" Value="{StaticResource Bg2}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Border.instanceCard:pointerover"><Setter Property="BorderBrush" Value="{StaticResource Line2}"/></Style>
+    <Style Selector="Border.instanceCard Button.play"><Setter Property="IsVisible" Value="False"/></Style>
+    <Style Selector="Border.instanceCard:pointerover Button.play"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="Border.instanceCard.active Button.play"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="Border.instanceCard Button.play.always"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="Button.play">
+        <Setter Property="Width" Value="42"/>
+        <Setter Property="Height" Value="42"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="CornerRadius" Value="21"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="White"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.play:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#FFDADADA"/>
+        <Setter Property="Foreground" Value="Black"/>
+    </Style>
     <!-- Window caption buttons: Windows sets the arrow cursor over them itself; a hand here makes it flicker. -->
     <Style Selector="CaptionButtons /template/ Button">
         <Setter Property="Cursor" Value="Arrow"/>

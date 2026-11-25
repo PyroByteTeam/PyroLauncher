@@ -24,6 +24,7 @@ public static class AppPaths
     }
 
     public static string Instances => Path.Combine(Root, "instances");
+    public static string ServerPacks => Path.Combine(Root, "servers");
 
     /// <summary>Shared ".minecraft-like" directory: libraries, assets and version JSONs shared by all instances.</summary>
     public static string Meta => Path.Combine(Root, "meta");

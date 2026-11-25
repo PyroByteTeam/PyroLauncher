@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
@@ -106,9 +107,7 @@ public sealed class AvaloniaPlatform : IPlatformUi
         if (Main is not { Clipboard: { } c } w) return false;
         var file = await w.StorageProvider.TryGetFileFromPathAsync(path);
         if (file == null) return false;
-        var data = new DataObject();
-        data.Set(DataFormats.Files, new[] { file });
-        await c.SetDataObjectAsync(data);
+        await c.SetFileAsync(file);
         return true;
     }
 

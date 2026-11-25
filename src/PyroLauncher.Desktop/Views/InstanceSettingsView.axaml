@@ -163,6 +163,20 @@
                         </StackPanel>
                     </DockPanel>
                 </Border>
+                <Border Classes="settingRow">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Command="{Binding CreateServerPackCommand}" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="icon" Text="{i:I E968}"/>
+                                <TextBlock Text="{l:T 'Create server pack…'}"/>
+                            </StackPanel>
+                        </Button>
+                        <StackPanel Margin="0,0,16,0">
+                            <TextBlock Text="{l:T 'Server pack'}" FontWeight="SemiBold"/>
+                            <TextBlock Classes="faint" Text="{l:T 'Make a server from this instance: choose which mods to take along, then run it from the Servers page or the button next to Play.'}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
 
                 <TextBlock Classes="h2" Text="{l:T 'Manage'}" Margin="0,28,0,4"/>
                 <Border Classes="settingRow" BorderThickness="0">

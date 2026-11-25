@@ -36,12 +36,17 @@ public partial class App : Application
         DownloadManager.Init();
         AccountManager.Load();
         InstanceManager.LoadAll();
+        Servers.ServerPackManager.LoadAll();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var window = new MainWindow();
             desktop.MainWindow = window;
-            window.Closed += (_, _) => Views.ConsoleWindow.CloseAll();
+            window.Closed += (_, _) =>
+            {
+                Views.ConsoleWindow.CloseAll();
+                Servers.ServerPackManager.StopAll();
+            };
             window.Opened += (_, _) => UI.ViewModels.MainViewModel.Instance.CheckForUpdatesOnStartup();
         }
         base.OnFrameworkInitializationCompleted();

@@ -159,6 +159,9 @@ public partial class InstanceSettingsViewModel : ObservableObject
     private void Export() => Dialogs.Show(new ExportViewModel(Instance));
 
     [RelayCommand]
+    private void CreateServerPack() => Dialogs.Show(new NewServerPackViewModel(Instance));
+
+    [RelayCommand]
     private void ApplyPreset()
     {
         var p = SelectedPreset ?? Presets.FirstOrDefault();

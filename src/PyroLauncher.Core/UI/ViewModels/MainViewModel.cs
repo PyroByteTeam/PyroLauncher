@@ -22,6 +22,16 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private object _currentPage;
     [ObservableProperty] private object? _dialog;
+    /// <summary>Dialogs (except the image viewer) are shrunk to fit small windows instead of running off-screen.</summary>
+    public bool IsImageDialog => Dialog is ImageViewerViewModel;
+    public object? FormDialog => IsImageDialog ? null : Dialog;
+    public object? ImageDialog => IsImageDialog ? Dialog : null;
+    partial void OnDialogChanged(object? value)
+    {
+        OnPropertyChanged(nameof(IsImageDialog));
+        OnPropertyChanged(nameof(FormDialog));
+        OnPropertyChanged(nameof(ImageDialog));
+    }
     [ObservableProperty] private string _nav = "home";
     [ObservableProperty] private Account? _account;
     public string AccountLabel => Account?.Username ?? L.T("No account");
@@ -103,7 +113,7 @@ public partial class MainViewModel : ObservableObject
             case "home":
                 if (CurrentPage is not HomeViewModel and not InstanceViewModel) CurrentPage = (object?)_lastInstance ?? Home;
                 break;
-            case "serverpacks": CurrentPage = _serverPacks ??= new ServerPacksViewModel(); break;
+            case "serverpacks": CurrentPage = (object?)_serverPage ?? (_serverPacks ??= new ServerPacksViewModel()); break;
             case "presets": CurrentPage = _presets ??= new PresetsViewModel(); break;
             case "discover": CurrentPage = (object?)_modpackPage ?? (_discover ??= new DiscoverViewModel()); break;
             case "settings": CurrentPage = _settings ??= new SettingsViewModel(); break;
@@ -190,5 +200,35 @@ public partial class MainViewModel : ObservableObject
         _lastInstance = vm;
         CurrentPage = vm;
         Nav = "home";
+    }
+
+    private ServerPackViewModel? _serverPage;
+
+    public void OpenServerPack(Servers.ServerPack pack, string? tab = null)
+    {
+        if (_serverPage?.Pack == pack)
+        {
+            if (tab != null) _serverPage.Tab = tab;
+        }
+        else
+        {
+            _serverPage?.Detach();
+            _serverPage = new ServerPackViewModel(pack, tab);
+        }
+        if (Nav != "serverpacks") Nav = "serverpacks";
+        CurrentPage = _serverPage;
+    }
+
+    [RelayCommand]
+    private void GoServers()
+    {
+        if (Nav == "serverpacks" && CurrentPage is ServerPackViewModel) CloseServerPack();
+    }
+
+    public void CloseServerPack()
+    {
+        _serverPage?.Detach();
+        _serverPage = null;
+        CurrentPage = _serverPacks ??= new ServerPacksViewModel();
     }
 }

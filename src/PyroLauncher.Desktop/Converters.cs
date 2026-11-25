@@ -120,3 +120,11 @@ public static class PresetStateConverters
 
     public static readonly IValueConverter Opacity = new FuncValueConverter<Content.PresetItemState, double>(s => s == Content.PresetItemState.Unavailable ? 0.55 : 1);
 }
+
+/// <summary>Translated text of a value (enum members and other English words).</summary>
+public sealed class LocText : IValueConverter
+{
+    public static readonly LocText Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => PyroLauncher.UI.L.T(value?.ToString() ?? "");
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => BindingOperations.DoNothing;
+}

@@ -141,7 +141,16 @@
                                             </Grid>
                                         </Border>
                                         <StackPanel Classes="dim" Grid.Column="3" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <DockPanel>
+                                                <Border DockPanel.Dock="Right" Classes="badge" Background="#33E0A030" Margin="8,0,0,0" IsVisible="{Binding IsClientOnly}"
+                                                        ToolTip.Tip="{l:T 'This mod only works on the client. Servers usually crash or ignore it - consider disabling or removing it.'}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                                        <TextBlock Classes="icon" Text="{i:I E7BA}" FontSize="10" Foreground="#FFE0A030"/>
+                                                        <TextBlock Classes="badgeText" Text="{l:T 'Client-only'}" Foreground="#FFE0A030"/>
+                                                    </StackPanel>
+                                                </Border>
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            </DockPanel>
                                             <TextBlock Classes="faint" TextTrimming="CharacterEllipsis" Margin="0,2,0,0">
                                                 <Run Text="{Binding Version}"/><Run Text="  ·  " Foreground="{StaticResource Line2}"/><Run Text="{Binding FileName}"/>
                                             </TextBlock>

@@ -105,6 +105,8 @@
                                 <DockPanel>
                                     <Button DockPanel.Dock="Right" Classes="primary" Content="{Binding ActionText}" Command="{Binding ActCommand}" IsEnabled="{Binding CanAct}"
                                             MinWidth="150" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                                    <Button DockPanel.Dock="Right" Margin="0,0,8,0" VerticalAlignment="Center" Command="{Binding CreateServerPackCommand}" IsEnabled="{Binding HasServerPack}"
+                                            ToolTip.Tip="{l:T 'Create server pack'}" ToolTip.ShowOnDisabled="True" Content="{i:I E710}" Classes="icon"/>
                                     <Button DockPanel.Dock="Right" Margin="0,0,8,0" VerticalAlignment="Center" Command="{Binding ServerPackCommand}" IsEnabled="{Binding HasServerPack}"
                                             ToolTip.Tip="{Binding ServerPackTip}" ToolTip.ShowOnDisabled="True">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
@@ -161,6 +163,14 @@
                                 <TextBlock Text="{l:T 'Server pack'}"/>
                             </StackPanel>
                         </Button>
+                        <Button Command="{Binding CreateServerPackCommand}" IsEnabled="{Binding HasServerPack}" ToolTip.ShowOnDisabled="True"
+                                ToolTip.Tip="{l:T 'Download the server files and set them up as a server pack in the launcher'}"
+                                Margin="0,8,0,0" Padding="16,9" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Classes="icon" Text="{i:I E710}"/>
+                                <TextBlock Text="{l:T 'Create server pack'}"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Border>
 
@@ -191,6 +201,14 @@
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <TextBlock Classes="icon" Text="{i:I E968}"/>
                                 <TextBlock Text="{l:T 'Server pack'}"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding CreateServerPackCommand}" IsEnabled="{Binding HasServerPack}" ToolTip.ShowOnDisabled="True"
+                                ToolTip.Tip="{l:T 'Download the server files and set them up as a server pack in the launcher'}"
+                                Margin="0,8,0,0" Padding="16,9" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Classes="icon" Text="{i:I E710}"/>
+                                <TextBlock Text="{l:T 'Create server pack'}"/>
                             </StackPanel>
                         </Button>
                         <TextBlock Classes="faint" Text="{l:T 'Pick any version on the Versions tab to switch to it. Worlds, screenshots and files you added are kept.'}"

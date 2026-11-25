@@ -59,6 +59,13 @@ and the right one is picked for each Minecraft version. Bring your own if you pr
 **Accounts.** Microsoft sign-in with several accounts, a 3D skin preview, skin upload and cape
 switching. Currently we are awaiting verification, so login doesn't work properly.
 
+**Server packs.** Turn an instance into a server: pick which mods go along (client-only ones are
+spotted and left out), and the launcher installs the server, its loader and Java. Each server
+gets a panel with live CPU, memory and player count, a console with command completion, a
+form for every `server.properties` setting, and player management (whitelist, ops, bans). A
+modpack's published server files can be turned into a server pack in one click, and linked
+instances get a start/stop button right next to Play.
+
 **Everything else.** Screenshot and server-list managers.
 A downloads page with pause, cancel and a list of every domain the launcher talked to. English
 and Russian interface (for now). And much more (more features coming)

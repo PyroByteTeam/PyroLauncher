@@ -41,11 +41,38 @@
                     <TextBlock Classes="muted" Text="{Binding Instance.LastPlayedText}" VerticalAlignment="Center"/>
                 </StackPanel>
             </StackPanel>
-            <StackPanel Grid.Column="3" VerticalAlignment="Center" Width="240">
+            <StackPanel Grid.Column="3" VerticalAlignment="Center" MinWidth="240">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Classes="icon" Content="{i:I E756}" ToolTip.Tip="{l:T 'Open console'}" Command="{Binding OpenConsoleCommand}" Margin="0,0,4,0" Width="44" Height="44"
                             IsVisible="{Binding ConsoleEnabled}"/>
                     <Button Classes="icon" Content="{i:I E838}" ToolTip.Tip="{l:T 'Open game folder'}" Command="{Binding OpenFolderCommand}" Margin="0,0,8,0" Width="44" Height="44"/>
+                    <ItemsControl ItemsSource="{Binding LinkedServers}" IsVisible="{Binding HasLinkedServers}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Margin="0,0,8,0" Height="44" Padding="12,0" Command="{Binding $parent[UserControl].DataContext.ToggleServerCommand}" CommandParameter="{Binding}"
+                                        IsEnabled="{Binding !IsBusy}">
+                                    <ToolTip.Tip>
+                                        <TextBlock><Run Text="{Binding Name}" FontWeight="SemiBold"/> · <Run Text="{Binding StateText}"/></TextBlock>
+                                    </ToolTip.Tip>
+                                    <Button.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{l:T 'Open server page'}" Command="{Binding $parent[UserControl].DataContext.OpenServerCommand}" CommandParameter="{Binding}"/>
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Grid>
+                                            <TextBlock Classes="icon" Text="{i:I E968}" FontSize="15"/>
+                                            <Ellipse Width="7" Height="7" Fill="White" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-3,-4,0" IsVisible="{Binding IsRunning}"/>
+                                        </Grid>
+                                        <TextBlock Classes="icon" Text="{Binding ToggleGlyph, Converter={StaticResource Icon}}" FontSize="11"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                     <Button Classes="primary" Command="{Binding LaunchCommand}" Padding="26,11" FontSize="15" MinWidth="140" ToolTip.Tip="{Binding LaunchTip}"
                             HorizontalContentAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="10">

@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ServerLogsView">
+    <Grid ColumnDefinitions="260,*" Margin="0,0,0,20">
+        <DockPanel Margin="0,0,16,0">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
+                <Button Classes="ghost" Command="{Binding LoadFilesCommand}" ToolTip.Tip="{l:T 'Refresh'}">
+                    <TextBlock Classes="icon" Text="{i:I E72C}" FontSize="12"/>
+                </Button>
+                <Button Classes="ghost" Command="{Binding OpenFolderCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E838}" FontSize="12"/><TextBlock Text="{l:T 'Open folder'}"/></StackPanel>
+                </Button>
+            </StackPanel>
+            <TextBlock DockPanel.Dock="Bottom" Classes="faint" TextWrapping="Wrap" Margin="0,10,0,0"
+                       Text="{l:T 'The current session is on the Panel tab.'}"/>
+            <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="8" Padding="4">
+                <Grid>
+                    <TextBlock Classes="faint" Text="{l:T 'No previous logs yet.'}" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding IsEmpty}"/>
+                    <ListBox ItemsSource="{Binding Files}" SelectedItem="{Binding Selected}" Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="2,3">
+                                    <TextBlock Text="{Binding Name}" FontFamily="{StaticResource MonoFont}" FontSize="12"/>
+                                    <TextBlock Classes="faint" Text="{Binding Info}" FontSize="11"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </DockPanel>
+        <Border Grid.Column="1" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="4">
+            <c:LogViewer Lines="{Binding Lines}" AutoScroll="False"/>
+        </Border>
+    </Grid>
+</UserControl>

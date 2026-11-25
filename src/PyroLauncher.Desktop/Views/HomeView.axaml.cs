@@ -9,7 +9,7 @@ namespace PyroLauncher.Desktop.Views;
 
 public partial class HomeView : UserControl
 {
-    private const string Format = "pyro/instance";
+    private static readonly DataFormat<string> Format = DataFormat.CreateStringApplicationFormat("pyro.instance");
     private Point _down;
     private bool _pressed;
     private bool _dragging;
@@ -42,9 +42,9 @@ public partial class HomeView : UserControl
         _dragging = true;
         _pressed = false;
         _dragged = inst;
-        var data = new DataObject();
-        data.Set(Format, inst.Id);
-        await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
+        var data = new DataTransfer();
+        data.Add(DataTransferItem.Create(Format, inst.Id));
+        await DragDrop.DoDragDropAsync(e, data, DragDropEffects.Move);
         _dragged = null;
         ClearHighlights();
     }
@@ -67,7 +67,7 @@ public partial class HomeView : UserControl
 
     private void OnDragOver(object? sender, DragEventArgs e)
     {
-        var target = e.Data.Contains(Format) ? GroupBorder(e.Source) : null;
+        var target = e.DataTransfer.Contains(Format) ? GroupBorder(e.Source) : null;
         e.DragEffects = target != null ? DragDropEffects.Move : DragDropEffects.None;
         ClearHighlights();
         target?.Classes.Add("dropTarget");

@@ -261,6 +261,49 @@
                             </StackPanel>
                         </DockPanel>
                     </Border>
+                    <Border Classes="settingRow">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Spacing="6">
+                                <RadioButton Classes="segment preview" Content="{l:T 'List'}" GroupName="servers" IsChecked="{Binding ServerListStyle, Converter={StaticResource Eq}, ConverterParameter=List}">
+                                    <ToolTip.Tip>
+                                        <StackPanel>
+                                            <TextBlock Text="{l:T 'List'}" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                            <Border Classes="mockFrame">
+                                                <StackPanel Spacing="6">
+                                                    <Border Classes="mockCard" Height="38" Margin="0"><StackPanel Orientation="Horizontal" Margin="5" Spacing="7"><Border Width="26" Height="26" CornerRadius="4" Background="#FF6A6A6A"/><StackPanel Spacing="5"><Border Classes="mockBar hi" Width="70"/><Border Classes="mockBar" Width="100" Height="4"/></StackPanel></StackPanel></Border>
+                                                    <Border Classes="mockCard" Height="38" Margin="0"><StackPanel Orientation="Horizontal" Margin="5" Spacing="7"><Border Width="26" Height="26" CornerRadius="4" Background="#FF8A8A8A"/><StackPanel Spacing="5"><Border Classes="mockBar hi" Width="54"/><Border Classes="mockBar" Width="88" Height="4"/></StackPanel></StackPanel></Border>
+                                                    <Border Classes="mockCard" Height="38" Margin="0"><StackPanel Orientation="Horizontal" Margin="5" Spacing="7"><Border Width="26" Height="26" CornerRadius="4" Background="#FF5A5A5A"/><StackPanel Spacing="5"><Border Classes="mockBar hi" Width="80"/><Border Classes="mockBar" Width="94" Height="4"/></StackPanel></StackPanel></Border>
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Classes="faint" Text="{l:T 'Compact rows with state, players and memory.'}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </ToolTip.Tip>
+                                </RadioButton>
+                                <RadioButton Classes="segment preview" Content="{l:T 'Grid'}" GroupName="servers" IsChecked="{Binding ServerListStyle, Converter={StaticResource Eq}, ConverterParameter=Grid}">
+                                    <ToolTip.Tip>
+                                        <StackPanel>
+                                            <TextBlock Text="{l:T 'Grid'}" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                            <Border Classes="mockFrame">
+                                                <UniformGrid Columns="3" Rows="2">
+                                                    <Border Classes="mockCard"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF4A4A4A"/><Border Classes="mockBar hi" Width="34" Margin="4,5,0,3"/></StackPanel></Border>
+                                                    <Border Classes="mockCard"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF5E5E5E"/><Border Classes="mockBar hi" Width="28" Margin="4,5,0,3"/></StackPanel></Border>
+                                                    <Border Classes="mockCard"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF3E3E3E"/><Border Classes="mockBar hi" Width="38" Margin="4,5,0,3"/></StackPanel></Border>
+                                                    <Border Classes="mockCard"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF565656"/><Border Classes="mockBar hi" Width="30" Margin="4,5,0,3"/></StackPanel></Border>
+                                                    <Border Classes="mockCard"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF464646"/><Border Classes="mockBar hi" Width="36" Margin="4,5,0,3"/></StackPanel></Border>
+                                                    <Border Classes="mockCard"><StackPanel><Border Height="26" CornerRadius="3,3,0,0" Background="#FF626262"/><Border Classes="mockBar hi" Width="26" Margin="4,5,0,3"/></StackPanel></Border>
+                                                </UniformGrid>
+                                            </Border>
+                                            <TextBlock Classes="faint" Text="{l:T 'Cards with the server picture, state and players.'}" Margin="0,6,0,0" Width="236" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </ToolTip.Tip>
+                                </RadioButton>
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock Classes="rowTitle" Text="{l:T 'Server list layout'}"/>
+                                <TextBlock Classes="faint" Text="{l:T 'How server packs are shown on the Servers page: cards with a picture, or compact rows.'}" Margin="0,3,16,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
 
                     <TextBlock Classes="h2" Text="{l:T 'Behaviour'}" Margin="0,28,0,4"/>
                     <Border Classes="settingRow">
@@ -343,6 +386,16 @@
                                 <TextBlock Classes="faint" Text="{l:T 'Passes --fullscreen to the game.'}" Margin="0,3,0,0"/>
                             </StackPanel>
                         </DockPanel>
+                    </Border>
+                    <TextBlock Classes="h2" Text="{l:T 'Server packs'}" Margin="0,28,0,4"/>
+                    <Border Classes="settingRow" BorderThickness="0">
+                        <StackPanel>
+                            <TextBlock Classes="rowTitle" Text="{l:T 'Default server.properties'}"/>
+                            <TextBlock Classes="faint" TextWrapping="Wrap" Margin="0,3,0,10"
+                                       Text="{l:T 'Applied to every new server pack, one key=value per line. For example: online-mode=false, allow-flight=true, max-players=10.'}"/>
+                            <TextBox Text="{Binding ServerPropertiesDefaults}" AcceptsReturn="True" Height="110" VerticalContentAlignment="Top"
+                                     FontFamily="{StaticResource MonoFont}" Watermark="allow-flight=true"/>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
 

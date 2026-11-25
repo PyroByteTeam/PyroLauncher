@@ -69,6 +69,7 @@ public partial class SettingsViewModel : ObservableObject
     public ContentListStyle ContentListStyle { get => S.ContentListStyle; set { S.ContentListStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
     public InstanceMenuStyle InstanceMenuStyle { get => S.InstanceMenuStyle; set { S.InstanceMenuStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
     public ContentListStyle DiscoverStyle { get => S.DiscoverStyle; set { S.DiscoverStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
+    public ContentListStyle ServerListStyle { get => S.ServerListStyle; set { S.ServerListStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
 
     public List<Choice<string>> LanguageOptions { get; } =
         [new("auto", L.T("Automatic (system)")), .. Loc.Languages.Select(l => new Choice<string>(l.Code, l.Name))];
@@ -125,6 +126,7 @@ public partial class SettingsViewModel : ObservableObject
     public int? Width { get => G.WindowWidth; set { G.WindowWidth = value ?? 854; Changed(); } }
     public int? Height { get => G.WindowHeight; set { G.WindowHeight = value ?? 480; Changed(); } }
     public bool Fullscreen { get => G.Fullscreen == true; set { G.Fullscreen = value; Changed(); } }
+    public string ServerPropertiesDefaults { get => S.ServerPropertiesDefaults; set { S.ServerPropertiesDefaults = value ?? ""; Changed(); } }
 
     [RelayCommand]
     private void ResetJvmArgs() => JvmArgs = GameSettings.Defaults().JvmArgs!;

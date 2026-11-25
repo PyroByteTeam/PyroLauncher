@@ -66,6 +66,7 @@ public class LauncherSettings
     public ContentListStyle ContentListStyle { get; set; } = ContentListStyle.List;
     public InstanceMenuStyle InstanceMenuStyle { get; set; } = InstanceMenuStyle.TopNavigation;
     public ContentListStyle DiscoverStyle { get; set; } = ContentListStyle.Grid;
+    public ContentListStyle ServerListStyle { get; set; } = ContentListStyle.Grid;
 
     /// <summary>Content presets (Settings → Presets).</summary>
     public List<Content.ContentPreset> Presets { get; set; } = [];
@@ -78,6 +79,8 @@ public class LauncherSettings
 
     /// <summary>Playtime of deleted instances, so the total never goes down.</summary>
     public long DeletedPlaytimeSeconds { get; set; }
+    /// <summary>"key=value" lines applied to the server.properties of every new server pack.</summary>
+    public string ServerPropertiesDefaults { get; set; } = "";
 }
 
 public static class SettingsService

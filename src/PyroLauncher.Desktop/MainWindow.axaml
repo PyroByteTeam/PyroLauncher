@@ -21,7 +21,7 @@
                     <RadioButton Classes="nav" Content="{l:T 'Home'}" Tag="{i:I E80F}" GroupName="nav"
                                  IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=home}" Command="{Binding GoHomeCommand}"/>
                     <RadioButton Classes="nav" Content="{l:T 'Servers'}" ToolTip.Tip="{l:T 'Server packs'}" Tag="{i:I E968}" GroupName="nav"
-                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=serverpacks}"/>
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=serverpacks}" Command="{Binding GoServersCommand}"/>
                     <RadioButton Classes="nav" Content="{l:T 'Discover'}" Tag="{i:I E909}" GroupName="nav"
                                  IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=discover}"/>
                     <RadioButton Classes="nav" Content="{l:T 'Profile'}" Tag="{i:I E77B}" GroupName="nav"
@@ -81,7 +81,10 @@
         </Grid>
 
         <Grid Grid.ColumnSpan="2" IsVisible="{Binding Dialog, Converter={StaticResource VisibleIf}}" Background="{StaticResource Scrim}">
-            <ContentControl Content="{Binding Dialog}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40"/>
+            <ContentControl Content="{Binding ImageDialog}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40" IsVisible="{Binding IsImageDialog}"/>
+            <Viewbox StretchDirection="DownOnly" Margin="24" IsVisible="{Binding !IsImageDialog}">
+                <ContentControl Content="{Binding FormDialog}"/>
+            </Viewbox>
         </Grid>
 
         <ItemsControl Grid.ColumnSpan="2" ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,20" Width="380">

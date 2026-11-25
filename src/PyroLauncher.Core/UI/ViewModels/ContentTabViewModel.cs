@@ -74,6 +74,7 @@ public partial class ContentTabViewModel : ObservableObject
         List.Items.CollectionChanged += OnItemsChanged;
         List.Refreshed += OnListRefreshed;
         WatchChecks();
+        MarkClientOnly();
 
         // Restore the suggestions toggle as it was left for this instance.
         Instance.Config.SuggestionsOn ??= [];
@@ -211,9 +212,26 @@ public partial class ContentTabViewModel : ObservableObject
     /// <summary>Called by the instance page when appearance settings change.</summary>
     public void OnAppearanceChanged() => OnPropertyChanged(nameof(IsGrid));
 
+    public bool IsServer => Instance.IsServer;
+    public int ClientOnlyCount => Installed.Count(i => i.IsClientOnly && i.IsEnabled);
+
+    /// <summary>On server packs, flags mods that only belong on the client.</summary>
+    private async void MarkClientOnly()
+    {
+        if (!Instance.IsServer || Type != ContentType.Mod || Installed.Count == 0) return;
+        try
+        {
+            var sides = await Servers.ModSides.ResolveAsync(Installed.ToList());
+            foreach (var (item, side) in sides) item.IsClientOnly = side == Servers.ModSide.Client;
+            OnPropertyChanged(nameof(ClientOnlyCount));
+        }
+        catch (Exception ex) { Log.Warn($"Mod side lookup failed: {ex.Message}"); }
+    }
+
     private void OnListRefreshed()
     {
         UpdatesCount = Installed.Count(i => i.HasUpdate);
+        MarkClientOnly();
         if (StatusFilter != "all") InstalledView.Refresh();
         if (SuggestionsEnabled) FilterSuggestions();
         // Keep the details pane pointing at the (possibly re-created) installed item.

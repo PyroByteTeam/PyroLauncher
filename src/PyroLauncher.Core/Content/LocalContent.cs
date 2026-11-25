@@ -35,6 +35,8 @@ public partial class LocalItem : ObservableObject
     [ObservableProperty] private bool _isSelected;
     /// <summary>Ticked for bulk actions (multi-select).</summary>
     [ObservableProperty] private bool _isChecked;
+    /// <summary>Set on server packs for mods that only work on the client (the server may crash or ignore them).</summary>
+    [ObservableProperty] private bool _isClientOnly;
 
     /// <summary>First two letters of the name, shown when there is no icon.</summary>
     public string Initials

@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
+             x:Class="PyroLauncher.Desktop.Views.ServerPanelView">
+    <UserControl.Styles>
+        <Style Selector="Border.stat">
+            <Setter Property="Background" Value="{StaticResource Bg2}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+        <Style Selector="TextBlock.statValue">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+        </Style>
+    </UserControl.Styles>
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="0,0,0,24">
+        <Grid ColumnDefinitions="*,*,*,*">
+            <Border Classes="stat">
+                <StackPanel>
+                    <TextBlock Classes="overline" Text="{l:T 'CPU'}"/>
+                    <TextBlock Classes="statValue" Text="{Binding Pack.CpuText}"/>
+                    <ProgressBar Margin="0,8,0,0" Maximum="100" Value="{Binding Pack.CpuPercent}"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Classes="stat">
+                <StackPanel>
+                    <TextBlock Classes="overline" Text="{l:T 'MEMORY'}"/>
+                    <TextBlock Classes="statValue"><Run Text="{Binding Pack.MemoryUsageText}"/><Run Text=" / " Foreground="{StaticResource Fg3}"/><Run Text="{Binding Pack.MemoryText}" Foreground="{StaticResource Fg3}"/></TextBlock>
+                    <ProgressBar Margin="0,8,0,0" Maximum="1" Value="{Binding Pack.MemoryUsageFraction}"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Classes="stat">
+                <StackPanel>
+                    <TextBlock Classes="overline" Text="{l:T 'PLAYERS'}"/>
+                    <TextBlock Classes="statValue" Text="{Binding Pack.PlayerCountText}"/>
+                    <TextBlock Classes="faint" Text="{Binding PlayersText}" TextTrimming="CharacterEllipsis" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="3" Classes="stat" Margin="0">
+                <StackPanel>
+                    <TextBlock Classes="overline" Text="{l:T 'UPTIME'}"/>
+                    <TextBlock Classes="statValue" Text="{Binding Pack.UptimeText}"/>
+                    <TextBlock Classes="faint" Text="{Binding Pack.StateText}" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <DockPanel Grid.Row="1" Margin="0,14,0,10">
+            <Button DockPanel.Dock="Right" Classes="ghost" Command="{Binding ClearCommand}" ToolTip.Tip="{l:T 'Clear the console'}">
+                <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E74D}" FontSize="12"/><TextBlock Text="{l:T 'Clear'}"/></StackPanel>
+            </Button>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="primary" Command="{Binding StartCommand}" IsVisible="{Binding !Pack.IsRunning}" IsEnabled="{Binding !Pack.IsBusy}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E768}" FontSize="12"/><TextBlock Text="{l:T 'Start'}"/></StackPanel>
+                </Button>
+                <Button Command="{Binding StopCommand}" IsVisible="{Binding Pack.IsRunning}" ToolTip.Tip="{l:T 'Save the world and shut down'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E71A}" FontSize="12"/><TextBlock Text="{l:T 'Stop'}"/></StackPanel>
+                </Button>
+                <Button Command="{Binding RestartCommand}" IsVisible="{Binding Pack.IsRunning}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E72C}" FontSize="12"/><TextBlock Text="{l:T 'Restart'}"/></StackPanel>
+                </Button>
+                <Button Command="{Binding KillCommand}" IsVisible="{Binding Pack.IsRunning}" ToolTip.Tip="{l:T 'End the process right away, without saving'}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E7BA}" FontSize="12"/><TextBlock Text="{l:T 'Kill'}"/></StackPanel>
+                </Button>
+            </StackPanel>
+        </DockPanel>
+
+        <Border Grid.Row="2" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="4">
+            <Grid>
+                <c:LogViewer Lines="{Binding Pack.Console}"/>
+                <TextBlock Classes="faint" Text="{l:T 'The server console appears here once it starts.'}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           IsVisible="{Binding !Pack.Console.Count}" IsHitTestVisible="False"/>
+            </Grid>
+        </Border>
+
+        <DockPanel Grid.Row="3" Margin="0,10,0,0">
+            <Button DockPanel.Dock="Right" Classes="primary" Command="{Binding SendCommand}" Margin="8,0,0,0" IsEnabled="{Binding Pack.IsRunning}">
+                <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E76C}" FontSize="11"/><TextBlock Text="{l:T 'Send'}"/></StackPanel>
+            </Button>
+            <AutoCompleteBox x:Name="CommandBox" Text="{Binding Command, Mode=TwoWay}" ItemsSource="{Binding Completions}" FilterMode="StartsWith"
+                             MinimumPrefixLength="1" MaxDropDownHeight="260" FontFamily="{StaticResource MonoFont}"
+                             Watermark="{l:T 'Type a command (Tab to complete, ↑ ↓ for history)'}" IsEnabled="{Binding Pack.IsRunning}"/>
+        </DockPanel>
+    </Grid>
+</UserControl>

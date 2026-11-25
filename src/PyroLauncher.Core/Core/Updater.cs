@@ -157,7 +157,7 @@ public static class Updater
             case InstallKind.AppImage:
             {
                 var target = Environment.GetEnvironmentVariable("APPIMAGE")!;
-                File.SetUnixFileMode(file, (UnixFileMode)0b111_101_101);
+                MakeExecutable(file);
                 RunShell(work, pid, $"mv -f '{file}' '{target}'\nnohup '{target}' >/dev/null 2>&1 &\n");
                 break;
             }
@@ -179,12 +179,17 @@ public static class Updater
         }
     }
 
+    private static void MakeExecutable(string path)
+    {
+        if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(path, (UnixFileMode)0b111_101_101);
+    }
+
     private static void RunShell(string work, int pid, string body)
     {
         var script = Path.Combine(work, "update.sh");
         File.WriteAllText(script,
             $"#!/bin/sh\nwhile kill -0 {pid} 2>/dev/null; do sleep 0.5; done\n{body}rm -rf '{work}'\n");
-        File.SetUnixFileMode(script, (UnixFileMode)0b111_101_101);
+        MakeExecutable(script);
         Process.Start(new ProcessStartInfo("/bin/sh", $"'{script}'") { UseShellExecute = false });
     }
 }

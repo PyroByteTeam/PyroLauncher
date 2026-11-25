@@ -90,12 +90,10 @@ public static class LoaderService
         {
             ModLoader.Fabric => await InstallFabricAsync(cfg.MinecraftVersion, cfg.LoaderVersion, progress, ct),
             ModLoader.Forge => await InstallForgeLikeAsync(cfg.MinecraftVersion,
-                $"https://maven.minecraftforge.net/net/minecraftforge/forge/{cfg.LoaderVersion}/forge-{cfg.LoaderVersion}-installer.jar",
+                InstallerUrl(ModLoader.Forge, cfg.LoaderVersion),
                 "Forge", progress, log, ct),
             ModLoader.NeoForge => await InstallForgeLikeAsync(cfg.MinecraftVersion,
-                cfg.LoaderVersion.StartsWith("1.20.1-")
-                    ? $"https://maven.neoforged.net/releases/net/neoforged/forge/{cfg.LoaderVersion}/forge-{cfg.LoaderVersion}-installer.jar"
-                    : $"https://maven.neoforged.net/releases/net/neoforged/neoforge/{cfg.LoaderVersion}/neoforge-{cfg.LoaderVersion}-installer.jar",
+                InstallerUrl(ModLoader.NeoForge, cfg.LoaderVersion),
                 "NeoForge", progress, log, ct),
             _ => cfg.MinecraftVersion,
         };
@@ -104,6 +102,12 @@ public static class LoaderService
         inst.Save();
         return id;
     }
+
+    public static string InstallerUrl(ModLoader loader, string version) => loader == ModLoader.Forge
+        ? $"https://maven.minecraftforge.net/net/minecraftforge/forge/{version}/forge-{version}-installer.jar"
+        : version.StartsWith("1.20.1-")
+            ? $"https://maven.neoforged.net/releases/net/neoforged/forge/{version}/forge-{version}-installer.jar"
+            : $"https://maven.neoforged.net/releases/net/neoforged/neoforge/{version}/neoforge-{version}-installer.jar";
 
     private static bool IsInstalled(string id)
     {

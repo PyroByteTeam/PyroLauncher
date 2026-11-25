@@ -1,0 +1,62 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.ServerPackView">
+    <Grid Margin="36,0,36,0" RowDefinitions="Auto,Auto,*">
+        <Grid Margin="0,0,0,18" ColumnDefinitions="Auto,Auto,*,Auto">
+            <Button Classes="icon" Content="{i:I E72B}" Command="{Binding BackCommand}" ToolTip.Tip="{l:T 'Back to server packs'}" VerticalAlignment="Top" Margin="-8,0,10,0"/>
+            <Border Grid.Column="1" Width="84" Height="84" CornerRadius="14" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line}" BorderThickness="1" ClipToBounds="True">
+                <Grid>
+                    <TextBlock Text="{Binding Pack.Initial}" FontSize="38" FontWeight="Bold" Foreground="#FF4A4A4A" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Image Source="{Binding Pack.Instance.Icon}" Stretch="UniformToFill"/>
+                </Grid>
+            </Border>
+            <StackPanel Grid.Column="2" Margin="20,2,20,0" VerticalAlignment="Center">
+                <TextBlock Classes="h1" Text="{Binding Pack.Name}" TextTrimming="CharacterEllipsis"/>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Spacing="6">
+                    <Border Classes="badge"><TextBlock Classes="badgeText" Text="{Binding Pack.Instance.Config.MinecraftVersion}"/></Border>
+                    <Border Classes="badge">
+                        <TextBlock Classes="badgeText"><Run Text="{Binding Pack.Instance.LoaderText}"/> <Run Text="{Binding Pack.Instance.ShortLoaderVersion}"/></TextBlock>
+                    </Border>
+                    <Border Classes="badge">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="6" Height="6" Fill="White" Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{Binding Pack.IsRunning}"/>
+                            <TextBlock Classes="badgeText" Text="{Binding Pack.StateText}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="3" VerticalAlignment="Center" Width="240">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Classes="icon" Content="{i:I E838}" ToolTip.Tip="{l:T 'Open server folder'}" Command="{Binding OpenFolderCommand}" Margin="0,0,8,0" Width="44" Height="44"/>
+                    <Button Classes="primary" Command="{Binding ToggleCommand}" Padding="26,11" FontSize="15" MinWidth="140" HorizontalContentAlignment="Center"
+                            IsEnabled="{Binding !Pack.IsBusy}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Classes="icon" Text="{Binding ToggleGlyph, Converter={StaticResource Icon}}" FontSize="14"/>
+                            <TextBlock Text="{Binding ToggleText}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0" IsVisible="{Binding Pack.IsBusy}">
+                    <TextBlock Classes="faint" Text="{Binding Pack.Status}" TextTrimming="CharacterEllipsis" HorizontalAlignment="Right"/>
+                    <ProgressBar Margin="0,6,0,0" Maximum="100" Value="{Binding Pack.Progress, Converter={StaticResource Percent}}"
+                                 IsIndeterminate="{Binding Pack.Progress, Converter={StaticResource Indeterminate}}"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,18">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton Classes="tab" Content="{l:T 'Panel'}" Tag="{i:I E756}" GroupName="stab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=panel}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Mods'}" Tag="{i:I EA86}" GroupName="stab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=mods}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Properties'}" Tag="{i:I E8B3}" GroupName="stab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=properties}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Players'}" Tag="{i:I E77B}" GroupName="stab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=players}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Logs'}" Tag="{i:I E9D9}" GroupName="stab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=logs}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Settings'}" Tag="{i:I E713}" GroupName="stab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=settings}"/>
+            </StackPanel>
+        </Border>
+
+        <ContentControl Grid.Row="2" Content="{Binding CurrentTab}"/>
+    </Grid>
+</UserControl>
