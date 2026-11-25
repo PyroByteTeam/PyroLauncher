@@ -42,6 +42,7 @@ public partial class App : Application
             var window = new MainWindow();
             desktop.MainWindow = window;
             window.Closed += (_, _) => Views.ConsoleWindow.CloseAll();
+            window.Opened += (_, _) => UI.ViewModels.MainViewModel.Instance.CheckForUpdatesOnStartup();
         }
         base.OnFrameworkInitializationCompleted();
     }

@@ -56,7 +56,6 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
-    // ---------------- Launcher
     public string CurseForgeApiKey { get => S.CurseForgeApiKey; set { S.CurseForgeApiKey = value; Changed(); } }
     public bool OpenConsoleOnLaunch { get => S.OpenConsoleOnLaunch; set { S.OpenConsoleOnLaunch = value; Changed(); SettingsService.NotifyAppearance(); } }
     public bool DeveloperMode
@@ -65,7 +64,6 @@ public partial class SettingsViewModel : ObservableObject
         set { S.DeveloperMode = value; Changed(); SettingsService.NotifyAppearance(); Accounts.AccountManager.NotifyDeveloperModeChanged(); }
     }
 
-    // ---------------- Appearance
     public List<ContentListStyle> ListStyles { get; } = [ContentListStyle.List, ContentListStyle.Grid];
     public List<InstanceMenuStyle> MenuStyles { get; } = [InstanceMenuStyle.TopNavigation, InstanceMenuStyle.Grid];
     public ContentListStyle ContentListStyle { get => S.ContentListStyle; set { S.ContentListStyle = value; Changed(); SettingsService.NotifyAppearance(); } }
@@ -88,8 +86,28 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
-    // ---------------- About
     public string AppVersion => Http.AppVersion;
+    [ObservableProperty] private string _updateStatus = "";
+    [ObservableProperty] private bool _isCheckingUpdates;
+
+    [RelayCommand]
+    private async Task CheckForUpdates()
+    {
+        IsCheckingUpdates = true;
+        UpdateStatus = L.T("Checking…");
+        try
+        {
+            await Updater.CheckAsync();
+            if (Updater.Available is { } u)
+            {
+                UpdateStatus = L.F("Version {0} is available.", u.Version.ToString(3));
+                await MainViewModel.Instance.UpdateLauncher();
+            }
+            else UpdateStatus = L.T("You have the latest version.");
+        }
+        catch (Exception ex) { UpdateStatus = L.F("Couldn't check for updates: {0}", ex.Message); }
+        finally { IsCheckingUpdates = false; }
+    }
     public string RuntimeText => $".NET {Environment.Version} · {System.Runtime.InteropServices.RuntimeInformation.OSDescription}";
 
     public int ConcurrentDownloads { get => S.ConcurrentDownloads; set { S.ConcurrentDownloads = Math.Clamp(value, 1, 64); Changed(); } }
@@ -99,7 +117,6 @@ public partial class SettingsViewModel : ObservableObject
         set { if (value != null) { S.OnLaunch = value.Value; Changed(); } }
     }
 
-    // ---------------- Minecraft defaults
     public string JavaPath { get => G.JavaPath ?? ""; set { G.JavaPath = string.IsNullOrWhiteSpace(value) ? null : value; Changed(); } }
     public int? MinMemory { get => G.MinMemoryMb; set { G.MinMemoryMb = value ?? 512; Changed(); OnPropertyChanged(nameof(MinAboveMax)); } }
     public bool MinAboveMax => (G.MinMemoryMb ?? 0) > (G.MaxMemoryMb ?? int.MaxValue);

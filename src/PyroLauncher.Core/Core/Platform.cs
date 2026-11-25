@@ -9,7 +9,7 @@ namespace PyroLauncher.Core;
 
 public record FileFilter(string Name, params string[] Patterns);
 
-public enum WindowAction { Minimize, Hide, Restore }
+public enum WindowAction { Minimize, Hide, Restore, Quit }
 
 /// <summary>Everything the shared code needs from the UI framework. The desktop app provides the implementation.</summary>
 public interface IPlatformUi
@@ -62,8 +62,6 @@ public static class Ui
 
     public static object? DecodeImage(byte[] data, int decodeWidth) => Platform?.DecodeImage(data, decodeWidth);
     public static object? LoadImageFile(string path, int decodeWidth) => Platform?.LoadImageFile(path, decodeWidth);
-
-    // ------------------------------------------------------------------ shell (cross-platform)
 
     public static void OpenPath(string path) => Shell(path);
     public static void OpenUrl(string url) => Shell(url);
@@ -122,8 +120,6 @@ public sealed class DispatcherTimer
         _timer = null;
     }
 }
-
-// ====================================================================== collection views
 
 /// <summary>Header row emitted by a grouped <see cref="ListCollectionView"/>.</summary>
 public sealed record GroupHeader(string Name);

@@ -37,6 +37,7 @@ public partial class ContentTabViewModel : ObservableObject
     private object? _selected;
 
     public string Title => Type.Display();
+    public string DropHint => L.F("Drop {0} here to add them", Type.Display().ToLower());
     public bool IsMods => Type == ContentType.Mod;
     public bool IsGrid => SettingsService.Current.ContentListStyle == ContentListStyle.Grid;
     public bool IsUnsupported => Type == ContentType.Mod && Instance.Config.Loader == ModLoader.Vanilla;
@@ -95,7 +96,6 @@ public partial class ContentTabViewModel : ObservableObject
         WatchChecks();
     }
 
-    // ---------------- multi-select
     private readonly HashSet<LocalItem> _watched = [];
     [ObservableProperty] private int _checkedCount;
     public bool HasChecked => CheckedCount > 0;
@@ -226,7 +226,6 @@ public partial class ContentTabViewModel : ObservableObject
     [RelayCommand]
     private Task Refresh() => List.RefreshAsync();
 
-    // ---------------- filters
     [ObservableProperty] private string _statusFilter = "all";
     [ObservableProperty] private SearchSort _sort = SearchSort.Relevance;
     [ObservableProperty] private string _category = AnyCategory;
@@ -278,7 +277,6 @@ public partial class ContentTabViewModel : ObservableObject
                || (i.ModId?.Contains(Query, StringComparison.OrdinalIgnoreCase) ?? false);
     }
 
-    // ---------------- updates
     [RelayCommand]
     private async Task CheckUpdates()
     {
@@ -337,7 +335,6 @@ public partial class ContentTabViewModel : ObservableObject
         await List.RefreshAsync();
     }
 
-    // ---------------- search
     partial void OnQueryChanged(string value)
     {
         InstalledView.Refresh();
@@ -415,7 +412,6 @@ public partial class ContentTabViewModel : ObservableObject
         await SearchAsync(cts.Token, true);
     }
 
-    // ---------------- files
     [RelayCommand]
     private void OpenFolder() => Dialogs.OpenPath(List.Folder);
 
@@ -431,15 +427,16 @@ public partial class ContentTabViewModel : ObservableObject
     public async Task AddFilesAsync(IEnumerable<string> files)
     {
         Directory.CreateDirectory(List.Folder);
-        int n = 0;
+        int n = 0, skipped = 0;
         foreach (var f in files)
         {
             var ext = Path.GetExtension(f).ToLowerInvariant();
-            if (Type == ContentType.Mod ? ext != ".jar" : ext != ".zip") continue;
+            if (Type == ContentType.Mod ? ext != ".jar" : ext != ".zip") { skipped++; continue; }
             try { File.Copy(f, Path.Combine(List.Folder, Path.GetFileName(f)), true); n++; }
             catch (Exception ex) { Dialogs.Toast(L.F("{0}: {1}", Path.GetFileName(f), ex.Message), true); }
         }
         if (n > 0) Dialogs.Toast(L.F("Added files: {0}", n));
+        if (skipped > 0) Dialogs.Toast(L.F("Skipped {0} file(s): expected {1}", skipped, Type == ContentType.Mod ? ".jar" : ".zip"), true);
         await List.RefreshAsync();
     }
 
@@ -463,7 +460,6 @@ public partial class ContentTabViewModel : ObservableObject
     [RelayCommand]
     private void Toggle(LocalItem item) => item.IsEnabled = !item.IsEnabled;
 
-    // ---------------- selection / details pane
     private void Select(object? item)
     {
         if (_selected is LocalItem a) a.IsSelected = false;

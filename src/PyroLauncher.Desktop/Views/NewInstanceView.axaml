@@ -17,7 +17,6 @@
                              IsChecked="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=import}"/>
             </StackPanel>
 
-            <!-- ================= Create ================= -->
             <StackPanel IsVisible="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=create}">
                 <TextBlock Classes="overline" Text="{l:T 'NAME'}" Margin="0,0,0,6"/>
                 <TextBox Text="{Binding Name}" Watermark="{Binding NamePlaceholder}"/>
@@ -67,7 +66,6 @@
                 </DockPanel>
             </StackPanel>
 
-            <!-- ================= Import ================= -->
             <StackPanel IsVisible="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=import}">
                 <Border x:Name="DropZone" DragDrop.AllowDrop="True" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="10" Padding="20,26">
                     <StackPanel HorizontalAlignment="Center">

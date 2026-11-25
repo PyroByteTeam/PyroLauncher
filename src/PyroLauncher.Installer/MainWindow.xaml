@@ -24,7 +24,6 @@
             </DockPanel>
 
             <Grid Grid.Row="1" Margin="36,18,36,28">
-                <!-- ============ Main ============ -->
                 <DockPanel x:Name="MainPage">
                     <StackPanel DockPanel.Dock="Top">
                         <TextBlock x:Name="Heading" FontSize="26" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display, Segoe UI"/>
@@ -47,7 +46,6 @@
                     </StackPanel>
                 </DockPanel>
 
-                <!-- ============ Uninstall ============ -->
                 <DockPanel x:Name="UninstallPage" Visibility="Collapsed">
                     <StackPanel DockPanel.Dock="Top">
                         <TextBlock Text="Uninstall PyroLauncher" FontSize="26" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display, Segoe UI"/>
@@ -70,7 +68,6 @@
                     </StackPanel>
                 </DockPanel>
 
-                <!-- ============ Progress / done ============ -->
                 <DockPanel x:Name="ProgressPage" Visibility="Collapsed">
                     <StackPanel DockPanel.Dock="Top">
                         <TextBlock x:Name="ProgressHeading" FontSize="26" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display, Segoe UI"/>

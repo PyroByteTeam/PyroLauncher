@@ -17,7 +17,6 @@ public partial class NewInstanceViewModel : ObservableObject
 
     [ObservableProperty] private string _mode = "create";
 
-    // ---- create
     [ObservableProperty] private string _name = "";
     [ObservableProperty] private bool _showSnapshots = SettingsService.Current.ShowSnapshots;
     public ObservableCollection<McVersionInfo> Versions { get; } = [];
@@ -32,13 +31,11 @@ public partial class NewInstanceViewModel : ObservableObject
     public List<string> Categories { get; } = ["- None -", .. SettingsService.Current.Categories];
     [ObservableProperty] private string _category = L.T("- None -");
 
-    // ---- import
     [ObservableProperty] private string? _importPath;
     [ObservableProperty] private ModpackInfo? _importInfo;
     [ObservableProperty] private string _importName = "";
     [ObservableProperty] private string? _importError;
 
-    // ---- progress
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
     [ObservableProperty] private double _progress = -1;
@@ -74,7 +71,6 @@ public partial class NewInstanceViewModel : ObservableObject
         SelectedVersion = Versions.FirstOrDefault(v => v.Id == prev) ?? Versions.FirstOrDefault(v => v.IsRelease) ?? Versions.FirstOrDefault();
     }
 
-    // ---- search inside the dropdowns (the selected item always stays visible so the selection is kept)
     private ICollectionView? _versionsView, _loaderVersionsView;
     public ICollectionView VersionsView => _versionsView ??= CreateView(Versions, o =>
         o is McVersionInfo v && (v == SelectedVersion || string.IsNullOrWhiteSpace(VersionQuery) || v.Id.Contains(VersionQuery.Trim(), StringComparison.OrdinalIgnoreCase)));

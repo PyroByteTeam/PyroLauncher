@@ -1,0 +1,54 @@
+name: Bug report
+description: Something doesn't work the way it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report this. The more detail, the faster it gets fixed.
+  - type: input
+    id: version
+    attributes:
+      label: Launcher version
+      description: Settings → About shows it.
+      placeholder: "1.5.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Linux
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: os-details
+    attributes:
+      label: OS details
+      description: Version or distro, if it might matter.
+      placeholder: "e.g. Ubuntu 24.04, macOS 15.2, Windows 11 24H2"
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Click ...
+        3. ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: For game crashes, attach the log from the instance's Logs tab. Drag images or files here.

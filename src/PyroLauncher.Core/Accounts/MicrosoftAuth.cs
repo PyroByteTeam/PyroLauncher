@@ -75,7 +75,6 @@ public static class MicrosoftAuth
 
     private static async Task<Account> LoginWithMsTokenAsync(string msToken, string? refresh, CancellationToken ct)
     {
-        // Xbox Live
         var xbl = await Http.PostJsonAsync("https://user.auth.xboxlive.com/user/authenticate", new JsonObject
         {
             ["Properties"] = new JsonObject
@@ -89,7 +88,6 @@ public static class MicrosoftAuth
         }, ct);
         var xblToken = xbl.Str("Token")!;
 
-        // XSTS
         JsonNode? xsts;
         try
         {
@@ -121,7 +119,6 @@ public static class MicrosoftAuth
         var uhs = xui.Str("uhs")!;
         var xuid = xui.Str("xid");
 
-        // Minecraft
         var mc = await Http.PostJsonAsync("https://api.minecraftservices.com/authentication/login_with_xbox", new JsonObject
         {
             ["identityToken"] = $"XBL3.0 x={uhs};{xstsToken}",

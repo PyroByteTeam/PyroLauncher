@@ -163,8 +163,6 @@ public partial class InstanceViewModel : ObservableObject
         return vm;
     }
 
-    // ------------------------------------------------------------------ grid menu
-
     private void BuildCards()
     {
         var order = SettingsService.Current.SectionOrder;

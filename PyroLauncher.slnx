@@ -3,6 +3,5 @@
     <Project Path="src/PyroLauncher.Core/PyroLauncher.Core.csproj" />
     <Project Path="src/PyroLauncher.Desktop/PyroLauncher.Desktop.csproj" />
     <Project Path="src/PyroLauncher.Installer/PyroLauncher.Installer.csproj" />
-    <Project Path="src/PyroLauncher/PyroLauncher.csproj" />
   </Folder>
 </Solution>

@@ -15,8 +15,6 @@ public static class GameOptions
 {
     private static string OptionsPath(string gameDir) => Path.Combine(gameDir, "options.txt");
 
-    // ------------------------------------------------------------------ resource packs
-
     /// <summary>Pack file/folder names that are enabled in options.txt (in load order, lowest priority first).</summary>
     public static List<string> ReadResourcePacks(string gameDir)
     {
@@ -64,8 +62,6 @@ public static class GameOptions
         }
     }
 
-    // ------------------------------------------------------------------ shaders
-
     public static ShaderLoader DetectShaderLoader(IEnumerable<LocalItem> mods)
     {
         foreach (var m in mods.Where(m => m.IsEnabled))
@@ -109,8 +105,6 @@ public static class GameOptions
         if (loader == ShaderLoader.OptiFine || File.Exists(Path.Combine(gameDir, "optionsshaders.txt")))
             WriteOption(Path.Combine(gameDir, "optionsshaders.txt"), "shaderPack", packName ?? "OFF", '=');
     }
-
-    // ------------------------------------------------------------------ key/value files
 
     private static string? ReadOption(string path, string key, char sep = ':')
     {

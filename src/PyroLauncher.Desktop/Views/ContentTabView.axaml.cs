@@ -17,13 +17,25 @@ public partial class ContentTabView : UserControl
         AttachedToVisualTree += (_, _) => Attach();
         DetachedFromVisualTree += (_, _) => { if (_vm != null) _vm.PropertyChanged -= OnVmChanged; };
 
+        AddHandler(DragDrop.DragEnterEvent, (_, e) => DropOverlay.IsVisible = e.Data.Contains(DataFormats.Files), handledEventsToo: true);
+        AddHandler(DragDrop.DragLeaveEvent, (_, e) =>
+        {
+            // Leaving a child raises DragLeave too; hide only when the pointer is outside the page.
+            var p = e.GetPosition(this);
+            if (p.X <= 0 || p.Y <= 0 || p.X >= Bounds.Width || p.Y >= Bounds.Height) DropOverlay.IsVisible = false;
+        }, handledEventsToo: true);
         AddHandler(DragDrop.DragOverEvent, (_, e) =>
-            e.DragEffects = e.Data.Contains(DataFormats.Files) ? DragDropEffects.Copy : DragDropEffects.None);
+        {
+            e.DragEffects = e.Data.Contains(DataFormats.Files) ? DragDropEffects.Copy : DragDropEffects.None;
+            e.Handled = true;
+        }, handledEventsToo: true);
         AddHandler(DragDrop.DropEvent, async (_, e) =>
         {
+            DropOverlay.IsVisible = false;
+            e.Handled = true;
             var files = e.Data.GetFiles()?.Select(f => f.TryGetLocalPath()).Where(p => p != null).Cast<string>().ToList();
             if (files is { Count: > 0 } && DataContext is ContentTabViewModel vm) await vm.AddFilesAsync(files);
-        });
+        }, handledEventsToo: true);
     }
 
     private void Attach()

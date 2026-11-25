@@ -47,7 +47,6 @@ public partial class LocalItem : ObservableObject
     }
     partial void OnNameChanged(string value) => OnPropertyChanged(nameof(Initials));
 
-    // ---- Resource packs / shaders: "enabled" means active in game (options.txt / shader config), not renamed.
     private bool _active;
     /// <summary>Called when a resource pack or shader is switched on/off; returns whether the change was applied.</summary>
     public Func<LocalItem, bool, bool>? ActivationHandler { get; set; }
@@ -201,8 +200,6 @@ public static class LocalContentScanner
         if (string.IsNullOrEmpty(item.Version) && r.VersionNumber != null) item.Version = r.VersionNumber;
         if (item.Type != ContentType.Mod && r.Title != null) item.Name = r.Title;
     }
-
-    // ------------------------------------------------------------ mod metadata
 
     public static void ReadModMetadata(LocalItem item)
     {

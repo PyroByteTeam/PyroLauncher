@@ -18,7 +18,6 @@
     </UserControl.Styles>
 
     <Grid Margin="36,0,36,0" RowDefinitions="Auto,Auto,*">
-        <!-- Header -->
         <Grid Margin="0,0,0,18" ColumnDefinitions="Auto,Auto,*,Auto">
             <Button Classes="icon" Content="{i:I E72B}" Command="{Binding BackCommand}" ToolTip.Tip="{l:T 'Back to instances'}" VerticalAlignment="Top" Margin="-8,0,10,0"/>
             <Border Grid.Column="1" Width="84" Height="84" CornerRadius="14" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line}" BorderThickness="1" ClipToBounds="True">
@@ -64,7 +63,6 @@
             </StackPanel>
         </Grid>
 
-        <!-- Top navigation -->
         <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,0,18" IsVisible="{Binding ShowTabs}">
             <StackPanel Orientation="Horizontal">
                 <RadioButton Classes="tab" Content="{l:T 'Modpack'}" Tag="{i:I E7B8}" GroupName="itab" IsChecked="{Binding Tab, Converter={StaticResource Eq}, ConverterParameter=modpack}"
@@ -94,7 +92,6 @@
             </StackPanel>
         </Border>
 
-        <!-- Section content -->
         <ContentControl Grid.Row="2" Content="{Binding CurrentTab}" IsVisible="{Binding !IsOverview}"/>
 
         <!-- Grid menu: overview cards (drag the corner grip to rearrange) -->

@@ -37,6 +37,63 @@ public partial class MainViewModel : ObservableObject
         _currentPage = Home;
         Account = AccountManager.Selected;
         AccountManager.SelectionChanged += () => Account = AccountManager.Selected;
+        Updater.AvailableChanged += () => Ui.Post(() =>
+        {
+            OnPropertyChanged(nameof(UpdateAvailable));
+            OnPropertyChanged(nameof(UpdateTip));
+        });
+    }
+
+    public bool UpdateAvailable => Updater.Available != null;
+    public string UpdateTip => Updater.Available is { } u ? L.F("Update to {0}", u.Version.ToString(3)) : "";
+    [ObservableProperty] private bool _isUpdating;
+    [ObservableProperty] private double _updateProgress;
+
+    /// <summary>Checks GitHub once when the launcher starts; silent when offline.</summary>
+    private bool _startupCheckDone;
+
+    public async void CheckForUpdatesOnStartup()
+    {
+        if (_startupCheckDone) return;
+        _startupCheckDone = true;
+        try { await Updater.CheckAsync(); }
+        catch (Exception ex) { Log.Info("Update check skipped: " + ex.Message); }
+    }
+
+    [RelayCommand]
+    public async Task UpdateLauncher()
+    {
+        if (Updater.Available is not { } info || IsUpdating) return;
+        var version = info.Version.ToString(3);
+        var auto = L.T("Update automatically");
+        var manual = L.T("Download manually");
+        string? choice;
+        if (Updater.AutoUpdateUrl(info) != null)
+            choice = await Dialogs.ChooseAsync(L.F("Update to {0}", version),
+                L.F("PyroLauncher {0} is available (you have {1}). The launcher can download it, close, replace itself and start again. If you installed it in an unusual way, download the update yourself instead.",
+                    version, Updater.Current.ToString(3)),
+                [auto, manual]);
+        else
+            choice = await Dialogs.ConfirmAsync(L.F("Update to {0}", version),
+                L.F("PyroLauncher {0} is available (you have {1}). This copy was installed by your package manager or in a way the launcher can't update itself, so download the new version from the releases page.",
+                    version, Updater.Current.ToString(3)), L.T("Open releases page")) ? manual : null;
+
+        if (choice == manual) { Ui.OpenUrl(info.PageUrl); return; }
+        if (choice != auto) return;
+
+        IsUpdating = true;
+        UpdateProgress = 0;
+        try
+        {
+            await Updater.PrepareAsync(info, new Progress<double>(p => UpdateProgress = p));
+            Ui.Platform.MainWindow(WindowAction.Quit);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Launcher update failed", ex);
+            Dialogs.Toast(L.F("Update failed: {0}", ex.Message), true);
+            IsUpdating = false;
+        }
     }
 
     partial void OnNavChanged(string value)

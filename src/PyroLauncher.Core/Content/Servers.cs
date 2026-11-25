@@ -9,8 +9,6 @@ using PyroLauncher.Core;
 
 namespace PyroLauncher.Content;
 
-// ------------------------------------------------------------------ minimal NBT
-
 public class NbtCompound : Dictionary<string, object> { }
 
 public class NbtList : List<object>
@@ -160,8 +158,6 @@ public static class Nbt
     }
 }
 
-// ------------------------------------------------------------------ servers.dat
-
 public class ServerEntry
 {
     public string Name { get; set; } = "";
@@ -209,8 +205,6 @@ public static class ServersDat
         File.Move(tmp, path, true);
     }
 }
-
-// ------------------------------------------------------------------ server list ping
 
 public record ServerStatus(bool Online, int Players, int MaxPlayers, long PingMs, string Motd, string Version, string? FaviconBase64);
 

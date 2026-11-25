@@ -14,8 +14,6 @@ public static class LoaderService
     private static List<string>? _neoVersions;
     private static List<string>? _neoLegacyVersions;
 
-    // ---------------------------------------------------------------- version lists
-
     public static async Task<List<string>> GetLoaderVersionsAsync(ModLoader loader, string mc, CancellationToken ct = default)
     {
         switch (loader)
@@ -72,8 +70,6 @@ public static class LoaderService
         catch (Exception ex) { Log.Warn($"Forge version lookup failed: {ex.Message}"); }
         return $"{mc}-{version}";
     }
-
-    // ---------------------------------------------------------------- install
 
     /// <summary>Ensures vanilla + loader files exist and returns the version id to launch.</summary>
     public static async Task<string> EnsureInstalledAsync(Instance inst, IProgress<TaskProgress>? progress, Action<string>? log, CancellationToken ct)

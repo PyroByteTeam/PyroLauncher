@@ -46,8 +46,6 @@ public static class JsonUtil
         File.WriteAllText(path, node.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
     }
 
-    // ---------- Safe JsonNode accessors ----------
-
     public static JsonNode? Get(this JsonNode? n, string key) =>
         n is JsonObject o && o.TryGetPropertyValue(key, out var v) ? v : null;
 

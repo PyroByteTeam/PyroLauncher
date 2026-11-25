@@ -60,7 +60,6 @@ public class LauncherSettings
     /// <summary>Unlocks offline accounts and other developer options.</summary>
     public bool DeveloperMode { get; set; }
 
-    // ---- Appearance & behaviour
     public LaunchBehavior OnLaunch { get; set; } = LaunchBehavior.Minimize;
     /// <summary>Separate game console window on launch / crash. When off, logs are only on the Logs tab.</summary>
     public bool OpenConsoleOnLaunch { get; set; } = true;
@@ -71,7 +70,6 @@ public class LauncherSettings
     /// <summary>Content presets (Settings → Presets).</summary>
     public List<Content.ContentPreset> Presets { get; set; } = [];
 
-    // ---- Modpack export
     public string? ExportFolder { get; set; }
     public string ExportFormat { get; set; } = "Modrinth";
     public string? ExportAuthor { get; set; }

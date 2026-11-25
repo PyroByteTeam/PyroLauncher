@@ -134,7 +134,6 @@ public static class GameLauncher
 
         var args = new List<string>();
 
-        // Memory + user JVM args
         // Java refuses to start when the initial heap is larger than the maximum, so cap it.
         var maxMb = s.MaxMemoryMb ?? 4096;
         var minMb = Math.Min(s.MinMemoryMb ?? 512, maxMb);

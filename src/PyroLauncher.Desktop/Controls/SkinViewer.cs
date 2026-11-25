@@ -49,8 +49,6 @@ public class SkinViewer : Control
         if (change.Property == SkinProperty || change.Property == CapeProperty || change.Property == SlimProperty) Build();
     }
 
-    // ------------------------------------------------------------------ input
-
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         _drag = e.GetPosition(this);
@@ -72,8 +70,6 @@ public class SkinViewer : Control
         _drag = null;
         e.Pointer.Capture(null);
     }
-
-    // ------------------------------------------------------------------ model
 
     private Color Texel((int W, int H, byte[] Px) img, int x, int y, int scale)
     {
@@ -155,8 +151,6 @@ public class SkinViewer : Control
             Box(c, Math.Max(1, c.W / 64), 0, 0, 10, 16, 1, -5, 8, -3.2, 0, cape: true);
         InvalidateVisual();
     }
-
-    // ------------------------------------------------------------------ rendering
 
     public override void Render(DrawingContext ctx)
     {

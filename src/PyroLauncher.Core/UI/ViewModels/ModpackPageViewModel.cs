@@ -41,7 +41,6 @@ public partial class ModpackPageViewModel : ObservableObject
     private List<ProjectVersion> _allVersions = [];
     private CancellationTokenSource? _changelogCts;
 
-    // ---- install / update
     [ObservableProperty] private string _instanceName = "";
     public List<string> Categories { get; } = [L.T("- None -"), .. SettingsService.Current.Categories];
     [ObservableProperty] private string _category;

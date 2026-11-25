@@ -170,7 +170,6 @@ src/
     Lang/                    translation files
   PyroLauncher.Desktop/      the launcher interface (Avalonia: Windows, macOS, Linux)
   PyroLauncher.Installer/    the Windows setup / uninstaller
-  PyroLauncher/              the older Windows-only WPF interface
 ```
 
 Adding a language means adding `PyroLauncher.Core/Lang/<code>.json` (English text → translation)

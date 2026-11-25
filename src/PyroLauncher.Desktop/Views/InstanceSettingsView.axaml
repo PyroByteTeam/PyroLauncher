@@ -10,7 +10,6 @@
     <Grid RowDefinitions="*,Auto">
         <ScrollViewer Padding="0,0,16,0">
             <StackPanel Width="820" HorizontalAlignment="Left">
-                <!-- General -->
                 <TextBlock Classes="h2" Text="{l:T 'General'}" Margin="0,0,0,4"/>
                 <Border Classes="settingRow">
                     <Grid ColumnDefinitions="240,*">
@@ -49,7 +48,6 @@
                     </Grid>
                 </Border>
 
-                <!-- Game overrides -->
                 <TextBlock Classes="h2" Text="{l:T 'Game settings'}" Margin="0,28,0,2"/>
                 <TextBlock Classes="muted" Text="{l:T 'Turn a setting on to override the global default from Settings → Minecraft for this instance only.'}" Margin="0,0,0,4" TextWrapping="Wrap"/>
                 <Border Classes="settingRow">
@@ -128,7 +126,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Presets -->
                 <TextBlock Classes="h2" Text="{l:T 'Presets'}" Margin="0,28,0,4"/>
                 <Border Classes="settingRow">
                     <Grid ColumnDefinitions="240,*">
@@ -151,7 +148,6 @@
                     </Grid>
                 </Border>
 
-                <!-- Share -->
                 <TextBlock Classes="h2" Text="{l:T 'Share'}" Margin="0,28,0,4"/>
                 <Border Classes="settingRow">
                     <DockPanel>
@@ -168,7 +164,6 @@
                     </DockPanel>
                 </Border>
 
-                <!-- Manage -->
                 <TextBlock Classes="h2" Text="{l:T 'Manage'}" Margin="0,28,0,4"/>
                 <Border Classes="settingRow" BorderThickness="0">
                     <StackPanel Orientation="Horizontal" Spacing="10">
@@ -180,7 +175,6 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Save bar -->
         <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,12,0,16">
             <DockPanel>
                 <Button DockPanel.Dock="Right" Classes="primary" Content="{l:T 'Save changes'}" Command="{Binding SaveCommand}" IsEnabled="{Binding IsDirty}"/>

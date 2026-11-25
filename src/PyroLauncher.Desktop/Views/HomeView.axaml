@@ -35,7 +35,6 @@
     </UserControl.Styles>
 
     <Grid Margin="36,0,20,0" RowDefinitions="Auto,*">
-        <!-- Header -->
         <DockPanel Margin="0,0,16,22">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom" Spacing="10">
                 <Grid Width="220">
@@ -67,7 +66,6 @@
             </StackPanel>
         </DockPanel>
 
-        <!-- Empty state -->
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,80" IsVisible="{Binding IsEmpty}">
             <Border Width="72" Height="72" CornerRadius="18" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" HorizontalAlignment="Center">
                 <TextBlock Classes="icon" Text="{i:I E7FC}" FontSize="28" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
@@ -77,7 +75,6 @@
             <Button Classes="primary" Content="{l:T 'Create your first instance'}" Command="{Binding NewInstanceCommand}" HorizontalAlignment="Center" Margin="0,20,0,0"/>
         </StackPanel>
 
-        <!-- Groups -->
         <ScrollViewer Grid.Row="1" Padding="0,0,16,24" IsVisible="{Binding !IsEmpty}">
             <ItemsControl ItemsSource="{Binding Groups}">
                 <ItemsControl.ItemTemplate>
@@ -149,7 +146,6 @@
                                                                     Content="{Binding PlayGlyph, Converter={StaticResource Icon}}" ToolTip.Tip="{Binding PlayTip}"/>
                                                         </Grid>
                                                     </Border>
-                                                    <!-- Info -->
                                                     <StackPanel Grid.Row="1" Margin="14,12,14,13">
                                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis"/>
                                                         <TextBlock Classes="muted" Text="{Binding VersionText}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
