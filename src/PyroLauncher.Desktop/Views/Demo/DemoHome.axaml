@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:d="clr-namespace:PyroLauncher.Desktop.Views.Demo"
+             x:Class="PyroLauncher.Desktop.Views.Demo.DemoHome">
+    <StackPanel Margin="36,0,28,0">
+        <DockPanel Margin="0,0,0,22">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                <Border Classes="row" Width="190" Padding="10,7" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}"/><TextBlock Classes="faint" Text="{l:T 'Search instances'}"/></StackPanel>
+                </Border>
+                <Button Content="{l:T 'New category'}"/>
+                <Button Classes="primary" Content="{l:T 'New instance'}"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Classes="h1" Text="{l:T 'Instances'}"/>
+                <TextBlock Classes="faint" Text="48h 57m" Margin="0,4,0,0"/>
+            </StackPanel>
+        </DockPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Classes="h2" Text="Favourites" FontSize="{l:F 16}"/>
+            <Border Classes="badge" Margin="10,0,0,0"><TextBlock Classes="badgeText" Text="4"/></Border>
+        </StackPanel>
+        <ItemsControl ItemsSource="{x:Static d:DemoData.Instances}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Classes="instanceCard" Width="204" Margin="0,0,14,14">
+                        <Grid RowDefinitions="132,Auto">
+                            <Border CornerRadius="11,11,0,0" Background="{Binding Tint}" ClipToBounds="True">
+                                <Grid>
+                                    <TextBlock Text="{Binding Initial}" FontSize="{l:F 56}" FontWeight="Bold" Foreground="#66FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Button Classes="play always" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Content="{i:I E768}" IsVisible="{Binding Highlight}"/>
+                                </Grid>
+                            </Border>
+                            <StackPanel Grid.Row="1" Margin="14,12,14,13">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="{l:F 15}" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Classes="muted" Text="{Binding Sub}" Margin="0,3,0,0"/>
+                                <TextBlock Classes="faint" Text="{Binding Extra}" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

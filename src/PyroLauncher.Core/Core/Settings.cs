@@ -57,6 +57,13 @@ public class LauncherSettings
     /// <summary>UI language: "auto", "en" or "ru".</summary>
     public string Language { get; set; } = "auto";
 
+    /// <summary>True only on a fresh install (no settings file existed) until the welcome screens are finished.
+    /// Updates and repairs keep the settings file, so they never show onboarding.</summary>
+    public bool OnboardingPending { get; set; }
+
+    /// <summary>Id of the active theme (see ThemeManager).</summary>
+    public string ThemeId { get; set; } = "builtin:dark";
+
     /// <summary>Unlocks offline accounts and other developer options.</summary>
     public bool DeveloperMode { get; set; }
 
@@ -65,8 +72,8 @@ public class LauncherSettings
     public bool OpenConsoleOnLaunch { get; set; } = true;
     public ContentListStyle ContentListStyle { get; set; } = ContentListStyle.List;
     public InstanceMenuStyle InstanceMenuStyle { get; set; } = InstanceMenuStyle.TopNavigation;
-    public ContentListStyle DiscoverStyle { get; set; } = ContentListStyle.Grid;
-    public ContentListStyle ServerListStyle { get; set; } = ContentListStyle.Grid;
+    public ContentListStyle DiscoverStyle { get; set; } = ContentListStyle.List;
+    public ContentListStyle ServerListStyle { get; set; } = ContentListStyle.List;
 
     /// <summary>Content presets (Settings → Presets).</summary>
     public List<Content.ContentPreset> Presets { get; set; } = [];
@@ -93,7 +100,9 @@ public static class SettingsService
 
     public static void Load()
     {
+        var fresh = !File.Exists(AppPaths.SettingsFile);
         Current = JsonUtil.Load<LauncherSettings>(AppPaths.SettingsFile) ?? new LauncherSettings();
+        if (fresh) Current.OnboardingPending = true;
         Current.Game ??= GameSettings.Defaults();
         Current.Presets ??= [];
         Downloader.Concurrency = Current.ConcurrentDownloads;

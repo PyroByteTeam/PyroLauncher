@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.Demo.DemoWindow"
+             Width="1040" Height="640" IsHitTestVisible="False" Focusable="False"
+             Foreground="{StaticResource Fg}" FontSize="{l:F 14}">
+    <!-- A stripped-down copy of the main window with made-up content, drawn with the real styles and theme -->
+    <Border Background="{StaticResource Bg0}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="12" ClipToBounds="True">
+        <Grid ColumnDefinitions="Auto,*">
+            <Border Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0" Width="{l:S 88}">
+                <DockPanel LastChildFill="False">
+                    <Border DockPanel.Dock="Top" Height="64">
+                        <Border Width="{l:S 42}" Height="{l:S 42}" CornerRadius="10" ClipToBounds="True" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Image Source="avares://PyroLauncher/Assets/logo.png" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                        </Border>
+                    </Border>
+                    <StackPanel DockPanel.Dock="Top" Margin="0,8,0,0">
+                        <RadioButton x:Name="NavHome" Classes="nav" Content="{l:T 'Home'}" Tag="{i:I E80F}"/>
+                        <RadioButton x:Name="NavServers" Classes="nav" Content="{l:T 'Servers'}" Tag="{i:I E968}"/>
+                        <RadioButton x:Name="NavDiscover" Classes="nav" Content="{l:T 'Discover'}" Tag="{i:I E909}"/>
+                        <RadioButton x:Name="NavProfile" Classes="nav" Content="{l:T 'Profile'}" Tag="{i:I E77B}"/>
+                        <RadioButton x:Name="NavPresets" Classes="nav" Content="{l:T 'Presets'}" Tag="{i:I E8FD}"/>
+                        <RadioButton x:Name="NavDownloads" Classes="nav" Content="{l:T 'Downloads'}" Tag="{i:I E896}"/>
+                        <RadioButton x:Name="NavSettings" Classes="nav" Content="{l:T 'Settings'}" Tag="{i:I E713}"/>
+                    </StackPanel>
+                    <Border DockPanel.Dock="Bottom" Width="{l:S 36}" Height="{l:S 36}" CornerRadius="8" Background="{StaticResource Bg3}" Margin="0,0,0,20">
+                        <TextBlock Classes="icon" Text="{i:I E77B}" FontSize="{l:S 15}" Foreground="{StaticResource Fg2}" HorizontalAlignment="Center"/>
+                    </Border>
+                    <TextBlock DockPanel.Dock="Bottom" Text="Steve" FontSize="{l:S 11}" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                </DockPanel>
+            </Border>
+            <ContentControl x:Name="Host" Grid.Column="1" Margin="0,44,0,0" ClipToBounds="True"/>
+        </Grid>
+    </Border>
+</UserControl>

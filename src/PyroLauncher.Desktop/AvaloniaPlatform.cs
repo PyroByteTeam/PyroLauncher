@@ -88,6 +88,19 @@ public sealed class AvaloniaPlatform : IPlatformUi
         return files.Select(f => f.TryGetLocalPath()).Where(p => p != null).Cast<string>().ToList();
     }
 
+    public async Task<string?> SaveFileAsync(string title, string suggestedName, IReadOnlyList<FileFilter> filters)
+    {
+        if (Storage is not { } s) return null;
+        var file = await s.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = title,
+            SuggestedFileName = suggestedName,
+            FileTypeChoices = Types(filters),
+            DefaultExtension = filters.FirstOrDefault()?.Patterns.FirstOrDefault()?.TrimStart('*', '.'),
+        });
+        return file?.TryGetLocalPath();
+    }
+
     public async Task<string?> PickFolderAsync(string title, string? initialDirectory)
     {
         if (Storage is not { } s) return null;

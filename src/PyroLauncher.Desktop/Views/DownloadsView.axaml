@@ -46,7 +46,7 @@
                                         <ProgressBar Margin="0,12,0,8" Maximum="100" Value="{Binding Progress, Converter={StaticResource Percent}}"
                                                      IsIndeterminate="{Binding Progress, Converter={StaticResource Indeterminate}}"/>
                                         <DockPanel>
-                                            <TextBlock DockPanel.Dock="Right" Classes="mono" Text="{Binding SpeedText}" FontSize="12"/>
+                                            <TextBlock DockPanel.Dock="Right" Classes="mono" Text="{Binding SpeedText}" FontSize="{l:F 13}"/>
                                             <TextBlock Classes="muted"><Run Text="{Binding FilesText}"/><Run Text="  ·  "/><Run Text="{Binding BytesText}"/></TextBlock>
                                         </DockPanel>
                                         <TextBlock Classes="faint mono" Text="{Binding CurrentFile}" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"
@@ -61,8 +61,8 @@
 
             <DockPanel Grid.Column="2">
                 <DockPanel DockPanel.Dock="Top" Margin="2,0,0,10">
-                    <Button DockPanel.Dock="Right" Classes="ghost" Content="{l:T 'Copy all'}" Padding="8,2" FontSize="12" Command="{Binding CopyAllHostsCommand}"/>
-                    <Button DockPanel.Dock="Right" Classes="ghost" Content="{l:T 'Clear'}" Padding="8,2" FontSize="12" Margin="0,0,4,0"
+                    <Button DockPanel.Dock="Right" Classes="ghost" Content="{l:T 'Copy all'}" Padding="8,2" FontSize="{l:F 13}" Command="{Binding CopyAllHostsCommand}"/>
+                    <Button DockPanel.Dock="Right" Classes="ghost" Content="{l:T 'Clear'}" Padding="8,2" FontSize="{l:F 13}" Margin="0,0,4,0"
                             Command="{Binding ClearHostsCommand}" ToolTip.Tip="{l:T 'Clear the list of contacted domains'}"/>
                     <TextBlock Classes="overline" Text="{l:T 'CONNECTED SERVERS'}" VerticalAlignment="Center"/>
                 </DockPanel>
@@ -80,13 +80,13 @@
                                     <Grid Margin="16,5" ColumnDefinitions="*,64,76,30" Background="Transparent"
                                           ToolTip.Tip="{Binding Requests, Converter={StaticResource Format}, ConverterParameter='# requests'}">
                                         <StackPanel Orientation="Horizontal">
-                                            <Ellipse Width="6" Height="6" Fill="White" Margin="0,0,8,0" VerticalAlignment="Center"
+                                            <Ellipse Width="6" Height="6" Fill="{StaticResource Accent}" Margin="0,0,8,0" VerticalAlignment="Center"
                                                      Opacity="{Binding Active, Converter={x:Static l:CountToOpacity.Instance}}"/>
-                                            <TextBlock Classes="mono" Text="{Binding Host}" TextTrimming="CharacterEllipsis" FontSize="12" VerticalAlignment="Center"/>
+                                            <TextBlock Classes="mono" Text="{Binding Host}" TextTrimming="CharacterEllipsis" FontSize="{l:F 13}" VerticalAlignment="Center"/>
                                         </StackPanel>
-                                        <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Active}" HorizontalAlignment="Right" FontSize="12" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Active}" HorizontalAlignment="Right" FontSize="{l:F 13}" VerticalAlignment="Center"/>
                                         <TextBlock Grid.Column="2" Classes="muted" Text="{Binding BytesText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="3" Classes="icon" Width="24" Height="24" FontSize="12" Content="{i:I E8C8}" HorizontalAlignment="Right"
+                                        <Button Grid.Column="3" Classes="icon" Width="24" Height="24" FontSize="{l:F 13}" Content="{i:I E8C8}" HorizontalAlignment="Right"
                                                 ToolTip.Tip="{l:T 'Copy domain (e.g. to add it to a VPN or firewall rule)'}"
                                                 Command="{Binding $parent[UserControl].DataContext.CopyHostCommand}" CommandParameter="{Binding}"/>
                                     </Grid>

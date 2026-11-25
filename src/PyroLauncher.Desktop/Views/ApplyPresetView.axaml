@@ -50,7 +50,7 @@
                                 <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanSelect}" VerticalAlignment="Center" Margin="0,0,6,0" MinWidth="0"/>
                                 <Border DockPanel.Dock="Left" Width="30" Height="30" CornerRadius="6" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
                                     <Grid>
-                                        <TextBlock Text="{Binding Initials}" FontSize="10" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Initials}" FontSize="{l:F 11}" FontWeight="Bold" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         <Image c:RemoteImage.DecodeWidth="60" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
                                     </Grid>
                                 </Border>

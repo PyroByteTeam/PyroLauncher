@@ -6,8 +6,8 @@
     <Border Classes="dialog" Width="580">
         <StackPanel>
             <DockPanel>
-                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="12" Command="{Binding CancelCommand}" ToolTip.Tip="{l:T 'Close'}" VerticalAlignment="Top"/>
-                <TextBlock Classes="h2" Text="{l:T 'New instance'}" FontSize="20"/>
+                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="{l:F 13}" Command="{Binding CancelCommand}" ToolTip.Tip="{l:T 'Close'}" VerticalAlignment="Top"/>
+                <TextBlock Classes="h2" Text="{l:T 'New instance'}" FontSize="{l:F 20}"/>
             </DockPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,14,0,18">
@@ -69,7 +69,7 @@
             <StackPanel IsVisible="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=import}">
                 <Border x:Name="DropZone" DragDrop.AllowDrop="True" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="10" Padding="20,26">
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Classes="icon" Text="{i:I E896}" FontSize="26" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
+                        <TextBlock Classes="icon" Text="{i:I E896}" FontSize="{l:F 26}" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
                         <TextBlock Text="{l:T 'Drop a .mrpack (Modrinth), .zip (CurseForge) or .pyropack (PyroLauncher) here'}" HorizontalAlignment="Center" Margin="0,12,0,4" TextWrapping="Wrap" TextAlignment="Center"/>
                         <TextBlock Classes="faint" Text="{l:T 'or'}" HorizontalAlignment="Center"/>
                         <Button Content="{l:T 'Choose file…'}" Command="{Binding BrowseImportCommand}" HorizontalAlignment="Center" Margin="0,8,0,0" IsEnabled="{Binding !IsBusy}"/>

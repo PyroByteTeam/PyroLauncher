@@ -33,6 +33,8 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(ImageDialog));
     }
     [ObservableProperty] private string _nav = "home";
+    /// <summary>First-run welcome screens, shown over the whole window until finished.</summary>
+    [ObservableProperty] private OnboardingViewModel? _onboarding;
     [ObservableProperty] private Account? _account;
     public string AccountLabel => Account?.Username ?? L.T("No account");
     partial void OnAccountChanged(Account? value) => OnPropertyChanged(nameof(AccountLabel));
@@ -46,6 +48,7 @@ public partial class MainViewModel : ObservableObject
         Home = new HomeViewModel();
         _currentPage = Home;
         Account = AccountManager.Selected;
+        if (SettingsService.Current.OnboardingPending) _onboarding = new OnboardingViewModel();
         AccountManager.SelectionChanged += () => Account = AccountManager.Selected;
         Updater.AvailableChanged += () => Ui.Post(() =>
         {

@@ -5,7 +5,7 @@
              x:Class="PyroLauncher.Desktop.Views.ConfigsView">
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,80" MaxWidth="440">
         <Border Width="72" Height="72" CornerRadius="18" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" HorizontalAlignment="Center">
-            <TextBlock Classes="icon" Text="{i:I E90F}" FontSize="28" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
+            <TextBlock Classes="icon" Text="{i:I E90F}" FontSize="{l:F 28}" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
         </Border>
         <TextBlock Classes="h2" Text="{l:T 'Config editor - coming soon'}" HorizontalAlignment="Center" Margin="0,18,0,6"/>
         <TextBlock Classes="muted" Text="{l:T 'Browse and edit mod configuration files right inside the launcher. Until then you can open the config folder directly.'}"

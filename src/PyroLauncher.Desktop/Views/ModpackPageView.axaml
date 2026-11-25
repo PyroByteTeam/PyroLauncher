@@ -5,7 +5,7 @@
              xmlns:c="clr-namespace:PyroLauncher.Desktop.Controls"
              x:Class="PyroLauncher.Desktop.Views.ModpackPageView">
     <UserControl.Styles>
-        <Style Selector="TextBlock.key"><Setter Property="Foreground" Value="{StaticResource Fg3}"/><Setter Property="FontSize" Value="12"/><Setter Property="Width" Value="96"/></Style>
+        <Style Selector="TextBlock.key"><Setter Property="Foreground" Value="{StaticResource Fg3}"/><Setter Property="FontSize" Value="{l:F 13}"/><Setter Property="Width" Value="96"/></Style>
         <Style Selector="TextBlock.val"><Setter Property="TextWrapping" Value="Wrap"/></Style>
         <Style Selector="DockPanel.info"><Setter Property="Margin" Value="0,0,0,9"/></Style>
         <Style Selector="Button.shot"><Setter Property="Padding" Value="0"/><Setter Property="Background" Value="{StaticResource Bg2}"/></Style>
@@ -83,8 +83,8 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <DockPanel>
-                                        <Border DockPanel.Dock="Right" Classes="badge" Background="White" BorderBrush="White" VerticalAlignment="Top" IsVisible="{Binding IsInstalled}">
-                                            <TextBlock Classes="badgeText" Text="{l:T 'Installed'}" Foreground="Black" FontWeight="SemiBold"/>
+                                        <Border DockPanel.Dock="Right" Classes="badge" Background="{StaticResource Accent}" BorderBrush="{StaticResource Accent}" VerticalAlignment="Top" IsVisible="{Binding IsInstalled}">
+                                            <TextBlock Classes="badgeText" Text="{l:T 'Installed'}" Foreground="{StaticResource AccentFg}" FontWeight="SemiBold"/>
                                         </Border>
                                         <StackPanel>
                                             <TextBlock Text="{Binding Version.Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
@@ -180,9 +180,9 @@
                             <Border Width="44" Height="44" CornerRadius="10" Background="{StaticResource Bg3}" ClipToBounds="True" Margin="0,0,12,0">
                                 <Image c:RemoteImage.DecodeWidth="96" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
                             </Border>
-                            <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8A7}" ToolTip.Tip="{l:T 'Open website'}" Command="{Binding OpenWebCommand}" Width="32" Height="32" FontSize="13"/>
+                            <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8A7}" ToolTip.Tip="{l:T 'Open website'}" Command="{Binding OpenWebCommand}" Width="32" Height="32" FontSize="{l:F 14}"/>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="{l:F 15}" TextTrimming="CharacterEllipsis"/>
                                 <TextBlock Classes="faint"><Run Text="{Binding SourceText}"/><Run Text=" · "/><Run Text="{Binding Author}"/></TextBlock>
                             </StackPanel>
                         </DockPanel>

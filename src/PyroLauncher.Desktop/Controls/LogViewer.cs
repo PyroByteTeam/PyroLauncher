@@ -93,7 +93,6 @@ public class LogViewer : UserControl
             SelectionMode = SelectionMode.Multiple,
             Background = Brushes.Transparent,
             FontFamily = (FontFamily)Application.Current!.FindResource("MonoFont")!,
-            FontSize = 12,
             ItemTemplate = new FuncDataTemplate<LogLine>((_, _) =>
             {
                 var t = new TextBlock { TextWrapping = TextWrapping.NoWrap };
@@ -106,7 +105,8 @@ public class LogViewer : UserControl
         {
             Setters = { new Avalonia.Styling.Setter(PaddingProperty, new Thickness(8, 1)), new Avalonia.Styling.Setter(MinHeightProperty, 0d) },
         });
-        ScrollViewer.SetHorizontalScrollBarVisibility(_list, Avalonia.Controls.Primitives.ScrollBarVisibility.Auto);
+        _list.Bind(FontSizeProperty, FontScale.For(13));
+        ScrollViewer.SetHorizontalScrollBarVisibility(_list,Avalonia.Controls.Primitives.ScrollBarVisibility.Auto);
 
         var menu = new ContextMenu
         {

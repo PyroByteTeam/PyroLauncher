@@ -30,6 +30,7 @@ public interface IPlatformUi
     Task<string?> PickFileAsync(string title, IReadOnlyList<FileFilter> filters);
     Task<IReadOnlyList<string>> PickFilesAsync(string title, IReadOnlyList<FileFilter> filters);
     Task<string?> PickFolderAsync(string title, string? initialDirectory);
+    Task<string?> SaveFileAsync(string title, string suggestedName, IReadOnlyList<FileFilter> filters);
 
     Task SetClipboardTextAsync(string text);
     Task<bool> SetClipboardImageAsync(string path);

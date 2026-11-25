@@ -23,7 +23,7 @@
         <Grid Margin="0,0,0,14" ColumnDefinitions="Auto,*,Auto">
             <Border Width="56" Height="56" CornerRadius="12" Background="{StaticResource Bg3}" ClipToBounds="True">
                 <Grid>
-                    <TextBlock Classes="icon" Text="{i:I EA86}" FontSize="24" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
+                    <TextBlock Classes="icon" Text="{i:I EA86}" FontSize="{l:F 24}" Foreground="{StaticResource Fg3}" HorizontalAlignment="Center"/>
                     <Image c:RemoteImage.DecodeWidth="144" c:RemoteImage.Url="{Binding IconUrl}" Stretch="UniformToFill"/>
                     <Image Source="{Binding LocalIcon}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="None"/>
                 </Grid>
@@ -31,7 +31,7 @@
             <StackPanel Grid.Column="1" Margin="14,0,8,0" VerticalAlignment="Center">
                 <DockPanel>
                     <Border DockPanel.Dock="Right" Classes="badge" Margin="10,2,0,0"><TextBlock Classes="badgeText" Text="{Binding SourceText}"/></Border>
-                    <TextBlock Classes="h2" Text="{Binding Title}" FontSize="20" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Classes="h2" Text="{Binding Title}" FontSize="{l:F 20}" TextTrimming="CharacterEllipsis"/>
                 </DockPanel>
                 <TextBlock Classes="muted" Text="{Binding Author, Converter={StaticResource Format}, ConverterParameter='by {0}'}" Margin="0,3,0,0"
                            IsVisible="{Binding Author, Converter={StaticResource VisibleIf}}"/>
@@ -39,7 +39,7 @@
             </StackPanel>
             <StackPanel Grid.Column="2" VerticalAlignment="Top" Orientation="Horizontal">
                 <Button Classes="icon" Content="{i:I E8A7}" ToolTip.Tip="{l:T 'Open website'}" Command="{Binding OpenWebCommand}" IsVisible="{Binding Details, Converter={StaticResource VisibleIf}}"/>
-                <Button Classes="icon" Content="{i:I E8BB}" FontSize="12" ToolTip.Tip="{l:T 'Close'}" Command="{Binding BackCommand}"/>
+                <Button Classes="icon" Content="{i:I E8BB}" FontSize="{l:F 13}" ToolTip.Tip="{l:T 'Close'}" Command="{Binding BackCommand}"/>
             </StackPanel>
         </Grid>
 
@@ -60,7 +60,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <ToggleSwitch IsChecked="{Binding Installed.IsEnabled}" OnContent="{Binding ActiveLabel}" OffContent="{Binding ActiveLabel}" Margin="0,-6"/>
                     <TextBlock VerticalAlignment="Center"><Run Text="{l:T 'Installed  '}" Foreground="{StaticResource Fg3}"/><Run Text="{Binding Installed.Version}"/></TextBlock>
-                    <Button Content="{l:T 'Remove'}" Padding="8,2" FontSize="11.5" Command="{Binding UninstallCommand}"/>
+                    <Button Content="{l:T 'Remove'}" Padding="8,2" FontSize="{l:F 12.5}" Command="{Binding UninstallCommand}"/>
                 </StackPanel>
             </Border>
         </WrapPanel>
@@ -95,8 +95,8 @@
                             <ToggleButton Classes="plain" IsChecked="{Binding DependenciesExpanded}" IsEnabled="{Binding HasDependencies}" HorizontalAlignment="Stretch">
                                 <DockPanel>
                                     <Grid DockPanel.Dock="Left" Margin="0,0,10,0">
-                                        <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="10" Foreground="{StaticResource Fg2}" IsVisible="{Binding !DependenciesExpanded}"/>
-                                        <TextBlock Classes="icon" Text="{i:I E70D}" FontSize="10" Foreground="{StaticResource Fg2}" IsVisible="{Binding DependenciesExpanded}"/>
+                                        <TextBlock Classes="icon" Text="{i:I E76C}" FontSize="{l:F 11}" Foreground="{StaticResource Fg2}" IsVisible="{Binding !DependenciesExpanded}"/>
+                                        <TextBlock Classes="icon" Text="{i:I E70D}" FontSize="{l:F 11}" Foreground="{StaticResource Fg2}" IsVisible="{Binding DependenciesExpanded}"/>
                                     </Grid>
                                     <ProgressBar DockPanel.Dock="Right" Width="60" IsIndeterminate="True" VerticalAlignment="Center" IsVisible="{Binding LoadingDependencies}"/>
                                     <TextBlock Text="{Binding DependenciesHeader}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
@@ -108,7 +108,7 @@
                                         <Border Classes="dep" CornerRadius="8" Padding="8,6" Margin="0,0,0,5" Cursor="Hand"
                                                 c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenDependencyCommand}">
                                             <DockPanel>
-                                                <Button DockPanel.Dock="Right" Content="{l:T 'Install'}" Padding="10,3" FontSize="12" IsVisible="{Binding CanInstall}"
+                                                <Button DockPanel.Dock="Right" Content="{l:T 'Install'}" Padding="10,3" FontSize="{l:F 13}" IsVisible="{Binding CanInstall}"
                                                         Command="{Binding $parent[UserControl].DataContext.InstallDependencyCommand}" CommandParameter="{Binding}"/>
                                                 <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{l:T 'Installed'}" VerticalAlignment="Center" Margin="0,0,4,0" IsVisible="{Binding IsInstalled}"/>
                                                 <Border Width="28" Height="28" CornerRadius="6" Background="{StaticResource Bg4}" ClipToBounds="True" Margin="0,0,10,0">
@@ -161,8 +161,8 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <DockPanel>
-                                    <Border DockPanel.Dock="Right" Classes="badge" Background="White" BorderBrush="White" VerticalAlignment="Top" IsVisible="{Binding IsInstalled}">
-                                        <TextBlock Classes="badgeText" Text="{l:T 'Installed'}" Foreground="Black" FontWeight="SemiBold"/>
+                                    <Border DockPanel.Dock="Right" Classes="badge" Background="{StaticResource Accent}" BorderBrush="{StaticResource Accent}" VerticalAlignment="Top" IsVisible="{Binding IsInstalled}">
+                                        <TextBlock Classes="badgeText" Text="{l:T 'Installed'}" Foreground="{StaticResource AccentFg}" FontWeight="SemiBold"/>
                                     </Border>
                                     <StackPanel>
                                         <TextBlock Text="{Binding Version.Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>

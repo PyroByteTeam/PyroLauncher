@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.Demo.DemoProfile">
+    <StackPanel Margin="36,0,28,0">
+        <TextBlock Classes="h1" Text="{l:T 'Profile'}" Margin="0,0,0,20"/>
+        <Grid ColumnDefinitions="300,*">
+            <Border Classes="card" Height="440" Padding="20">
+                <Grid RowDefinitions="Auto,*">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Border Width="40" Height="40" CornerRadius="8" Background="#FF6E4E37"/>
+                        <StackPanel VerticalAlignment="Center"><TextBlock Text="Steve" FontWeight="SemiBold"/><TextBlock Classes="faint" Text="Microsoft"/></StackPanel>
+                    </StackPanel>
+                    <!-- simple blocky player -->
+                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="64" Height="64" Background="#FF6E4E37" HorizontalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Width="32" Height="96" Background="#FF2FA3A3"/><Border Width="64" Height="96" Background="#FF33B3B3"/><Border Width="32" Height="96" Background="#FF2FA3A3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Width="32" Height="96" Background="#FF3B3B9A"/><Border Width="32" Height="96" Background="#FF34348A"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                <DockPanel Margin="0,0,0,12">
+                    <Button DockPanel.Dock="Right" Classes="primary" Content="{l:T 'Upload skin'}"/>
+                    <TextBlock Classes="h2" Text="{l:T 'Skins'}" VerticalAlignment="Center"/>
+                </DockPanel>
+                <UniformGrid Columns="4">
+                    <Border Classes="card" Height="150" Margin="0,0,10,10" BorderBrush="{StaticResource Accent}" BorderThickness="2"><Border Width="34" Height="90" Background="#FF33B3B3" VerticalAlignment="Center"/></Border>
+                    <Border Classes="card" Height="150" Margin="0,0,10,10"><Border Width="34" Height="90" Background="#FFB34A4A" VerticalAlignment="Center"/></Border>
+                    <Border Classes="card" Height="150" Margin="0,0,10,10"><Border Width="34" Height="90" Background="#FF4A8A4A" VerticalAlignment="Center"/></Border>
+                    <Border Classes="card" Height="150" Margin="0,0,10,10"><Border Width="34" Height="90" Background="#FF8A7A4A" VerticalAlignment="Center"/></Border>
+                </UniformGrid>
+                <TextBlock Classes="h2" Text="{l:T 'Capes'}" Margin="0,14,0,12"/>
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Border Classes="card" Width="70" Height="100"><Border Width="34" Height="56" Background="#FFB03E3E"/></Border>
+                    <Border Classes="card" Width="70" Height="100"><Border Width="34" Height="56" Background="#FF3E6FB0"/></Border>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>
