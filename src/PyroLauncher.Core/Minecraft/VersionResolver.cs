@@ -71,6 +71,10 @@ public static class VersionResolver
             {
                 var name = lib.Str("name");
                 if (name == null) continue;
+                // Filter by OS rules before deduping: vanilla JSONs list the same artifact twice
+                // (e.g. LWJGL 3.2.1 osx-only, then 3.2.2 for everyone else), and letting the
+                // disallowed entry claim the key would drop the one this OS actually needs.
+                if (!RulesAllow(lib.Get("rules"))) continue;
                 var key = LibKey(name) + (lib.Obj("natives") != null ? ":natives" : "");
                 if (libKeys.Add(key)) r.Libraries.Add((JsonObject)lib.DeepClone());
             }

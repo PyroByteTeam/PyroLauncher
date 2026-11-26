@@ -1,0 +1,157 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:PyroLauncher.Desktop"
+             xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             x:Class="PyroLauncher.Desktop.Views.ImportLauncherView">
+    <UserControl.Styles>
+        <Style Selector="Border.stepDot">
+            <Setter Property="Width" Value="22"/><Setter Property="Height" Value="22"/><Setter Property="CornerRadius" Value="11"/>
+            <Setter Property="Background" Value="{StaticResource Bg3}"/><Setter Property="BorderBrush" Value="{StaticResource Line2}"/><Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Border.stepDot.on"><Setter Property="Background" Value="{StaticResource Accent}"/><Setter Property="BorderBrush" Value="{StaticResource Accent}"/></Style>
+        <Style Selector="Border.stepDot > TextBlock"><Setter Property="FontSize" Value="{l:F 12}"/><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
+        <Style Selector="Border.stepDot.on > TextBlock"><Setter Property="Foreground" Value="{StaticResource AccentFg}"/></Style>
+    </UserControl.Styles>
+
+    <Border Classes="dialog" Width="640">
+        <StackPanel>
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E8BB}" FontSize="{l:F 13}" Command="{Binding CancelCommand}"
+                        ToolTip.Tip="{l:T 'Close'}" VerticalAlignment="Top" IsVisible="{Binding !IsBusy}"/>
+                <StackPanel>
+                    <TextBlock Classes="h2" Text="{l:T 'Import from another launcher'}" FontSize="{l:F 20}"/>
+                    <TextBlock Classes="faint" Text="{l:T 'Instances are copied with their mods, worlds and settings. The other launcher keeps its own copy.'}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Step indicator -->
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,16,0,18">
+                <Border Classes="stepDot" Classes.on="{Binding StepNumber, Converter={StaticResource Eq}, ConverterParameter=1}"><TextBlock Text="1"/></Border>
+                <TextBlock Classes="muted" Text="{l:T 'Launcher'}" VerticalAlignment="Center"/>
+                <Border Width="24" Height="1" Background="{StaticResource Line2}" VerticalAlignment="Center"/>
+                <Border Classes="stepDot" Classes.on="{Binding StepNumber, Converter={StaticResource Eq}, ConverterParameter=2}"><TextBlock Text="2"/></Border>
+                <TextBlock Classes="muted" Text="{l:T 'Folder'}" VerticalAlignment="Center"/>
+                <Border Width="24" Height="1" Background="{StaticResource Line2}" VerticalAlignment="Center"/>
+                <Border Classes="stepDot" Classes.on="{Binding StepNumber, Converter={StaticResource Eq}, ConverterParameter=3}"><TextBlock Text="3"/></Border>
+                <TextBlock Classes="muted" Text="{l:T 'Instances'}" VerticalAlignment="Center"/>
+                <Border Width="24" Height="1" Background="{StaticResource Line2}" VerticalAlignment="Center"/>
+                <Border Classes="stepDot" Classes.on="{Binding StepNumber, Converter={StaticResource Eq}, ConverterParameter=4}"><TextBlock Text="4"/></Border>
+                <TextBlock Classes="muted" Text="{l:T 'Import'}" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- 1. Launcher -->
+            <StackPanel IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=launcher}">
+                <TextBlock Classes="overline" Text="{l:T 'WHICH LAUNCHER?'}" Margin="0,0,0,8"/>
+                <ItemsControl ItemsSource="{Binding Launchers}">
+                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="2"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Classes="themeCard" Classes.active="{Binding IsSelected}" Margin="0,0,10,10" Padding="14,12" HorizontalAlignment="Stretch"
+                                    Command="{Binding $parent[ItemsControl].DataContext.ChooseLauncherCommand}" CommandParameter="{Binding}">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Left" Width="40" Height="40" CornerRadius="10" Background="{StaticResource Bg3}" Margin="0,0,12,0">
+                                        <TextBlock Classes="icon" Text="{Binding Glyph}" FontSize="{l:F 18}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                        <TextBlock Classes="faint" Text="{l:T 'Found on this computer'}" IsVisible="{Binding IsDetected}" Margin="0,2,0,0"/>
+                                        <TextBlock Classes="faint" Text="{l:T 'Not found, choose the folder'}" IsVisible="{Binding !IsDetected}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <!-- 2. Folder -->
+            <StackPanel IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=folder}">
+                <TextBlock Classes="h3" Text="{Binding LauncherName}" Margin="0,0,0,8"/>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="{l:T 'Browse…'}" Command="{Binding BrowseCommand}" Margin="8,0,0,0"/>
+                    <TextBox Text="{Binding Folder}" Watermark="{l:T 'Folder of the launcher'}"/>
+                </DockPanel>
+                <TextBlock Classes="faint" Text="{Binding FolderHint}" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,12,0,0" IsVisible="{Binding IsScanning}">
+                    <ProgressBar IsIndeterminate="True" Width="120" VerticalAlignment="Center"/>
+                    <TextBlock Classes="muted" Text="{l:T 'Looking for instances…'}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- 3. Instances -->
+            <StackPanel IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=instances}">
+                <DockPanel Margin="0,0,0,8">
+                    <Button DockPanel.Dock="Right" Classes="ghost" Content="{l:T 'Select all / none'}" Command="{Binding SelectAllCommand}" Padding="6,2"/>
+                    <TextBlock Classes="h3" Text="{Binding LauncherName}" VerticalAlignment="Center"/>
+                </DockPanel>
+                <ScrollViewer MaxHeight="300">
+                    <ItemsControl ItemsSource="{Binding Candidates}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Classes="row" Padding="10,8" Margin="0,0,6,6">
+                                    <DockPanel>
+                                        <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanImport}" VerticalAlignment="Center" Margin="0,0,6,0" MinWidth="0"/>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Classes="faint" Text="{Binding Details}" Margin="0,2,0,0"/>
+                                            <TextBlock Classes="faint" Text="{Binding Note}" Foreground="{StaticResource LogWarn}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                                       IsVisible="{Binding Note, Converter={StaticResource VisibleIf}}"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <TextBlock Classes="overline" Text="{l:T 'CATEGORY'}" Margin="0,14,0,6"/>
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}"/>
+                <TextBlock Classes="faint" Text="{l:T 'Worlds and big mod folders can take a while to copy.'}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+            </StackPanel>
+
+            <!-- 4. Import progress and results -->
+            <StackPanel IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=import}">
+                <StackPanel IsVisible="{Binding IsBusy}" Margin="0,0,0,12">
+                    <TextBlock Classes="muted" Text="{Binding Status}" TextTrimming="CharacterEllipsis"/>
+                    <ProgressBar Margin="0,8,0,0" Maximum="100" Value="{Binding Progress, Converter={StaticResource Percent}}"
+                                 IsIndeterminate="{Binding Progress, Converter={StaticResource Indeterminate}}"/>
+                </StackPanel>
+                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" Margin="0,0,0,12" IsVisible="{Binding IsDone}"/>
+                <ScrollViewer MaxHeight="300">
+                    <ItemsControl ItemsSource="{Binding Candidates}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Classes="row" Padding="12,8" Margin="0,0,6,6">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{Binding Result}" MaxWidth="300" TextWrapping="Wrap" TextAlignment="Right"
+                                                   VerticalAlignment="Center" Margin="12,0,0,0" IsVisible="{Binding !Failed}"/>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Result}" Foreground="{StaticResource LogWarn}" MaxWidth="300" TextWrapping="Wrap" TextAlignment="Right"
+                                                   VerticalAlignment="Center" Margin="12,0,0,0" IsVisible="{Binding Failed}"/>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Classes="faint" Text="{Binding Details}"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+
+            <TextBlock Text="{Binding Error}" Foreground="{StaticResource LogWarn}" TextWrapping="Wrap" Margin="0,12,0,0" IsVisible="{Binding Error, Converter={StaticResource VisibleIf}}"/>
+
+            <!-- Buttons -->
+            <DockPanel Margin="0,22,0,0">
+                <Button DockPanel.Dock="Left" Content="{l:T 'Back'}" Command="{Binding BackCommand}" IsVisible="{Binding CanGoBack}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                    <Button Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}" IsVisible="{Binding !IsDone}"/>
+                    <Button Classes="primary" Content="{l:T 'Next'}" Command="{Binding NextCommand}" IsDefault="True"
+                            IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=folder}"/>
+                    <Button Classes="primary" Content="{Binding ImportButtonText}" Command="{Binding ImportCommand}"
+                            IsVisible="{Binding Step, Converter={StaticResource Eq}, ConverterParameter=instances}"/>
+                    <Button Classes="primary" Content="{l:T 'Done'}" Command="{Binding CancelCommand}" IsVisible="{Binding IsDone}"/>
+                </StackPanel>
+            </DockPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

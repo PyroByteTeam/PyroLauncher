@@ -59,6 +59,8 @@ public partial class SettingsViewModel : ObservableObject
 
     public string CurseForgeApiKey { get => S.CurseForgeApiKey; set { S.CurseForgeApiKey = value; Changed(); } }
     public bool OpenConsoleOnLaunch { get => S.OpenConsoleOnLaunch; set { S.OpenConsoleOnLaunch = value; Changed(); SettingsService.NotifyAppearance(); } }
+    /// <summary>Used when the launcher starts; F11 switches fullscreen at any time.</summary>
+    public bool StartFullscreen { get => S.StartFullscreen; set { S.StartFullscreen = value; Changed(); } }
     public bool DeveloperMode
     {
         get => S.DeveloperMode;

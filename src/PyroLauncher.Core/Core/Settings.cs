@@ -70,6 +70,8 @@ public class LauncherSettings
     public LaunchBehavior OnLaunch { get; set; } = LaunchBehavior.Minimize;
     /// <summary>Separate game console window on launch / crash. When off, logs are only on the Logs tab.</summary>
     public bool OpenConsoleOnLaunch { get; set; } = true;
+    /// <summary>Open the launcher window in fullscreen instead of a normal window.</summary>
+    public bool StartFullscreen { get; set; }
     public ContentListStyle ContentListStyle { get; set; } = ContentListStyle.List;
     public InstanceMenuStyle InstanceMenuStyle { get; set; } = InstanceMenuStyle.TopNavigation;
     public ContentListStyle DiscoverStyle { get; set; } = ContentListStyle.List;
@@ -88,6 +90,40 @@ public class LauncherSettings
     public long DeletedPlaytimeSeconds { get; set; }
     /// <summary>"key=value" lines applied to the server.properties of every new server pack.</summary>
     public string ServerPropertiesDefaults { get; set; } = "";
+
+    /// <summary>LAN page (internet play that looks like LAN to Minecraft).</summary>
+    public LanSettings Lan { get; set; } = new();
+}
+
+public class LanBan
+{
+    public string Ip { get; set; } = "";
+    /// <summary>Name the player had when banned (just a reminder; the ban is by IP).</summary>
+    public string? Name { get; set; }
+    public DateTimeOffset BannedAt { get; set; }
+}
+
+public class LanSettings
+{
+    /// <summary>Off by default: no lobby port is opened and nothing is contacted until the user turns LAN on.</summary>
+    public bool Enabled { get; set; }
+    public int Port { get; set; } = 25570;
+    /// <summary>Ask the router to forward the lobby port (UPnP) while hosting.</summary>
+    public bool UseUpnp { get; set; } = true;
+    /// <summary>Put this computer's IPv6 addresses in invite codes.</summary>
+    public bool UseIPv6 { get; set; } = true;
+    /// <summary>Also accept players through UDP hole punching (no port forwarding needed on either side).</summary>
+    public bool HolePunching { get; set; }
+    /// <summary>Host identity key (PKCS#8, DPAPI-protected, base64). Its fingerprint goes into invite codes.</summary>
+    public string? ProtectedHostKey { get; set; }
+    public string? LobbyName { get; set; }
+    public int MaxPlayers { get; set; } = 8;
+    /// <summary>Lobby password from the last hosted lobby, DPAPI-protected (base64), so the same lobby can be hosted again.</summary>
+    public string? ProtectedPassword { get; set; }
+    public string? LastJoinCode { get; set; }
+    /// <summary>The IP disclaimer was agreed to once; later it can be skipped without the countdown.</summary>
+    public bool DisclaimerAccepted { get; set; }
+    public List<LanBan> Bans { get; set; } = [];
 }
 
 public static class SettingsService
@@ -105,6 +141,8 @@ public static class SettingsService
         if (fresh) Current.OnboardingPending = true;
         Current.Game ??= GameSettings.Defaults();
         Current.Presets ??= [];
+        Current.Lan ??= new LanSettings();
+        Current.Lan.Bans ??= [];
         Downloader.Concurrency = Current.ConcurrentDownloads;
     }
 

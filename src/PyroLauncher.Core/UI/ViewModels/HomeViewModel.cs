@@ -84,6 +84,9 @@ public partial class HomeViewModel : ObservableObject
     private void NewInstance() => Dialogs.Show(new NewInstanceViewModel());
 
     [RelayCommand]
+    private void ImportFromLauncher() => Dialogs.Show(new ImportLauncherViewModel());
+
+    [RelayCommand]
     private async Task NewCategory()
     {
         var name = await Dialogs.PromptAsync(L.T("New category"), L.T("Category name"), "", L.T("Create"));

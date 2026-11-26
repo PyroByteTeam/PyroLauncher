@@ -35,6 +35,8 @@
                                  IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=presets}"/>
                     <RadioButton Classes="nav" Content="{l:T 'Downloads'}" Tag="{i:I E896}" GroupName="nav"
                                  IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=downloads}"/>
+                    <RadioButton Classes="nav" Content="{l:T 'LAN'}" ToolTip.Tip="{l:T 'LAN (beta)'}" Tag="{i:I E125}" GroupName="nav"
+                                 IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=lan}"/>
                     <RadioButton Classes="nav" Content="{l:T 'Settings'}" Tag="{i:I E713}" GroupName="nav"
                                  IsChecked="{Binding Nav, Converter={StaticResource Eq}, ConverterParameter=settings}"/>
                 </StackPanel>
@@ -81,6 +83,38 @@
                     <TextBlock Classes="mono" Text="{Binding Downloads.Text}" FontSize="{l:F 13}" VerticalAlignment="Center" MinWidth="110"/>
                 </StackPanel>
             </Button>
+
+            <!-- Right side of the header. The margin (set in code) keeps clear of the window's caption buttons. -->
+            <StackPanel x:Name="HeaderRight" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="6">
+                <!-- LAN lobby status: only while LAN is turned on (toggle on the LAN page) -->
+                <Button x:Name="LanStatusButton" Classes="ghost" Padding="10,4" IsVisible="{Binding ShowLanStatus}" ToolTip.Tip="{l:T 'LAN lobby'}">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <Panel VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="#FF4CC38A" IsVisible="{Binding Lan.IsLobbyActive}"/>
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource Fg3}" IsVisible="{Binding !Lan.IsLobbyActive}"/>
+                        </Panel>
+                        <TextBlock Classes="icon" Text="{i:I E125}" FontSize="{l:F 13}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Lan.HeaderText}" VerticalAlignment="Center" FontSize="{l:F 13}"/>
+                    </StackPanel>
+                    <Button.Flyout>
+                        <Flyout Placement="BottomEdgeAlignedRight">
+                            <StackPanel Width="260" Spacing="4">
+                                <TextBlock Classes="h3" Text="{l:T 'LAN lobby'}"/>
+                                <TextBlock Classes="muted" Text="{Binding Lan.StatusText}" TextWrapping="Wrap"/>
+                                <TextBlock Classes="faint" Text="{Binding Lan.PlayersText}" Margin="0,2,0,0"/>
+                                <ItemsControl ItemsSource="{Binding Lan.Players}" Margin="0,4,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate><TextBlock Margin="0,2"><Run Text="{Binding Name}"/><Run Text="{Binding PingText, StringFormat='  {0}'}" Foreground="{StaticResource Fg3}"/></TextBlock></DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button Content="{l:T 'Open LAN page'}" Command="{Binding GoLanCommand}" Click="OpenLanPage_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+                <Button x:Name="ExitFullscreenButton" Classes="icon" Content="{i:I E11B}" FontSize="{l:F 14}" IsVisible="False"
+                        Click="ExitFullscreen_Click" ToolTip.Tip="{l:T 'Exit fullscreen (F11)'}"/>
+            </StackPanel>
 
             <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False"/>
         </Grid>
