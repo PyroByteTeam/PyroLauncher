@@ -64,7 +64,7 @@ tells you what is missing, and lets you untick anything before installing.
 and the right one is picked for each Minecraft version. Bring your own if you prefer.
 
 **Accounts.** Microsoft sign-in with several accounts, a 3D skin preview, skin upload and cape
-switching. Currently we are awaiting verification, so login doesn't work properly.
+switching. 
 
 **Server packs.** Turn an instance into a server: pick which mods go along (client-only ones are
 spotted and left out), and the launcher installs the server, its loader and Java. Each server
@@ -72,6 +72,11 @@ gets a panel with live CPU, memory and player count, a console with command comp
 form for every `server.properties` setting, and player management (whitelist, ops, bans). A
 modpack's published server files can be turned into a server pack in one click, and linked
 instances get a start/stop button right next to Play.
+
+**LAN over the internet (beta).** Open a single-player world to LAN, start a lobby, and send
+friends an invite code: your world shows up under *LAN worlds* in their Minecraft, as if you
+were on the same network. Players connect directly to the host, with no server in between, and
+everything is encrypted. See [Playing over LAN](#playing-over-lan).
 
 **Everything else.** Screenshot and server-list managers.
 A downloads page with pause, cancel and a list of every domain the launcher talked to. English
@@ -127,6 +132,51 @@ Launcher data lives in `%APPDATA%\PyroLauncher` on Windows,
 `~/Library/Application Support/PyroLauncher` on macOS and `~/.local/share/PyroLauncher` on Linux.
 Set `PYROLAUNCHER_HOME` to keep it somewhere else, e.g. on another drive or next to a portable copy.
 
+## Playing over LAN
+
+The **LAN** page lets friends join your single-player world over the internet. It is off by
+default: while it's off the launcher opens no ports and contacts nobody for LAN. Turn it on from
+the LAN page (you'll be asked to read a short note about IP addresses first).
+
+**Hosting**
+
+1. Start Minecraft from any instance and load a single-player world.
+2. Press Esc → **Open to LAN** → **Start LAN World**.
+3. In the launcher, choose **Host a lobby** → **Start lobby**. The world is detected
+   automatically. If it isn't (some firewalls and VPNs get in the way), type the port Minecraft
+   printed in chat ("Local game hosted on port …").
+4. Copy the invite code and send it privately to your friends, along with the password if you set one.
+
+When Windows Firewall asks about PyroLauncher, allow it, or nobody can connect.
+
+**Joining**
+
+1. Choose **Join a lobby**, paste the invite code and press **Join**.
+   **Test connection** checks that the lobby is reachable and measures ping without joining.
+2. Start Minecraft with the same game version and mods as the host.
+3. Open **Multiplayer**: the host's world appears at the bottom under *LAN worlds*. If it
+   doesn't, use **Direct Connection** with the `127.0.0.1:<port>` address shown on the lobby
+   page. Don't type the host's IP address into Minecraft.
+
+**How friends reach you.** Everything (lobby control, tests and game traffic) goes through a
+single TCP port on the host, `25570` by default. The launcher asks your router to forward it
+with UPnP; if that fails, forward it by hand, or let friends with IPv6 connect directly. When
+neither side can open a port, turn on **hole punching**: a friend who can't connect gets a
+reply code to send you, and once you paste it the two of you connect over UDP. It doesn't work
+with every router (symmetric NAT in particular), and the lobby page warns you when it probably
+won't. The address used for hole punching is hidden on the lobby page so it doesn't show up on
+stream; a button next to it copies it.
+
+**Managing a lobby.** The host sees every player with their ping, and can kick and ban them
+(bans apply to every lobby you host). Join, leave and timeout messages show in the launcher
+and, if you turn on system notifications in **Settings**, from your OS while you're playing.
+
+**Privacy and security.** There is no relay server, so the host sees the IP address of everyone
+who joins, and everyone who joins sees the host's (it's inside the invite code). Only play with
+people you trust and don't post invite codes publicly. Every connection is end-to-end encrypted
+(ECDH key exchange, AES-256-GCM), and the invite code contains the host's key fingerprint so
+players can tell they reached you and not an impersonator.
+
 ## Building from source
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
@@ -180,6 +230,7 @@ src/
     Content/                 Modrinth & CurseForge APIs, modpacks, presets, export
     Minecraft/               version resolving, loaders, Java, launching
     Instances/               instance model and storage
+    Lan/                     LAN lobbies: hosting, joining, encryption, hole punching
     UI/                      view models, dialogs, translations
     Lang/                    translation files
   PyroLauncher.Desktop/      the launcher interface (Avalonia: Windows, macOS, Linux)
