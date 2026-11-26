@@ -25,6 +25,8 @@ public partial class LanViewModel : ObservableObject
         _maxPlayersText = S.MaxPlayers.ToString();
         _portText = S.Port.ToString();
         _useUpnp = S.UseUpnp;
+        _useIPv6 = S.UseIPv6;
+        _holePunching = S.HolePunching;
         _joinCode = S.LastJoinCode ?? "";
         Lan.PropertyChanged += (_, e) =>
         {
@@ -177,6 +179,8 @@ public partial class LanViewModel : ObservableObject
     partial void OnLobbyNameChanged(string value) { S.LobbyName = value.Trim(); SettingsService.Save(); }
     partial void OnHostPasswordChanged(string value) { SavePassword(value); SettingsService.Save(); }
     partial void OnUseUpnpChanged(bool value) { S.UseUpnp = value; SettingsService.Save(); }
+    partial void OnUseIPv6Changed(bool value) { S.UseIPv6 = value; SettingsService.Save(); }
+    partial void OnHolePunchingChanged(bool value) { S.HolePunching = value; SettingsService.Save(); }
     partial void OnJoinCodeChanged(string value) { S.LastJoinCode = value.Trim(); SettingsService.Save(); }
 
     partial void OnMaxPlayersTextChanged(string value)
@@ -218,6 +222,8 @@ public partial class LanViewModel : ObservableObject
     [ObservableProperty] private string _maxPlayersText;
     [ObservableProperty] private string _portText;
     [ObservableProperty] private bool _useUpnp;
+    [ObservableProperty] private bool _useIPv6;
+    [ObservableProperty] private bool _holePunching;
     [ObservableProperty] private string _manualWorldPortText = "";
 
     [RelayCommand]
@@ -231,7 +237,7 @@ public partial class LanViewModel : ObservableObject
         var max = int.TryParse(MaxPlayersText.Trim(), out var m) ? m : 8;
         // Saved (with name, size, port and UPnP, which LanService.Host stores) so the same lobby can be hosted next time.
         SavePassword(HostPassword);
-        try { LanService.Host(LobbyName, HostPassword, max, port, UseUpnp); }
+        try { LanService.Host(LobbyName, HostPassword, max, port, UseUpnp, UseIPv6, HolePunching); }
         catch (LanException ex) { Dialogs.Toast(ex.Message, true); }
     }
 
@@ -312,6 +318,36 @@ public partial class LanViewModel : ObservableObject
     private void Leave() => LanService.Stop();
 
     [RelayCommand]
+    private void CancelJoin() => LanService.CancelJoin();
+
+    /// <summary>Guest: copy the reply code that the host has to paste for hole punching.</summary>
+    [RelayCommand]
+    private async Task CopyReplyCode()
+    {
+        if (Lan.ReplyCode is not { } code) return;
+        try { await Ui.Platform.SetClipboardTextAsync(code); Dialogs.Toast(L.T("Reply code copied. Send it to the host.")); } catch { }
+    }
+
+    // ---------- host: accept a hole-punching reply ----------
+    [ObservableProperty] private string _replyInput = "";
+    [ObservableProperty] private bool _acceptingReply;
+
+    [RelayCommand]
+    private async Task AcceptReply()
+    {
+        if (AcceptingReply || string.IsNullOrWhiteSpace(ReplyInput)) return;
+        AcceptingReply = true;
+        try
+        {
+            await LanService.AcceptReplyAsync(ReplyInput);
+            ReplyInput = "";
+            Dialogs.Toast(L.T("Connected to the player. They will appear in the list in a moment."));
+        }
+        catch (LanException ex) { Dialogs.Toast(ex.Message, true); }
+        finally { AcceptingReply = false; }
+    }
+
+    [RelayCommand]
     private async Task CopyLocalAddress()
     {
         if (Lan.LocalAddress.Length == 0) return;
@@ -351,7 +387,8 @@ public partial class LanViewModel : ObservableObject
     {
         var lines = new List<string>
         {
-            L.F("Lobby \"{0}\" reached at {1} (TCP port {2}).", r.LobbyName, LanProtocol.FormatEndpoint(r.Address, r.Port), r.Port),
+            L.F("Lobby \"{0}\" reached at {1}.", r.LobbyName, r.Address),
+            r.Verified ? L.T("Encrypted end to end; the host identity matches the invite code.") : L.T("Encrypted end to end; host identity not verified (address typed by hand)."),
             r.Pings.Count > 0
                 ? L.F("Ping: {0:0} ms average, {1:0}-{2:0} ms, jitter {3:0.0} ms, lost {4}%.", r.Avg, r.Min, r.Max, r.Jitter, r.LossPercent)
                 : L.T("Ping: no answers to the test packets."),

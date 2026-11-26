@@ -90,10 +90,10 @@
                     <!-- ===== Step 1: disclaimer ===== -->
                     <Border Classes="warnCard" IsVisible="{Binding IsDisclaimerStep}" VerticalAlignment="Top">
                         <StackPanel Spacing="10">
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <TextBlock Classes="icon" Text="{i:I E7BA}" FontSize="{l:F 22}" Foreground="{StaticResource LogWarn}" VerticalAlignment="Center"/>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{i:I E7BA}" FontSize="{l:F 22}" Foreground="{StaticResource LogWarn}" VerticalAlignment="Center" Margin="0,0,12,0"/>
                                 <TextBlock Classes="h2" Text="{l:T 'Your IP address is visible to the people you play with'}" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                            </StackPanel>
+                            </DockPanel>
                             <TextBlock Classes="muted" TextWrapping="Wrap"
                                        Text="{l:T 'Players connect to each other directly, with no server in between. The host sees the IP address of everyone who joins, and everyone who joins sees the host IP address (it is inside the invite code).'}"/>
                             <TextBlock Classes="muted" TextWrapping="Wrap"
@@ -162,7 +162,7 @@
                                         <CheckBox x:Name="ShowPw" Content="{l:T 'Show password'}" Margin="0,4,0,0"/>
                                     </StackPanel>
                                 </Grid>
-                                <Grid ColumnDefinitions="140,12,140,12,*">
+                                <Grid ColumnDefinitions="140,12,140,*">
                                     <StackPanel>
                                         <TextBlock Classes="label" Text="{l:T 'Max players'}"/>
                                         <TextBox Text="{Binding MaxPlayersText}" MaxLength="2"/>
@@ -171,9 +171,30 @@
                                         <TextBlock Classes="label" Text="{l:T 'Lobby port (TCP)'}"/>
                                         <TextBox Classes="mono" FontFamily="{StaticResource MonoFont}" Text="{Binding PortText}" MaxLength="5"/>
                                     </StackPanel>
-                                    <CheckBox Grid.Column="4" VerticalAlignment="Bottom" Margin="0,0,0,4" IsChecked="{Binding UseUpnp}"
-                                              Content="{l:T 'Open the port on my router automatically (UPnP)'}"/>
                                 </Grid>
+                                <StackPanel Spacing="8">
+                                    <TextBlock Classes="label" Text="{l:T 'How friends reach you'}" Margin="0,4,0,0"/>
+                                    <StackPanel>
+                                        <CheckBox IsChecked="{Binding UseUpnp}" Content="{l:T 'Open the port on my router automatically (UPnP)'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Margin="28,0,0,0"
+                                                   Text="{l:T 'Turn this off if you forwarded the lobby port on your router yourself.'}"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <CheckBox IsChecked="{Binding UseIPv6}" Content="{l:T 'Include IPv6 addresses in the invite code'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Margin="28,0,0,0"
+                                                   Text="{l:T 'Friends with IPv6 can usually connect without any port forwarding. Turn off if you only want them to use your forwarded IPv4 port.'}"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <CheckBox IsChecked="{Binding HolePunching}" Content="{l:T 'Allow hole punching'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Margin="28,0,0,0"
+                                                   Text="{l:T 'Lets friends join when no port is open on either side. Players who cannot connect directly get a reply code to send you, which you paste on the lobby page. Does not work with every router.'}"/>
+                                    </StackPanel>
+                                    <DockPanel Margin="0,2,0,0">
+                                        <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{i:I E946}" Foreground="{StaticResource Fg3}" VerticalAlignment="Top" FontSize="{l:F 12}" Margin="0,2,6,0"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap"
+                                                   Text="{l:T 'Every connection is end-to-end encrypted, and the invite code lets players check they reached you and not an impersonator.'}"/>
+                                    </DockPanel>
+                                </StackPanel>
                                 <Button Classes="primary" Content="{l:T 'Start lobby'}" Command="{Binding HostCommand}" HorizontalAlignment="Left"/>
                             </StackPanel>
                         </Border>
@@ -212,9 +233,28 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Button Classes="primary" Content="{l:T 'Join'}" Command="{Binding JoinCommand}" IsEnabled="{Binding !Lan.Busy}"/>
                                     <Button Content="{l:T 'Test connection'}" Command="{Binding TestConnectionCommand}" IsEnabled="{Binding !Testing}"
+                                            IsVisible="{Binding !Lan.Busy}"
                                             ToolTip.Tip="{l:T 'Checks that the lobby is reachable and measures ping, without joining'}"/>
+                                    <Button Content="{l:T 'Cancel'}" Command="{Binding CancelJoinCommand}" IsVisible="{Binding Lan.Busy}"/>
                                     <TextBlock Classes="faint" Text="{l:T 'Connecting…'}" IsVisible="{Binding Lan.Busy}" VerticalAlignment="Center" Margin="6,0,0,0"/>
                                 </StackPanel>
+                                <!-- Hole punching: the guest's reply code for the host -->
+                                <Border Classes="row" Padding="14,12" IsVisible="{Binding Lan.IsWaitingForHost}">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock FontWeight="SemiBold" TextWrapping="Wrap"
+                                                   Text="{l:T 'The host could not be reached directly. Send them this reply code; once they paste it, you connect through hole punching.'}"/>
+                                        <DockPanel>
+                                            <Button DockPanel.Dock="Right" Classes="primary" Command="{Binding CopyReplyCodeCommand}" Margin="12,0,0,0" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock Classes="icon" Text="{i:I E8C8}" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{l:T 'Copy code'}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
+                                            <SelectableTextBlock Classes="mono" FontFamily="{StaticResource MonoFont}" Text="{Binding Lan.ReplyCode}" TextWrapping="Wrap" FontSize="{l:F 13}" VerticalAlignment="Center"/>
+                                        </DockPanel>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{l:T 'Waiting up to 3 minutes for the host…'}"/>
+                                    </StackPanel>
+                                </Border>
                                 <Border Classes="row" Padding="12,10" IsVisible="{Binding TestText, Converter={StaticResource VisibleIf}}">
                                     <SelectableTextBlock Text="{Binding TestText}" TextWrapping="Wrap" FontSize="{l:F 13}"/>
                                 </Border>
@@ -261,11 +301,23 @@
                                 </DockPanel>
                                 <TextBlock Classes="faint" TextWrapping="Wrap"
                                            Text="{l:T 'Send this code privately. It contains your IP address but not the lobby password - share that separately.'}"/>
-                                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding Lan.ReachabilityWarning}">
-                                    <TextBlock Classes="icon" Text="{i:I E7BA}" Foreground="{StaticResource LogWarn}" VerticalAlignment="Top" Margin="0,2,0,0"/>
-                                    <TextBlock Classes="faint" Foreground="{StaticResource LogWarn}" TextWrapping="Wrap" MaxWidth="700"
+                                <!-- Hole punching: accept a player's reply code -->
+                                <Border Classes="row" Padding="14,12" IsVisible="{Binding Lan.HolePunching}">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock FontWeight="SemiBold" Text="{l:T 'Players who cannot connect directly'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding Lan.PunchText}"/>
+                                        <DockPanel>
+                                            <Button DockPanel.Dock="Right" Content="{l:T 'Accept'}" Command="{Binding AcceptReplyCommand}" IsEnabled="{Binding !AcceptingReply}" Margin="8,0,0,0"/>
+                                            <TextBox Classes="mono" FontFamily="{StaticResource MonoFont}" Text="{Binding ReplyInput}" Watermark="PYROR-…"/>
+                                        </DockPanel>
+                                        <TextBlock Classes="faint" Text="{l:T 'Connecting to the player…'}" IsVisible="{Binding AcceptingReply}"/>
+                                    </StackPanel>
+                                </Border>
+                                <DockPanel IsVisible="{Binding Lan.ReachabilityWarning}">
+                                    <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{i:I E7BA}" Foreground="{StaticResource LogWarn}" VerticalAlignment="Top" Margin="0,2,8,0"/>
+                                    <TextBlock Classes="faint" Foreground="{StaticResource LogWarn}" TextWrapping="Wrap"
                                                Text="{l:T 'Friends may not be able to reach you. Open the connection details below.'}"/>
-                                </StackPanel>
+                                </DockPanel>
                             </StackPanel>
                         </Border>
 
@@ -391,6 +443,12 @@
                                                 <TextBlock Classes="faint" Text="{l:T 'Direct connection to the host lobby port (TCP).'}" TextWrapping="Wrap" Margin="0,3,16,0"/>
                                             </StackPanel>
                                         </DockPanel>
+                                    </Border>
+                                    <Border Classes="settingRow">
+                                        <StackPanel>
+                                            <TextBlock Text="{l:T 'Security'}" FontWeight="SemiBold"/>
+                                            <TextBlock Classes="faint" Text="{Binding Lan.SecurityText}" TextWrapping="Wrap" Margin="0,3,16,0"/>
+                                        </StackPanel>
                                     </Border>
                                     <Border Classes="settingRow">
                                         <DockPanel>

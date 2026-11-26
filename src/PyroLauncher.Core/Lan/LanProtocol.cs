@@ -6,23 +6,33 @@ using System.Text.Json.Nodes;
 
 namespace PyroLauncher.Lan;
 
+/// <summary>An invite code, decoded.</summary>
+/// <param name="Hosts">Addresses to try over TCP (public IPv4, IPv6, home network).</param>
+/// <param name="Fingerprint">Host identity fingerprint; null for an address typed by hand (connection is still encrypted, but unverified).</param>
+/// <param name="Udp">Host's public UDP endpoint for hole punching, when the host enabled it.</param>
+public sealed record LanInvite(List<string> Hosts, int Port, string? Fingerprint, IPEndPoint? Udp);
+
+/// <summary>A guest's answer for hole punching: where to send packets, and which session it is.</summary>
+public sealed record LanReply(IPEndPoint Udp, ulong SessionId);
+
 /// <summary>
-/// Wire format of PyroLauncher LAN. Every TCP connection to a lobby starts with newline-separated JSON messages:
-/// the host greets with "hi" (lobby name, password flag, a random nonce), the client answers with "hello" naming
-/// what the connection is for:
+/// Wire format of PyroLauncher LAN. Every connection to a lobby is first encrypted (<see cref="SecureChannel"/>), then
+/// carries newline-separated JSON messages: the host greets with "hi" (lobby name, password flag, a random nonce),
+/// the client answers with "hello" naming what the connection is for:
 ///   probe  - connection test: lobby info and ping/pong, nothing else;
 ///   join   - control connection of a player: lobby state, pings, kick notices;
-///   tunnel - one Minecraft connection; after "ok" the socket carries raw game bytes to the host's LAN world.
-/// Peers connect to each other directly (no relay or third-party service in the path), so the only thing that has
-/// to be reachable is the host's lobby port.
+///   tunnel - one Minecraft connection; after "ok" it carries raw game bytes to the host's LAN world.
+/// Peers connect to each other directly (no relay in the path): over TCP to the host's lobby port, or over
+/// UDP hole punching (<see cref="UdpMux"/>) when the host turned that on.
 /// </summary>
 public static class LanProtocol
 {
-    public const int Version = 1;
+    public const int Version = 2;
     public const string App = "PyroLauncher-LAN";
     public const int DefaultPort = 25570;
     public const int MaxLine = 16 * 1024;
     public const string CodePrefix = "PYRO-";
+    public const string ReplyPrefix = "PYROR-";
 
     public static readonly TimeSpan HandshakeTimeout = TimeSpan.FromSeconds(10);
 
@@ -46,32 +56,59 @@ public static class LanProtocol
     public static string CleanText(string? text, int max) =>
         new string((text ?? "").Where(c => !char.IsControl(c)).Take(max).ToArray()).Trim();
 
-    // ---------- invite codes ----------
+    // ---------- invite and reply codes ----------
 
-    /// <summary>"PYRO-" + base64url("1|addr1,addr2|port"). Holds addresses only - never the password.</summary>
-    public static string MakeCode(IEnumerable<string> addresses, int port)
+    private static string B64(string raw) =>
+        Convert.ToBase64String(Encoding.UTF8.GetBytes(raw)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+    private static string? UnB64(string s)
     {
-        var raw = $"{Version}|{string.Join(",", addresses.Distinct())}|{port}";
-        return CodePrefix + Convert.ToBase64String(Encoding.UTF8.GetBytes(raw)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        try
+        {
+            var b64 = s.Trim().Replace('-', '+').Replace('_', '/');
+            b64 = b64.PadRight(b64.Length + (4 - b64.Length % 4) % 4, '=');
+            return Encoding.UTF8.GetString(Convert.FromBase64String(b64));
+        }
+        catch { return null; }
+    }
+
+    /// <summary>
+    /// "PYRO-" + base64url("2|addr1,addr2|port|fingerprint|udp-endpoint"). Holds addresses and the host's key
+    /// fingerprint - never the password.
+    /// </summary>
+    public static string MakeCode(IEnumerable<string> addresses, int port, string fingerprint, IPEndPoint? udp) =>
+        CodePrefix + B64($"{Version}|{string.Join(",", addresses.Distinct())}|{port}|{fingerprint}|{udp}");
+
+    public static string MakeReply(IPEndPoint udp, ulong sessionId) => ReplyPrefix + B64($"{Version}|{udp}|{sessionId:x16}");
+
+    public static LanReply? ParseReply(string? text)
+    {
+        text = text?.Trim();
+        if (text == null || !text.StartsWith(ReplyPrefix, StringComparison.OrdinalIgnoreCase)) return null;
+        var parts = UnB64(text[ReplyPrefix.Length..])?.Split('|');
+        if (parts is not { Length: >= 3 } || parts[0] != Version.ToString()) return null;
+        if (!IPEndPoint.TryParse(parts[1], out var ep) || ep.Port == 0 || ep.AddressFamily != AddressFamily.InterNetwork) return null;
+        if (!ulong.TryParse(parts[2], System.Globalization.NumberStyles.HexNumber, null, out var sid)) return null;
+        return new LanReply(ep, sid);
     }
 
     /// <summary>Accepts an invite code, or a plain "host", "host:port", "1.2.3.4:port" or "[ipv6]:port".</summary>
-    public static (List<string> Hosts, int Port)? ParseCode(string? text)
+    public static LanInvite? ParseCode(string? text)
     {
         text = text?.Trim();
         if (string.IsNullOrEmpty(text)) return null;
+        if (text.StartsWith(ReplyPrefix, StringComparison.OrdinalIgnoreCase)) return null;
         if (text.StartsWith(CodePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            try
-            {
-                var b64 = text[CodePrefix.Length..].Replace('-', '+').Replace('_', '/');
-                b64 = b64.PadRight(b64.Length + (4 - b64.Length % 4) % 4, '=');
-                var parts = Encoding.UTF8.GetString(Convert.FromBase64String(b64)).Split('|');
-                if (parts.Length < 3 || !int.TryParse(parts[2], out var p) || p is < 1 or > 65535) return null;
-                var hosts = parts[1].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Where(IsSaneHost).ToList();
-                return hosts.Count == 0 ? null : (hosts, p);
-            }
-            catch { return null; }
+            var parts = UnB64(text[CodePrefix.Length..])?.Split('|');
+            if (parts is not { Length: >= 4 } || parts[0] != Version.ToString()) return null;
+            if (!int.TryParse(parts[2], out var p) || p is < 1 or > 65535) return null;
+            var hosts = parts[1].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Where(IsSaneHost).ToList();
+            var fp = parts[3].Trim().ToLowerInvariant();
+            if (fp.Length != SecureChannel.FingerprintBytes * 2 || !fp.All(Uri.IsHexDigit)) return null;
+            IPEndPoint? udp = null;
+            if (parts.Length >= 5 && IPEndPoint.TryParse(parts[4], out var u) && u.Port != 0 && u.AddressFamily == AddressFamily.InterNetwork) udp = u;
+            return hosts.Count == 0 && udp == null ? null : new LanInvite(hosts, p, fp, udp);
         }
 
         string host = text;
@@ -91,7 +128,7 @@ public static class LanProtocol
             if (!int.TryParse(text[(i + 1)..], out port)) return null;
         }
         if (port is < 1 or > 65535 || !IsSaneHost(host)) return null;
-        return ([host], port);
+        return new LanInvite([host], port, null, null);
     }
 
     private static bool IsSaneHost(string h) =>

@@ -38,7 +38,8 @@ public static class NetInfo
                 .Where(a => a.Address.AddressFamily == AddressFamily.InterNetworkV6
                             && !a.Address.IsIPv6LinkLocal && !a.Address.IsIPv6SiteLocal && !a.Address.IsIPv6UniqueLocal
                             && !a.Address.IsIPv6Teredo && (a.Address.GetAddressBytes()[0] & 0xE0) == 0x20 // 2000::/3
-                            && a.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Preferred)
+                            // Address state is only reported on Windows; elsewhere every listed address is taken as usable.
+                            && (!OperatingSystem.IsWindows() || a.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Preferred))
                 // Stable addresses first; temporary (privacy) ones change during the day.
                 .OrderBy(a => OperatingSystem.IsWindows() && a.SuffixOrigin == SuffixOrigin.Random ? 1 : 0)
                 .Select(a => a.Address)

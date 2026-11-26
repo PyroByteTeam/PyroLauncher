@@ -110,6 +110,12 @@ public class LanSettings
     public int Port { get; set; } = 25570;
     /// <summary>Ask the router to forward the lobby port (UPnP) while hosting.</summary>
     public bool UseUpnp { get; set; } = true;
+    /// <summary>Put this computer's IPv6 addresses in invite codes.</summary>
+    public bool UseIPv6 { get; set; } = true;
+    /// <summary>Also accept players through UDP hole punching (no port forwarding needed on either side).</summary>
+    public bool HolePunching { get; set; }
+    /// <summary>Host identity key (PKCS#8, DPAPI-protected, base64). Its fingerprint goes into invite codes.</summary>
+    public string? ProtectedHostKey { get; set; }
     public string? LobbyName { get; set; }
     public int MaxPlayers { get; set; } = 8;
     /// <summary>Lobby password from the last hosted lobby, DPAPI-protected (base64), so the same lobby can be hosted again.</summary>

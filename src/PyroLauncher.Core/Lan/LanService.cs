@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PyroLauncher.Accounts;
 using PyroLauncher.Core;
@@ -64,6 +65,20 @@ public partial class LanState : ObservableObject
     /// <summary>Port of the world on this computer (host) - never exposed to the internet.</summary>
     [ObservableProperty] private int? _worldPort;
     [ObservableProperty] private bool _manualWorldPort;
+    /// <summary>Host accepts players through hole punching (shows the "accept a reply code" box).</summary>
+    [ObservableProperty] private bool _holePunching;
+    /// <summary>Host's public UDP address for hole punching, or a reason it is missing.</summary>
+    [ObservableProperty] private string? _punchText;
+
+    // Guest, while hole punching
+    /// <summary>Code the guest sends back to the host so both sides can punch through.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsWaitingForHost))]
+    private string? _replyCode;
+    public bool IsWaitingForHost => ReplyCode != null;
+
+    /// <summary>"Encrypted, host verified" and how the connection is made (guest).</summary>
+    [ObservableProperty] private string? _securityText;
 
     // Guest
     [ObservableProperty] private string? _hostAddress;
@@ -114,8 +129,9 @@ public partial class LanState : ObservableObject
 
 /// <summary>
 /// Internet play that looks like LAN to Minecraft. One player hosts a lobby; the others connect straight to the
-/// host's lobby port (no relay servers, so nothing in between can be blocked). The host's "Open to LAN" world is
-/// forwarded through that connection and shows up in each guest's "LAN worlds" list.
+/// host (TCP to the lobby port, or UDP hole punching), with no relay servers in between that could be blocked.
+/// Every connection is end-to-end encrypted. The host's "Open to LAN" world is forwarded through it and shows up
+/// in each guest's "LAN worlds" list.
 /// </summary>
 public static class LanService
 {
@@ -126,6 +142,8 @@ public static class LanService
     private static LanGuest? _guest;
     private static UpnpMapping? _upnp;
     private static CancellationTokenSource? _hostCts;
+    private static CancellationTokenSource? _joinCts;
+    private static ECDiffieHellman? _identity;
 
     /// <summary>Raised on the UI thread when a lobby ends unexpectedly, with the reason.</summary>
     public static event Action<string>? Disconnected;
@@ -153,9 +171,32 @@ public static class LanService
         if (!S.Enabled) throw new LanException(L.T("LAN is turned off."));
     }
 
+    /// <summary>
+    /// The host's long-lived key (kept encrypted in settings), so its fingerprint - and an invite code sent earlier -
+    /// stays valid across launcher restarts.
+    /// </summary>
+    private static ECDiffieHellman Identity()
+    {
+        if (_identity != null) return _identity;
+        if (!string.IsNullOrEmpty(S.ProtectedHostKey))
+        {
+            try
+            {
+                var key = SecureChannel.NewKey();
+                key.ImportPkcs8PrivateKey(SecureStore.Unprotect(Convert.FromBase64String(S.ProtectedHostKey)), out _);
+                return _identity = key;
+            }
+            catch (Exception ex) { Log.Warn("LAN host key unreadable, making a new one: " + ex.Message); }
+        }
+        var fresh = SecureChannel.NewKey();
+        S.ProtectedHostKey = Convert.ToBase64String(SecureStore.Protect(fresh.ExportPkcs8PrivateKey()));
+        SettingsService.Save();
+        return _identity = fresh;
+    }
+
     // ---------- hosting ----------
 
-    public static void Host(string lobbyName, string? password, int maxPlayers, int port, bool useUpnp)
+    public static void Host(string lobbyName, string? password, int maxPlayers, int port, bool useUpnp, bool useIPv6, bool holePunching)
     {
         RequireEnabled();
         var account = RequireAccount();
@@ -167,8 +208,11 @@ public static class LanService
         S.MaxPlayers = maxPlayers = Math.Clamp(maxPlayers, 2, 32);
         S.Port = port;
         S.UseUpnp = useUpnp;
+        S.UseIPv6 = useIPv6;
+        S.HolePunching = holePunching;
         SettingsService.Save();
 
+        var identity = Identity();
         var host = new LanHost(new LanHostOptions
         {
             LobbyName = lobbyName,
@@ -178,6 +222,8 @@ public static class LanService
             HostName = account.Username,
             HostUuid = account.Uuid,
             IsBanned = IsBanned,
+            Identity = identity,
+            HolePunching = holePunching,
         });
         try { host.Start(); }
         catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
@@ -198,33 +244,41 @@ public static class LanService
         State.LobbyName = lobbyName;
         State.LobbyPort = port;
         State.HasPassword = host.HasPassword;
+        State.HolePunching = holePunching;
+        State.PunchText = holePunching ? L.T("Finding your public address for hole punching…") : null;
         State.InviteCode = null;
         State.AddressesText = L.T("Finding your addresses…");
         State.ReachabilityText = null;
         State.ReachabilityWarning = false;
         State.Mode = LanMode.Hosting;
         SyncHost();
-        _ = PrepareReachabilityAsync(port, useUpnp, _hostCts.Token);
+        _ = PrepareReachabilityAsync(host, SecureChannel.Fingerprint(identity), port, useUpnp, useIPv6, _hostCts.Token);
     }
 
-    /// <summary>Opens the port on the router (UPnP) and works out which addresses friends can use.</summary>
-    private static async Task PrepareReachabilityAsync(int port, bool useUpnp, CancellationToken ct)
+    /// <summary>Opens the port on the router (UPnP), asks STUN for the punching address, and builds the invite code.</summary>
+    private static async Task PrepareReachabilityAsync(LanHost host, string fingerprint, int port, bool useUpnp, bool useIPv6, CancellationToken ct)
     {
         var upnpTask = useUpnp ? Task.Run(() => UpnpMapping.TryMapAsync(port, ct), ct) : Task.FromResult<UpnpMapping?>(null);
         var publicTask = Task.Run(async () => { try { return await NetInfo.PublicIPv4Async(ct); } catch { return null; } }, ct);
+        var stunTask = host.Mux is { } mux
+            ? Task.Run(async () => { try { return await mux.DiscoverAsync(ct); } catch { return null; } }, ct)
+            : Task.FromResult<IPEndPoint?>(null);
         UpnpMapping? upnp = null;
         IPAddress? pub = null;
+        IPEndPoint? udp = null;
         try { upnp = await upnpTask; } catch { }
         try { pub = await publicTask; } catch { }
+        try { udp = await stunTask; } catch { }
         if (ct.IsCancellationRequested)
         {
             if (upnp != null) _ = upnp.RemoveAsync();
             return;
         }
 
-        var v6 = NetInfo.GlobalIPv6();
+        var v6 = useIPv6 ? NetInfo.GlobalIPv6() : [];
         var local = NetInfo.LocalIPv4();
         var routerWan = upnp?.ExternalAddress;
+        pub ??= udp?.Address;
         var v4 = pub ?? (routerWan != null && !NetInfo.IsCgnat(routerWan) ? routerWan : null);
         var addresses = new List<string>();
         if (v4 != null) addresses.Add(v4.ToString());
@@ -233,30 +287,54 @@ public static class LanService
 
         var notes = new List<string>();
         var warn = false;
+        var cgnat = routerWan != null && (NetInfo.IsCgnat(routerWan) || (pub != null && !routerWan.Equals(pub)));
         if (upnp != null) notes.Add(L.F("Router port forwarding set up automatically (UPnP): TCP {0}.", port));
-        else if (useUpnp) { notes.Add(L.F("The router did not accept automatic port forwarding (UPnP). Forward TCP port {0} to this computer in your router settings, or use IPv6.", port)); warn = true; }
-        else notes.Add(L.F("Automatic port forwarding is off. Forward TCP port {0} to this computer in your router settings, or use IPv6.", port));
-
-        if (routerWan != null && NetInfo.IsCgnat(routerWan) || (routerWan != null && pub != null && !routerWan.Equals(pub)))
+        else if (useUpnp)
         {
-            notes.Add(L.T("Your internet provider puts you behind a shared address (CGNAT), so friends cannot reach you over IPv4 even with port forwarding. IPv6 may still work; otherwise let a friend with a public address host."));
-            warn = true;
+            notes.Add(L.F("The router did not accept automatic port forwarding (UPnP). If you forwarded TCP port {0} yourself, turn off automatic forwarding and this warning goes away.", port));
+            // Hole punching or IPv6 can still get friends in, so only warn when neither is there.
+            warn = host.Mux == null && v6.Count == 0;
+        }
+        else notes.Add(L.F("Using the port forwarding you set up on your router: TCP {0} to this computer.", port));
+
+        if (cgnat)
+        {
+            notes.Add(L.T("Your internet provider puts you behind a shared address (CGNAT), so friends cannot reach you over IPv4 even with port forwarding. IPv6 or hole punching may still work; otherwise let a friend with a public address host."));
+            warn = host.Mux == null && v6.Count == 0;
         }
         if (v6.Count > 0) notes.Add(L.T("IPv6 is available: friends with IPv6 can usually connect without port forwarding."));
+        else if (!useIPv6) notes.Add(L.T("IPv6 addresses are left out of the invite code (turned off)."));
         notes.Add(L.T("Windows Firewall may ask whether to allow PyroLauncher on the network - allow it, or nobody can connect."));
+
+        string? punchText = null;
+        if (host.Mux is { } m)
+        {
+            if (udp == null)
+            {
+                punchText = L.T("Hole punching is unavailable: no STUN server answered, so your public UDP address is unknown.");
+                warn = true;
+            }
+            else if (m.LikelySymmetricNat)
+                punchText = L.F("Hole punching address: {0}. Your router changes ports for every destination (symmetric NAT), so punching will probably fail; port forwarding is more reliable.", udp);
+            else
+                punchText = L.F("Hole punching address: {0}. Friends who cannot connect directly get a reply code to send you; paste it below.", udp);
+        }
 
         Ui.Post(() =>
         {
-            if (_host == null || ct.IsCancellationRequested) { if (upnp != null) _ = upnp.RemoveAsync(); return; }
+            if (_host != host || ct.IsCancellationRequested) { if (upnp != null) _ = upnp.RemoveAsync(); return; }
             _upnp = upnp;
-            State.InviteCode = addresses.Count > 0 ? LanProtocol.MakeCode(addresses, port) : null;
+            State.InviteCode = addresses.Count > 0 || udp != null ? LanProtocol.MakeCode(addresses, port, fingerprint, udp) : null;
             var lines = new List<string>();
             if (v4 != null) lines.Add(L.F("Internet (IPv4): {0}", LanProtocol.FormatEndpoint(v4.ToString(), port)));
             foreach (var a in v6) lines.Add(L.F("Internet (IPv6): {0}", LanProtocol.FormatEndpoint(a.ToString(), port)));
             foreach (var a in local) lines.Add(L.F("Same home network: {0}", LanProtocol.FormatEndpoint(a.ToString(), port)));
+            if (udp != null) lines.Add(L.F("Hole punching (UDP): {0}", udp));
+            lines.Add(L.F("Host key fingerprint: {0}", fingerprint));
             State.AddressesText = lines.Count > 0 ? string.Join("\n", lines) : L.T("No network address found. Are you connected to the internet?");
             State.ReachabilityText = string.Join("\n", notes.Select(n => "• " + n));
             State.ReachabilityWarning = warn;
+            State.PunchText = punchText;
         });
 
         // UPnP leases last two hours; renew while the lobby is open.
@@ -268,6 +346,19 @@ public static class LanService
                 try { await upnp.RenewAsync(ct); } catch (Exception ex) { Log.Info("UPnP renew failed: " + ex.Message); }
             }
         }
+    }
+
+    /// <summary>Host: starts punching towards a guest who sent a reply code.</summary>
+    public static async Task AcceptReplyAsync(string code)
+    {
+        if (_host is not { } host) throw new LanException(L.T("You are not hosting a lobby."));
+        if (!State.HolePunching) throw new LanException(L.T("Hole punching is turned off for this lobby."));
+        if (LanProtocol.ParseReply(code) is not { } reply) throw new LanException(L.T("That is not a valid reply code."));
+        if (IsBanned(reply.Udp.Address)) throw new LanException(L.T("You are banned from this lobby."));
+        var session = host.AcceptReply(reply) ?? throw new LanException(L.T("Hole punching is turned off for this lobby."));
+        try { await session.Established.WaitAsync(TimeSpan.FromSeconds(45)); }
+        catch (TimeoutException) { throw new LanException(L.T("Could not reach the player. Both routers may block hole punching; try port forwarding or IPv6 instead.")); }
+        catch (IOException) { throw new LanException(L.T("Could not reach the player. Both routers may block hole punching; try port forwarding or IPv6 instead.")); }
     }
 
     private static void SyncHost()
@@ -328,21 +419,46 @@ public static class LanService
 
     // ---------- joining ----------
 
+    private static LanInvite ParseOrThrow(string code) =>
+        LanProtocol.ParseCode(code) ?? throw new LanException(
+            LanProtocol.ParseReply(code) != null
+                ? L.T("That is a reply code - it goes to the host. Paste the host's invite code here.")
+                : L.T("That is not a valid invite code or address."));
+
+    /// <summary>
+    /// Joins a lobby: directly over TCP first; if nothing answers and the host offers hole punching, punches
+    /// through UDP (showing a reply code the guest sends to the host meanwhile).
+    /// </summary>
     public static async Task JoinAsync(string code, string? password)
     {
         RequireEnabled();
         var account = RequireAccount();
-        if (LanProtocol.ParseCode(code) is not { } parsed) throw new LanException(L.T("That is not a valid invite code or address."));
-        var (hosts, port) = parsed;
+        var invite = ParseOrThrow(code);
         Stop();
         S.LastJoinCode = code.Trim();
         SettingsService.Save();
 
+        var cts = _joinCts = new CancellationTokenSource();
         State.Busy = true;
+        LanRoute? route = null;
         try
         {
-            var guest = await LanGuest.JoinAsync(hosts, port, account.Username, account.Uuid, password, CancellationToken.None);
-            if (!S.Enabled) { guest.Dispose(); return; } // turned off while connecting
+            LanGuest guest;
+            try
+            {
+                if (invite.Hosts.Count == 0) throw new LanUnreachableException("");
+                route = new TcpRoute(invite.Hosts, invite.Port) { Fingerprint = invite.Fingerprint };
+                guest = await LanGuest.JoinAsync(route, account.Username, account.Uuid, password, cts.Token);
+            }
+            catch (LanUnreachableException) when (invite.Udp != null)
+            {
+                route?.Dispose();
+                route = await PunchToHostAsync(invite, cts.Token);
+                guest = await LanGuest.JoinAsync(route, account.Username, account.Uuid, password, cts.Token);
+            }
+            route = null; // the guest owns it now
+
+            if (!S.Enabled || cts.IsCancellationRequested) { guest.Dispose(); return; } // turned off or cancelled while connecting
             _guest = guest;
             guest.Changed += () => Ui.Post(SyncGuest);
             guest.Closed += reason => Ui.Post(() =>
@@ -353,14 +469,53 @@ public static class LanService
                 if (reason != null) Disconnected?.Invoke(reason);
             });
             State.Error = null;
-            State.HostAddress = LanProtocol.FormatEndpoint(guest.HostAddress, port);
-            State.LobbyPort = port;
+            State.HostAddress = guest.HostAddress;
             State.LobbyName = guest.LobbyName;
+            State.SecurityText = (guest.Verified
+                    ? L.T("Encrypted end to end. The host proved it is the one from the invite code.")
+                    : L.T("Encrypted end to end, but the host could not be verified because you typed an address instead of an invite code."))
+                + " " + (guest.ViaPunch ? L.T("Connected through hole punching (UDP).") : L.T("Connected directly (TCP)."));
             State.Mode = LanMode.Joined;
             SyncGuest();
         }
-        finally { State.Busy = false; }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested) { }
+        finally
+        {
+            route?.Dispose();
+            State.Busy = false;
+            State.ReplyCode = null;
+            if (_joinCts == cts) _joinCts = null;
+        }
     }
+
+    private static async Task<PunchRoute> PunchToHostAsync(LanInvite invite, CancellationToken ct)
+    {
+        var mux = new UdpMux(acceptUnsolicited: false);
+        try
+        {
+            if (await mux.DiscoverAsync(ct) is not { } me)
+                throw new LanException(L.T("The host could not be reached directly, and hole punching needs your public address, but no STUN server answered."));
+            var session = mux.Connect(invite.Udp!, UdpMux.NewSessionId(), opener: true);
+            // Some routers let our packets in without the host punching back; give that a few seconds first.
+            try { await session.Established.WaitAsync(TimeSpan.FromSeconds(3), ct); }
+            catch (TimeoutException)
+            {
+                Ui.Post(() => State.ReplyCode = LanProtocol.MakeReply(me, session.Id));
+                try { await session.Established.WaitAsync(TimeSpan.FromMinutes(3), ct); }
+                catch (Exception ex) when (ex is TimeoutException or IOException)
+                {
+                    throw new LanException(mux.LikelySymmetricNat
+                        ? L.T("Hole punching failed: your router changes ports for every destination (symmetric NAT). Ask the host to forward the port or use IPv6.")
+                        : L.T("Hole punching failed. Make sure the host pasted your reply code; if it still fails, both routers block it and the host needs port forwarding or IPv6."));
+                }
+            }
+            return new PunchRoute(mux, session) { Fingerprint = invite.Fingerprint };
+        }
+        catch { mux.Dispose(); throw; }
+    }
+
+    /// <summary>Stops a join that is still connecting or waiting for the host.</summary>
+    public static void CancelJoin() => _joinCts?.Cancel();
 
     private static void SyncGuest()
     {
@@ -377,19 +532,23 @@ public static class LanService
         State.RefreshTexts();
     }
 
-    public static Task<LanTestResult> TestAsync(string code, IProgress<int>? progress, CancellationToken ct)
+    /// <summary>Connection test before joining (direct TCP only; hole punching needs the host's help).</summary>
+    public static async Task<LanTestResult> TestAsync(string code, IProgress<int>? progress, CancellationToken ct)
     {
-        if (LanProtocol.ParseCode(code) is not { } parsed) throw new LanException(L.T("That is not a valid invite code or address."));
-        var (hosts, port) = parsed;
-        return LanGuest.ProbeAsync(hosts, port, 10, progress, ct);
+        var invite = ParseOrThrow(code);
+        if (invite.Hosts.Count == 0)
+            throw new LanException(L.T("This lobby can only be reached through hole punching, which needs the host to accept your reply code. Press Join to start."));
+        using var route = new TcpRoute(invite.Hosts, invite.Port) { Fingerprint = invite.Fingerprint };
+        try { return await LanGuest.ProbeAsync(route, 10, progress, ct); }
+        catch (LanUnreachableException ex) when (invite.Udp != null)
+        {
+            throw new LanException(ex.Message + "\n" + L.T("A direct connection is not possible, but the host offers hole punching: press Join and send the host the reply code you get."));
+        }
     }
 
     /// <summary>Ping test against the lobby this computer is in.</summary>
-    public static Task<LanTestResult> TestCurrentAsync(IProgress<int>? progress, CancellationToken ct)
-    {
-        if (_guest is not { } g) throw new LanException(L.T("You are not in a lobby."));
-        return LanGuest.ProbeAsync([g.HostAddress], g.Port, 10, progress, ct);
-    }
+    public static Task<LanTestResult> TestCurrentAsync(IProgress<int>? progress, CancellationToken ct) =>
+        _guest is { } g ? g.ProbeAsync(progress, ct) : throw new LanException(L.T("You are not in a lobby."));
 
     public static Task<(System.Text.Json.Nodes.JsonObject? Status, TimeSpan Ping)> TestWorldAsync(CancellationToken ct) =>
         _guest is { } g ? g.TestWorldAsync(ct) : throw new LanException(L.T("You are not in a lobby."));
@@ -405,6 +564,7 @@ public static class LanService
     /// <summary>Leaves or closes whatever lobby is running.</summary>
     public static void Stop()
     {
+        _joinCts?.Cancel();
         _hostCts?.Cancel();
         _hostCts = null;
         _host?.Dispose();
@@ -423,10 +583,13 @@ public static class LanService
         State.WorldMotd = null;
         State.WorldPort = null;
         State.ManualWorldPort = false;
+        State.HolePunching = false;
+        State.PunchText = null;
         State.InviteCode = null;
         State.AddressesText = null;
         State.ReachabilityText = null;
         State.HostAddress = null;
+        State.SecurityText = null;
         State.PingMs = null;
         State.LocalGamePort = null;
         State.RefreshTexts();

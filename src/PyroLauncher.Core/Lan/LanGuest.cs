@@ -8,20 +8,83 @@ using PyroLauncher.UI;
 namespace PyroLauncher.Lan;
 
 /// <summary>An error with a message meant for the user.</summary>
-public sealed class LanException(string message) : Exception(message);
+public class LanException(string message) : Exception(message);
+
+/// <summary>Nothing answered on the host's TCP addresses (as opposed to the host answering and refusing).</summary>
+public sealed class LanUnreachableException(string message) : LanException(message);
 
 public record LobbyPlayer(int Id, string Name, string Uuid, bool IsHost, int? PingMs);
+
+/// <summary>How a guest reaches the host: plain TCP to one of the invite addresses, or a hole-punched UDP session.</summary>
+public abstract class LanRoute : IDisposable
+{
+    /// <summary>Expected host fingerprint (from the invite code); null when the user typed an address.</summary>
+    public string? Fingerprint { get; init; }
+    public abstract string Label { get; }
+    public abstract bool ViaPunch { get; }
+    public abstract Task<(Stream Stream, IDisposable Owner)> OpenAsync(CancellationToken ct);
+    public virtual void Dispose() { }
+}
+
+public sealed class TcpRoute(IReadOnlyList<string> hosts, int port) : LanRoute
+{
+    private string? _winner;
+    public int Port => port;
+    public override string Label => LanProtocol.FormatEndpoint(_winner ?? hosts[0], port);
+    public override bool ViaPunch => false;
+
+    public override async Task<(Stream, IDisposable)> OpenAsync(CancellationToken ct)
+    {
+        var candidates = _winner != null ? [_winner] : hosts;
+        try
+        {
+            var (client, host) = await LanProtocol.ConnectAnyAsync(candidates, port, TimeSpan.FromSeconds(6), ct);
+            _winner = host;
+            return (client.GetStream(), client);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+        catch (Exception ex)
+        {
+            throw new LanUnreachableException(L.F("Could not reach the lobby at {0}: {1}",
+                string.Join(", ", candidates.Select(h => LanProtocol.FormatEndpoint(h, port))), ex.Message));
+        }
+    }
+}
+
+public sealed class PunchRoute(UdpMux mux, PunchSession session) : LanRoute
+{
+    public override string Label => session.Remote.ToString();
+    public override bool ViaPunch => true;
+    public PunchSession Session => session;
+
+    public override Task<(Stream, IDisposable)> OpenAsync(CancellationToken ct)
+    {
+        try
+        {
+            var s = session.OpenStream();
+            return Task.FromResult<(Stream, IDisposable)>((s, s));
+        }
+        catch (IOException) { throw new LanException(L.T("Lost connection to the host.")); }
+    }
+
+    public override void Dispose()
+    {
+        session.Close();
+        mux.Dispose();
+    }
+}
 
 /// <summary>Result of a connection test against a lobby.</summary>
 public sealed class LanTestResult
 {
     public string Address { get; init; } = "";
-    public int Port { get; init; }
     public double ConnectMs { get; init; }
     public string LobbyName { get; init; } = "";
     public int Players { get; init; }
     public int MaxPlayers { get; init; }
     public bool PasswordRequired { get; init; }
+    public bool Verified { get; init; }
+    public bool ViaPunch { get; init; }
     public string? World { get; init; }
     public List<double> Pings { get; init; } = [];
     public int Sent { get; init; }
@@ -35,42 +98,40 @@ public sealed class LanTestResult
 
 internal static class LanHandshake
 {
-    /// <summary>Opens a connection and reads the host's greeting. Throws <see cref="LanException"/> with a readable reason.</summary>
-    public static async Task<(TcpClient Client, string Host, LineReader Reader, LineWriter Writer, JsonObject Hi)> OpenAsync(
-        IReadOnlyList<string> hosts, int port, CancellationToken ct)
+    /// <summary>Opens an encrypted connection and reads the host's greeting. Throws <see cref="LanException"/> with a readable reason.</summary>
+    public static async Task<(IDisposable Owner, SecureStream Stream, LineReader Reader, LineWriter Writer, JsonObject Hi)> OpenAsync(
+        LanRoute route, CancellationToken ct)
     {
-        TcpClient client;
-        string host;
-        try { (client, host) = await LanProtocol.ConnectAnyAsync(hosts, port, TimeSpan.FromSeconds(6), ct); }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
-        catch (Exception ex)
-        {
-            throw new LanException(L.F("Could not reach the lobby at {0}: {1}", string.Join(", ", hosts.Select(h => LanProtocol.FormatEndpoint(h, port))), ex.Message));
-        }
+        var (raw, owner) = await route.OpenAsync(ct);
         try
         {
-            var stream = client.GetStream();
-            var reader = new LineReader(stream);
-            var writer = new LineWriter(stream);
             using var hs = CancellationTokenSource.CreateLinkedTokenSource(ct);
             hs.CancelAfter(LanProtocol.HandshakeTimeout);
+            var stream = await SecureChannel.ClientAsync(raw, route.Fingerprint, hs.Token);
+            var reader = new LineReader(stream);
+            var writer = new LineWriter(stream);
             var hi = await reader.ReadAsync(hs.Token);
             if (hi?.Str("t") == "denied") throw new LanException(DeniedText(hi.Str("reason")));
             if (hi?.Str("t") != "hi" || hi.Str("app") != LanProtocol.App)
                 throw new LanException(L.T("Something answered on that address, but it is not a PyroLauncher lobby."));
             if (hi.Int("v") > LanProtocol.Version)
                 throw new LanException(L.T("The host uses a newer version of PyroLauncher. Update the launcher to join."));
-            return (client, host, reader, writer, hi);
+            return (owner, stream, reader, writer, hi);
         }
-        catch (LanException) { client.Dispose(); throw; }
+        catch (LanException) { owner.Dispose(); throw; }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
-            client.Dispose();
+            owner.Dispose();
             throw new LanException(L.T("The host did not answer in time."));
         }
-        catch (Exception ex) when (ex is IOException or SocketException or InvalidDataException)
+        catch (InvalidDataException)
         {
-            client.Dispose();
+            owner.Dispose();
+            throw new LanException(L.T("Something answered on that address, but it is not a PyroLauncher lobby (or the connection was tampered with)."));
+        }
+        catch (Exception ex) when (ex is IOException or SocketException or EndOfStreamException)
+        {
+            owner.Dispose();
             throw new LanException(L.F("The connection broke during the handshake: {0}", ex.Message));
         }
     }
@@ -95,16 +156,19 @@ internal static class LanHandshake
 public sealed class LanGuest : IDisposable
 {
     private readonly CancellationTokenSource _cts = new();
-    private readonly TcpClient _control;
+    private readonly IDisposable _control;
     private readonly LineReader _reader;
     private readonly LineWriter _writer;
-    private readonly List<string> _hosts;
+    private readonly LanRoute _route;
     private TcpListener? _gameListener;
     private LanWorldAnnouncer? _announcer;
     private string? _closeReason;
+    private volatile bool _leaving;
 
-    public string HostAddress { get; }
-    public int Port { get; }
+    public string HostAddress => _route.Label;
+    public bool ViaPunch => _route.ViaPunch;
+    /// <summary>The host proved it owns the key from the invite code.</summary>
+    public bool Verified => _route.Fingerprint != null;
     public string Token { get; }
     public int MyId { get; }
     public string MyName { get; }
@@ -119,23 +183,22 @@ public sealed class LanGuest : IDisposable
     /// <summary>Raised once when the connection ends, with a message for the user (null when the user left).</summary>
     public event Action<string?>? Closed;
 
-    private LanGuest(TcpClient control, string host, int port, LineReader reader, LineWriter writer, JsonObject welcome, string lobbyName)
+    private LanGuest(LanRoute route, IDisposable control, LineReader reader, LineWriter writer, JsonObject welcome, string lobbyName)
     {
+        _route = route;
         _control = control;
         _reader = reader;
         _writer = writer;
-        HostAddress = host;
-        _hosts = [host];
-        Port = port;
         Token = welcome.Str("token") ?? "";
         MyId = welcome.Int("id");
         MyName = welcome.Str("name") ?? "";
         LobbyName = lobbyName;
     }
 
-    public static async Task<LanGuest> JoinAsync(IReadOnlyList<string> hosts, int port, string name, string uuid, string? password, CancellationToken ct)
+    /// <summary>Joins through <paramref name="route"/>; on success the guest owns the route and disposes it when leaving.</summary>
+    public static async Task<LanGuest> JoinAsync(LanRoute route, string name, string uuid, string? password, CancellationToken ct)
     {
-        var (client, host, reader, writer, hi) = await LanHandshake.OpenAsync(hosts, port, ct);
+        var (owner, _, reader, writer, hi) = await LanHandshake.OpenAsync(route, ct);
         try
         {
             var pwRequired = hi.Bool("pw");
@@ -150,20 +213,20 @@ public sealed class LanGuest : IDisposable
             if (reply?.Str("t") == "denied") throw new LanException(LanHandshake.DeniedText(reply.Str("reason")));
             if (reply?.Str("t") != "welcome") throw new LanException(L.T("The host refused the connection."));
 
-            var guest = new LanGuest(client, host, port, reader, writer, reply, LanProtocol.CleanText(hi.Str("name"), 40));
+            var guest = new LanGuest(route, owner, reader, writer, reply, LanProtocol.CleanText(hi.Str("name"), 40));
             _ = guest.ReadLoop();
             _ = guest.PingLoop();
             return guest;
         }
-        catch (LanException) { client.Dispose(); throw; }
+        catch (LanException) { owner.Dispose(); throw; }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
-            client.Dispose();
+            owner.Dispose();
             throw new LanException(L.T("The host did not answer in time."));
         }
         catch (Exception ex) when (ex is IOException or SocketException or InvalidDataException)
         {
-            client.Dispose();
+            owner.Dispose();
             throw new LanException(L.F("The connection broke during the handshake: {0}", ex.Message));
         }
     }
@@ -277,23 +340,16 @@ public sealed class LanGuest : IDisposable
         game.NoDelay = true;
         try
         {
-            using var tunnel = await OpenTunnelAsync(ct);
-            await LanProtocol.BridgeAsync(game.GetStream(), tunnel.Stream, tunnel.Pending, ct);
+            var (owner, stream, pending) = await OpenTunnelAsync(ct);
+            using (owner) await LanProtocol.BridgeAsync(game.GetStream(), stream, pending, ct);
         }
         catch (Exception ex) { Log.Info("LAN tunnel failed: " + ex.Message); }
     }
 
-    internal sealed class Tunnel(TcpClient client, ReadOnlyMemory<byte> pending) : IDisposable
+    /// <summary>An encrypted connection to the host's world. Bytes in Pending already arrived from the host.</summary>
+    private async Task<(IDisposable Owner, Stream Stream, ReadOnlyMemory<byte> Pending)> OpenTunnelAsync(CancellationToken ct)
     {
-        public Stream Stream => client.GetStream();
-        public ReadOnlyMemory<byte> Pending { get; } = pending;
-        public void Dispose() => client.Dispose();
-    }
-
-    /// <summary>A raw connection to the host's world through the lobby port.</summary>
-    internal async Task<Tunnel> OpenTunnelAsync(CancellationToken ct)
-    {
-        var (client, _, reader, writer, _) = await LanHandshake.OpenAsync(_hosts, Port, ct);
+        var (owner, stream, reader, writer, _) = await LanHandshake.OpenAsync(_route, ct);
         try
         {
             await writer.SendAsync(LanProtocol.Msg("hello", ("kind", "tunnel"), ("token", Token)), ct);
@@ -301,10 +357,9 @@ public sealed class LanGuest : IDisposable
             hs.CancelAfter(LanProtocol.HandshakeTimeout);
             var reply = await reader.ReadAsync(hs.Token);
             if (reply?.Str("t") != "ok") throw new LanException(LanHandshake.DeniedText(reply?.Str("reason")));
-            // Anything after "ok" is game data from the host; normally nothing, as the Minecraft client speaks first.
-            return new Tunnel(client, reader.Remaining.ToArray());
+            return (owner, stream, reader.Remaining.ToArray());
         }
-        catch { client.Dispose(); throw; }
+        catch { owner.Dispose(); throw; }
     }
 
     /// <summary>Asks the host's world for its status through a tunnel, like the multiplayer screen does.</summary>
@@ -312,16 +367,19 @@ public sealed class LanGuest : IDisposable
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct, _cts.Token);
         cts.CancelAfter(TimeSpan.FromSeconds(10));
-        using var tunnel = await OpenTunnelAsync(cts.Token);
-        return await MinecraftLan.StatusAsync(tunnel.Stream, "localhost", 25565, cts.Token);
+        var (owner, stream, _) = await OpenTunnelAsync(cts.Token);
+        using (owner) return await MinecraftLan.StatusAsync(stream, "localhost", 25565, cts.Token);
     }
 
-    public static async Task<LanTestResult> ProbeAsync(IReadOnlyList<string> hosts, int port, int count, IProgress<int>? progress, CancellationToken ct)
+    /// <summary>Ping test over the route this guest is connected through.</summary>
+    public Task<LanTestResult> ProbeAsync(IProgress<int>? progress, CancellationToken ct) => ProbeAsync(_route, 10, progress, ct);
+
+    public static async Task<LanTestResult> ProbeAsync(LanRoute route, int count, IProgress<int>? progress, CancellationToken ct)
     {
         var sw = Stopwatch.StartNew();
-        var (client, host, reader, writer, _) = await LanHandshake.OpenAsync(hosts, port, ct);
+        var (owner, _, reader, writer, _) = await LanHandshake.OpenAsync(route, ct);
         var connectMs = sw.Elapsed.TotalMilliseconds;
-        using var c = client;
+        using var o = owner;
         try
         {
             await writer.SendAsync(LanProtocol.Msg("hello", ("kind", "probe")), ct);
@@ -354,7 +412,7 @@ public sealed class LanGuest : IDisposable
             }
             return new LanTestResult
             {
-                Address = host, Port = port, ConnectMs = connectMs,
+                Address = route.Label, ConnectMs = connectMs, Verified = route.Fingerprint != null, ViaPunch = route.ViaPunch,
                 LobbyName = LanProtocol.CleanText(info.Str("name"), 40), Players = info.Int("players"), MaxPlayers = info.Int("max"),
                 PasswordRequired = info.Bool("pw"), World = info.Str("world") is { } w ? LanProtocol.CleanText(w, 80) : null,
                 Pings = pings, Sent = sent,
@@ -371,11 +429,10 @@ public sealed class LanGuest : IDisposable
         _announcer?.Dispose();
         _announcer = null;
         try { _gameListener?.Stop(); } catch { }
-        try { _control.Close(); } catch { }
+        try { _control.Dispose(); } catch { }
         if (!_cts.IsCancellationRequested) _cts.Cancel();
+        _route.Dispose();
     }
-
-    private volatile bool _leaving;
 
     /// <summary>Leaves the lobby (tells the host, then closes).</summary>
     public void Dispose()
