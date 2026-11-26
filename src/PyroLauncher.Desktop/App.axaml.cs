@@ -16,6 +16,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         Ui.Platform = new AvaloniaPlatform();
+        Controls.AnimatedBitmap.Install();
         AppPaths.Ensure();
         Log.Info($"PyroLauncher {Http.AppVersion} starting on {System.Runtime.InteropServices.RuntimeInformation.OSDescription}");
 

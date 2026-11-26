@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>PyroLauncher</RootNamespace>
-    <Version>1.8.1</Version>
+    <Version>1.8.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

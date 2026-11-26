@@ -67,6 +67,14 @@ public static class CurseForgeApi
         return res.Arr("data").Select(ParseSummary).ToList();
     }
 
+    /// <summary>CF thumbnails of animated logos are flattened to a still frame, so animated logos use the original file.</summary>
+    internal static string? LogoUrl(JsonNode? logo)
+    {
+        var url = logo.Str("url");
+        if (url != null && (url.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) || url.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))) return url;
+        return logo.Str("thumbnailUrl") ?? url;
+    }
+
     private static ProjectSummary ParseSummary(JsonNode? m) => new()
     {
         Source = ContentSource.CurseForge,
@@ -75,7 +83,7 @@ public static class CurseForgeApi
         Title = m.Str("name") ?? "",
         Description = m.Str("summary") ?? "",
         Author = m.Arr("authors").FirstOrDefault().Str("name") ?? "",
-        IconUrl = m.Obj("logo")?.Str("thumbnailUrl"),
+        IconUrl = LogoUrl(m.Obj("logo")),
         Downloads = m.Long("downloadCount"),
         WebUrl = m.Obj("links")?.Str("websiteUrl"),
     };
@@ -174,7 +182,7 @@ public static class CurseForgeApi
         var res = await Http.PostJsonAsync($"{Base}/mods", new JsonObject { ["modIds"] = ids }, ct, Auth);
         var dict = new Dictionary<string, (string, string?, int, string?)>();
         foreach (var m in res.Arr("data"))
-            dict[m.Long("id").ToString()] = (m.Str("name") ?? "", m.Obj("logo")?.Str("thumbnailUrl"), m.Int("classId"), m.Obj("links")?.Str("websiteUrl"));
+            dict[m.Long("id").ToString()] = (m.Str("name") ?? "", LogoUrl(m.Obj("logo")), m.Int("classId"), m.Obj("links")?.Str("websiteUrl"));
         return dict;
     }
 
