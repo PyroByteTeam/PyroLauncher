@@ -63,7 +63,12 @@ public partial class MainWindow : Window
         base.OnKeyDown(e);
     }
 
-    private void OpenLanPage_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) => LanStatusButton.Flyout?.Hide();
+    /// <summary>Navigates first, then hides: hiding detaches the flyout content, which drops a bound command before it can run.</summary>
+    private void OpenLanPage_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        (DataContext as MainViewModel)?.GoLanCommand.Execute(null);
+        LanStatusButton.Flyout?.Hide();
+    }
 
     private void ExitFullscreen_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {

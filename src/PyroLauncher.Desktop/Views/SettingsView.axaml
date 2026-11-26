@@ -497,6 +497,26 @@
                             </StackPanel>
                         </DockPanel>
                     </Border>
+
+                    <TextBlock Classes="h2" Text="{l:T 'Notifications'}" Margin="0,28,0,4"/>
+                    <Border Classes="settingRow">
+                        <DockPanel>
+                            <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding SystemNotifications}" VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock Classes="rowTitle" Text="{l:T 'System notifications'}"/>
+                                <TextBlock Classes="faint" TextWrapping="Wrap" Margin="0,3,16,0"
+                                           Text="{l:T 'Also show launcher messages as notifications from your operating system, so you see them while playing or with the launcher minimized. Only sent while the launcher window is not focused.'}"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Classes="settingRow" BorderThickness="0" IsEnabled="{Binding SystemNotifications}">
+                        <StackPanel Spacing="6">
+                            <CheckBox IsChecked="{Binding NotifyInstalls}" Content="{l:T 'Instance and modpack installs and imports finished'}"/>
+                            <CheckBox IsChecked="{Binding NotifyLobby}" Content="{l:T 'LAN lobby: players joining, leaving or timing out'}"/>
+                            <CheckBox IsChecked="{Binding NotifyOther}" Content="{l:T 'Other: game crashes'}"/>
+                            <Button Content="{l:T 'Send a test notification'}" Command="{Binding TestNotificationCommand}" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
 
                 <StackPanel Classes="section" IsVisible="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=minecraft}">

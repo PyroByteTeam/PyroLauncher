@@ -76,6 +76,7 @@ public static class LaunchService
                 if (code != 0 && !killed)
                 {
                     Dialogs.Toast(L.F("{0} crashed (exit code {1}). See the logs for details.", inst.Name, code), true);
+                    Notifications.Notify(L.F("{0} crashed", inst.Name), L.F("{0} crashed (exit code {1}). See the logs for details.", inst.Name, code), NotifyKind.Other);
                     if (SettingsService.Current.OpenConsoleOnLaunch) Ui.Platform.ShowConsole(inst, true);
                     else MainViewModel.Instance.OpenInstance(inst, "logs");
                 }
@@ -121,6 +122,7 @@ public static class LaunchService
             await GameLauncher.InstallAsync(inst, progress, cts.Token);
             inst.AppendLog("[PyroLauncher] Install finished");
             Dialogs.Toast(L.F("{0} is installed and ready to play", inst.Name));
+            Notifications.Notify(L.T("Instance installed"), L.F("{0} is installed and ready to play", inst.Name), NotifyKind.Instance);
         }
         catch (OperationCanceledException)
         {

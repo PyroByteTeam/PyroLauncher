@@ -34,17 +34,101 @@ public partial class ImportCandidate : ObservableObject
 
 /// <summary>
 /// Import instances from another launcher in four steps: pick the launcher, pick its folder, choose instances, import.
+/// The first step also offers a modpack file (.mrpack, .zip, .pyropack), which has a single step of its own.
 /// </summary>
 public partial class ImportLauncherViewModel : ObservableObject
 {
-    public const string StepLauncher = "launcher", StepFolder = "folder", StepInstances = "instances", StepImport = "import";
+    public const string StepLauncher = "launcher", StepFolder = "folder", StepInstances = "instances", StepImport = "import", StepFile = "file";
 
     private CancellationTokenSource? _cts;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(StepNumber), nameof(CanGoBack))]
+    [NotifyPropertyChangedFor(nameof(StepNumber), nameof(CanGoBack), nameof(IsFileStep), nameof(ShowSteps))]
     [NotifyCanExecuteChangedFor(nameof(NextCommand))]
     private string _step = StepLauncher;
+
+    public bool IsFileStep => Step == StepFile;
+    /// <summary>The 1-2-3-4 indicator belongs to the launcher flow; the file flow has a single step.</summary>
+    public bool ShowSteps => Step != StepFile;
+
+    // ---------- from a modpack file ----------
+    [ObservableProperty] private string? _filePath;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ImportFileCommand))]
+    private ModpackInfo? _fileInfo;
+    [ObservableProperty] private string _fileName = "";
+
+    [RelayCommand]
+    private void ChooseFile()
+    {
+        foreach (var l in Launchers) l.IsSelected = false;
+        Selected = null;
+        Error = null;
+        Step = StepFile;
+    }
+
+    [RelayCommand]
+    private async Task BrowseFile()
+    {
+        var file = await Ui.Platform.PickFileAsync(L.T("Import modpack"), [new FileFilter(L.T("Modpacks"), "*.mrpack", "*.zip", "*.pyropack")]);
+        if (file != null) SetFile(file);
+    }
+
+    /// <summary>Also called when a file is dropped on the dialog: jumps straight to the file step.</summary>
+    public void SetFile(string path)
+    {
+        if (IsBusy) return;
+        if (Step != StepFile) ChooseFile();
+        FilePath = path;
+        Error = null;
+        FileInfo = null;
+        try
+        {
+            FileInfo = ModpackImporter.Inspect(path);
+            FileName = FileInfo.Name;
+        }
+        catch (Exception ex) { Error = ex.Message; }
+    }
+
+    private bool CanImportFile() => FileInfo != null && !IsBusy;
+
+    [RelayCommand(CanExecute = nameof(CanImportFile))]
+    private async Task ImportFile()
+    {
+        if (FilePath == null || FileInfo == null) return;
+        IsBusy = true;
+        ImportFileCommand.NotifyCanExecuteChanged();
+        Error = null;
+        _cts = new CancellationTokenSource();
+        var progress = new Progress<TaskProgress>(p => { Status = p.Message; Progress = p.Fraction; });
+        try
+        {
+            var name = string.IsNullOrWhiteSpace(FileName) ? FileInfo.Name : FileName.Trim();
+            var category = Category == Categories[0] ? null : Category;
+            var result = await ModpackImporter.ImportAsync(FilePath, name, category, progress, _cts.Token);
+            Dialogs.Close(this);
+            MainViewModel.Instance.OpenInstance(result.Instance);
+            if (result.SkippedFiles.Count > 0) Dialogs.Show(new ManualDownloadsViewModel(result.Instance, result.SkippedFiles));
+            else
+            {
+                Dialogs.Toast(L.F("Imported \"{0}\"", result.Instance.Name));
+                Notifications.Notify(L.T("Instance imported"), result.Instance.Name, NotifyKind.Instance);
+            }
+        }
+        catch (OperationCanceledException) { Error = L.T("Cancelled"); }
+        catch (Exception ex)
+        {
+            Log.Error("Import failed", ex);
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+            Status = null;
+            Progress = -1;
+            ImportFileCommand.NotifyCanExecuteChanged();
+        }
+    }
 
     public int StepNumber => Step switch { StepLauncher => 1, StepFolder => 2, StepInstances => 3, _ => 4 };
 
@@ -233,7 +317,11 @@ public partial class ImportLauncherViewModel : ObservableObject
         Summary = failed == 0
             ? L.F("Imported {0} of {1} instances. Press Install on an instance to download the game files.", ok, todo.Count)
             : L.F("Imported {0} of {1} instances; {2} failed. Press Install on an instance to download the game files.", ok, todo.Count, failed);
-        if (ok > 0) Dialogs.Toast(L.F("Imported {0} instances from {1}", ok, LauncherName));
+        if (ok > 0)
+        {
+            Dialogs.Toast(L.F("Imported {0} instances from {1}", ok, LauncherName));
+            Notifications.Notify(L.T("Import finished"), L.F("Imported {0} instances from {1}", ok, LauncherName), NotifyKind.Instance);
+        }
         _lastImported = ok == 1 ? last : null;
     }
 

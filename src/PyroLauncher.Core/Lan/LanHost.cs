@@ -23,6 +23,8 @@ public sealed class LanHostOptions
     public bool HolePunching { get; init; }
 }
 
+public enum LanPlayerEvent { Joined, Left, TimedOut, Kicked }
+
 /// <summary>A player connected to the lobby this computer hosts.</summary>
 public sealed class HostedPlayer
 {
@@ -36,6 +38,8 @@ public sealed class HostedPlayer
     internal IDisposable Connection { get; init; } = null!;
     internal CancellationTokenSource Cts { get; } = new();
     internal int Tunnels;
+    /// <summary>Set by Kick, so leaving is reported as a kick rather than a disconnect.</summary>
+    internal volatile bool Kicked;
     public int? PingMs { get; internal set; }
 }
 
@@ -64,6 +68,9 @@ public sealed class LanHost : IDisposable
 
     /// <summary>Raised on a background thread whenever players, pings or the world change.</summary>
     public event Action? Changed;
+    /// <summary>Raised on a background thread when a player joins or leaves (not while the lobby is closing).</summary>
+    public event Action<string, LanPlayerEvent>? PlayerEvent;
+    private volatile bool _closing;
 
     public int Port => _o.Port;
     public string LobbyName => _o.LobbyName;
@@ -228,6 +235,7 @@ public sealed class LanHost : IDisposable
             Token = LanProtocol.NewToken(), Writer = writer, Connection = connection,
         };
         using var link = CancellationTokenSource.CreateLinkedTokenSource(ct, player.Cts.Token);
+        var timedOut = false;
         _players[player.Id] = player;
         Log.Info($"LAN: {name} joined from {ip}" + (viaPunch ? " (hole punching)" : ""));
         try
@@ -235,11 +243,14 @@ public sealed class LanHost : IDisposable
             await writer.SendAsync(LanProtocol.Msg("welcome", ("id", player.Id), ("token", player.Token), ("name", name)), link.Token);
             BroadcastState();
             Changed?.Invoke();
+            PlayerEvent?.Invoke(name, LanPlayerEvent.Joined);
             while (!link.IsCancellationRequested)
             {
                 using var idle = CancellationTokenSource.CreateLinkedTokenSource(link.Token);
                 idle.CancelAfter(TimeSpan.FromSeconds(30)); // pings run every 3 s; silence means the player is gone
-                var m = await reader.ReadAsync(idle.Token);
+                JsonObject? m;
+                try { m = await reader.ReadAsync(idle.Token); }
+                catch (OperationCanceledException) when (!link.IsCancellationRequested) { timedOut = true; break; }
                 if (m == null) break;
                 switch (m.Str("t"))
                 {
@@ -256,9 +267,11 @@ public sealed class LanHost : IDisposable
         {
             if (_players.TryRemove(player.Id, out _))
             {
-                Log.Info($"LAN: {name} left");
+                Log.Info($"LAN: {name} left" + (timedOut ? " (timed out)" : player.Kicked ? " (kicked)" : ""));
                 BroadcastState();
                 Changed?.Invoke();
+                if (!_closing)
+                    PlayerEvent?.Invoke(name, timedOut ? LanPlayerEvent.TimedOut : player.Kicked ? LanPlayerEvent.Kicked : LanPlayerEvent.Left);
             }
             player.Cts.Cancel();
         }
@@ -338,6 +351,7 @@ public sealed class LanHost : IDisposable
     public void Kick(int id, bool banned)
     {
         if (!_players.TryGetValue(id, out var p)) return;
+        p.Kicked = true;
         _ = Task.Run(async () =>
         {
             try
@@ -359,6 +373,7 @@ public sealed class LanHost : IDisposable
 
     public void Dispose()
     {
+        _closing = true;
         foreach (var p in _players.Values)
         {
             try { p.Writer.Post(LanProtocol.Msg("closed")); } catch { }

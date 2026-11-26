@@ -163,4 +163,127 @@ public sealed class AvaloniaPlatform : IPlatformUi
                 break;
         }
     }
+
+    public bool IsMainWindowActive => Main is { } w && w.IsVisible && w.IsActive && w.WindowState != WindowState.Minimized;
+
+    public void ShowSystemNotification(string title, string body)
+    {
+        if (OperatingSystem.IsWindows()) SystemNotifications.ShowWindows(Main, title, body);
+        else if (OperatingSystem.IsMacOS())
+            SystemNotifications.Run("osascript", "-e", $"display notification \"{SystemNotifications.AppleEscape(body)}\" with title \"{SystemNotifications.AppleEscape(title)}\"");
+        else SystemNotifications.Run("notify-send", "-a", "PyroLauncher", title, body);
+    }
+}
+
+/// <summary>
+/// OS notifications without extra packages. On Windows a tray balloon, which Windows 10/11 shows as a regular
+/// notification; the tray icon is only there while notifications are recent.
+/// </summary>
+internal static class SystemNotifications
+{
+    public static void Run(string file, params string[] args)
+    {
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo(file) { UseShellExecute = false, CreateNoWindow = true };
+            foreach (var a in args) psi.ArgumentList.Add(a);
+            System.Diagnostics.Process.Start(psi)?.Dispose();
+        }
+        catch (Exception ex) { Log.Warn($"{file} failed: {ex.Message}"); }
+    }
+
+    public static string AppleEscape(string s) => s.Replace("\\", "\\\\").Replace("\"", "\\\"");
+
+    // ---------- Windows ----------
+    private const int NIM_ADD = 0, NIM_MODIFY = 1, NIM_DELETE = 2, NIM_SETVERSION = 4;
+    private const int NIF_ICON = 0x2, NIF_TIP = 0x4, NIF_INFO = 0x10;
+    private const int NIIF_USER = 0x4, NIIF_LARGE_ICON = 0x20;
+    private const int IconId = 0x5059; // "PY"
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct NotifyIconData
+    {
+        public int cbSize;
+        public IntPtr hWnd;
+        public int uID;
+        public int uFlags;
+        public int uCallbackMessage;
+        public IntPtr hIcon;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] public string szTip;
+        public int dwState;
+        public int dwStateMask;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)] public string szInfo;
+        public int uTimeoutOrVersion;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)] public string szInfoTitle;
+        public int dwInfoFlags;
+        public Guid guidItem;
+        public IntPtr hBalloonIcon;
+    }
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool Shell_NotifyIconW(int message, ref NotifyIconData data);
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern uint ExtractIconExW(string file, int index, out IntPtr large, out IntPtr small, uint count);
+
+    private static IntPtr _icon, _hwnd;
+    private static bool _added;
+    private static Avalonia.Threading.DispatcherTimer? _removeTimer;
+
+    /// <summary>Must run on the UI thread.</summary>
+    public static void ShowWindows(Window? window, string title, string body)
+    {
+        var hwnd = window?.TryGetPlatformHandle()?.Handle ?? IntPtr.Zero;
+        if (hwnd == IntPtr.Zero) return;
+        if (_icon == IntPtr.Zero && Environment.ProcessPath is { } exe)
+        {
+            ExtractIconExW(exe, 0, out var large, out var small, 1);
+            _icon = large != IntPtr.Zero ? large : small;
+        }
+
+        var data = NewData(hwnd);
+        if (!_added || _hwnd != hwnd)
+        {
+            data.uFlags = NIF_ICON | NIF_TIP;
+            _added = Shell_NotifyIconW(NIM_ADD, ref data) || Shell_NotifyIconW(NIM_MODIFY, ref data);
+            _hwnd = hwnd;
+            data.uTimeoutOrVersion = 4; // NOTIFYICON_VERSION_4
+            Shell_NotifyIconW(NIM_SETVERSION, ref data);
+        }
+        data = NewData(hwnd);
+        data.uFlags = NIF_INFO;
+        data.szInfoTitle = Trim(title, 63);
+        data.szInfo = Trim(body, 255);
+        data.dwInfoFlags = _icon != IntPtr.Zero ? NIIF_USER | NIIF_LARGE_ICON : 0;
+        data.hBalloonIcon = _icon;
+        if (!Shell_NotifyIconW(NIM_MODIFY, ref data)) Log.Warn("Windows did not accept the notification.");
+
+        // Keep the tray icon around while notifications are recent, then take it away again.
+        _removeTimer ??= new Avalonia.Threading.DispatcherTimer(TimeSpan.FromSeconds(30), Avalonia.Threading.DispatcherPriority.Background, (_, _) => Remove());
+        _removeTimer.Stop();
+        _removeTimer.Start();
+    }
+
+    /// <summary>Removes the tray icon (also called when the launcher quits).</summary>
+    public static void Remove()
+    {
+        _removeTimer?.Stop();
+        if (!_added) return;
+        var data = NewData(_hwnd);
+        Shell_NotifyIconW(NIM_DELETE, ref data);
+        _added = false;
+    }
+
+    private static NotifyIconData NewData(IntPtr hwnd) => new()
+    {
+        cbSize = Marshal.SizeOf<NotifyIconData>(),
+        hWnd = hwnd,
+        uID = IconId,
+        hIcon = _icon,
+        szTip = "PyroLauncher",
+        szInfo = "",
+        szInfoTitle = "",
+    };
+
+    private static string Trim(string s, int max) => s.Length <= max ? s : s[..(max - 1)] + "…";
 }

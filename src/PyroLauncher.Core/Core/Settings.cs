@@ -72,6 +72,7 @@ public class LauncherSettings
     public bool OpenConsoleOnLaunch { get; set; } = true;
     /// <summary>Open the launcher window in fullscreen instead of a normal window.</summary>
     public bool StartFullscreen { get; set; }
+    public NotificationSettings Notifications { get; set; } = new();
     public ContentListStyle ContentListStyle { get; set; } = ContentListStyle.List;
     public InstanceMenuStyle InstanceMenuStyle { get; set; } = InstanceMenuStyle.TopNavigation;
     public ContentListStyle DiscoverStyle { get; set; } = ContentListStyle.List;
@@ -103,6 +104,19 @@ public class LanBan
     public DateTimeOffset BannedAt { get; set; }
 }
 
+/// <summary>Notifications shown by the operating system while the launcher window is not focused.</summary>
+public class NotificationSettings
+{
+    /// <summary>Off by default: in-app toasts are always shown, OS notifications only when turned on.</summary>
+    public bool System { get; set; }
+    /// <summary>An instance or modpack finished installing or importing.</summary>
+    public bool Installs { get; set; } = true;
+    /// <summary>Players joining, leaving or timing out of a hosted LAN lobby.</summary>
+    public bool Lobby { get; set; } = true;
+    /// <summary>Game crashes, launcher updates and other events.</summary>
+    public bool Other { get; set; } = true;
+}
+
 public class LanSettings
 {
     /// <summary>Off by default: no lobby port is opened and nothing is contacted until the user turns LAN on.</summary>
@@ -123,6 +137,8 @@ public class LanSettings
     public string? LastJoinCode { get; set; }
     /// <summary>The IP disclaimer was agreed to once; later it can be skipped without the countdown.</summary>
     public bool DisclaimerAccepted { get; set; }
+    /// <summary>Host: show a message when a player joins, leaves or times out.</summary>
+    public bool NotifyPlayers { get; set; } = true;
     public List<LanBan> Bans { get; set; } = [];
 }
 

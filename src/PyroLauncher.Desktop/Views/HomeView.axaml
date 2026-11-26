@@ -2,11 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:l="clr-namespace:PyroLauncher.Desktop"
              xmlns:i="clr-namespace:PyroLauncher.Desktop"
+             xmlns:vm="clr-namespace:PyroLauncher.UI.ViewModels;assembly=PyroLauncher.Core"
+             xmlns:inst="clr-namespace:PyroLauncher.Instances;assembly=PyroLauncher.Core"
              x:Class="PyroLauncher.Desktop.Views.HomeView">
     <UserControl.Styles>
         <Style Selector="Border.group.dropTarget"><Setter Property="BorderBrush" Value="{StaticResource Line2}"/></Style>
     </UserControl.Styles>
 
+    <Panel>
     <Grid Margin="36,0,36,0" RowDefinitions="Auto,*">
         <DockPanel Margin="0,0,0,20">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Spacing="10">
@@ -14,7 +17,7 @@
                     <TextBox Classes="search" Text="{Binding Filter}" Watermark="{l:T 'Search instances'}"/>
                     <TextBlock Classes="icon" Text="{i:I E721}" Foreground="{StaticResource Fg3}" FontSize="{l:F 13}" Margin="12,0,0,0" IsHitTestVisible="False"/>
                 </Grid>
-                <Button Command="{Binding ImportFromLauncherCommand}" ToolTip.Tip="{l:T 'Import instances from Modrinth App, Prism Launcher, CurseForge or XMCL'}">
+                <Button Command="{Binding ImportFromLauncherCommand}" ToolTip.Tip="{l:T 'Import a modpack file, or instances from Modrinth App, Prism Launcher, CurseForge or XMCL'}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <TextBlock Classes="icon" Text="{i:I E8B5}"/>
                         <TextBlock Text="{l:T 'Import'}"/>
@@ -85,12 +88,21 @@
                                 <TextBlock Classes="faint" Text="{l:T 'Empty - drag instances here.'}" Margin="22,0,0,14"
                                            IsVisible="{Binding !Items.Count}"/>
 
-                                <ItemsControl ItemsSource="{Binding Items}" IsVisible="{Binding IsExpanded}">
+                                <ItemsControl ItemsSource="{Binding Shown}" IsVisible="{Binding IsExpanded}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
+                                    <ItemsControl.DataTemplates>
+                                        <!-- Where the dragged instance lands if released here -->
+                                        <DataTemplate DataType="vm:DropSlot">
+                                            <Panel Width="{Binding Width}" Height="{Binding Height}" Margin="0,0,14,14">
+                                                <Rectangle RadiusX="12" RadiusY="12" Fill="{StaticResource Bg2}" Opacity="0.6"
+                                                           Stroke="{StaticResource Accent}" StrokeThickness="2" StrokeDashArray="4,3"/>
+                                                <TextBlock Classes="icon" Text="{i:I E710}" FontSize="{l:F 22}" Foreground="{StaticResource Accent}" Opacity="0.7"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Panel>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="inst:Instance">
                                             <Border Classes="instanceCard" Classes.active="{Binding IsRunning}" Width="204" Margin="0,0,14,14"
                                                     PointerPressed="Card_PointerPressed" PointerMoved="Card_PointerMoved" PointerReleased="Card_PointerReleased">
                                                 <Border.ContextMenu>
@@ -140,7 +152,7 @@
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
+                                    </ItemsControl.DataTemplates>
                                 </ItemsControl>
                             </StackPanel>
                         </Border>
@@ -149,4 +161,7 @@
             </ItemsControl>
         </ScrollViewer>
     </Grid>
+    <!-- Drag ghost: a picture of the dragged card that follows the pointer -->
+    <Canvas x:Name="DragLayer" IsHitTestVisible="False" ClipToBounds="False"/>
+    </Panel>
 </UserControl>

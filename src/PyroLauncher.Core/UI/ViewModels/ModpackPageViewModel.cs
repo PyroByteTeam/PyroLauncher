@@ -232,6 +232,7 @@ public partial class ModpackPageViewModel : ObservableObject
             MainViewModel.Instance.OpenInstance(result.Instance);
             if (result.SkippedFiles.Count > 0) Dialogs.Show(new ManualDownloadsViewModel(result.Instance, result.SkippedFiles));
             else Dialogs.Toast(L.F("Created \"{0}\"", result.Instance.Name));
+            Notifications.Notify(L.T("Modpack installed"), result.Instance.Name, NotifyKind.Instance);
         }
         catch (OperationCanceledException) { Dialogs.Toast(L.T("Cancelled")); }
         catch (Exception ex)
