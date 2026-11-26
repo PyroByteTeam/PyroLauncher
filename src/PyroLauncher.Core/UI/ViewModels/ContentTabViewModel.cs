@@ -78,6 +78,8 @@ public partial class ContentTabViewModel : ObservableObject
         WatchChecks();
         MarkClientOnly();
         UpdateLoading();
+        // Items are cached per instance, so update results from an earlier visit are still on them.
+        _updatesCount = Installed.Count(i => i.HasUpdate);
 
         // Restore the suggestions toggle as it was left for this instance.
         Instance.Config.SuggestionsOn ??= [];

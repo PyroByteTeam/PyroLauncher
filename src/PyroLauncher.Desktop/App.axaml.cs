@@ -50,6 +50,7 @@ public partial class App : Application
                 Views.ConsoleWindow.CloseAll();
                 Servers.ServerPackManager.StopAll();
                 Lan.LanService.Shutdown();
+                SystemNotifications.Remove();
             };
             window.Opened += (_, _) => UI.ViewModels.MainViewModel.Instance.CheckForUpdatesOnStartup();
         }

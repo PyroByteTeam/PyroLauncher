@@ -165,6 +165,7 @@ public sealed class LanWorldWatcher : IDisposable
             _ = ExpireLoop(_cts.Token);
         }
         catch (Exception ex) { Log.Warn("LAN world detection unavailable: " + ex.Message); }
+        _ = ScanLoop(_cts.Token);
     }
 
     private async Task ReceiveLoop(UdpClient udp, CancellationToken ct)
@@ -179,17 +180,29 @@ public sealed class LanWorldWatcher : IDisposable
                 var text = Encoding.UTF8.GetString(r.Buffer);
                 if (text.Contains(MinecraftLan.RelayTag)) continue;
                 if (MinecraftLan.Parse(text) is not { } world) continue;
-                _lastSeen = DateTime.UtcNow;
-                if (world != _world)
-                {
-                    _world = world;
-                    Changed?.Invoke(world);
-                }
+                Set(world, scanned: false);
             }
             catch (OperationCanceledException) { break; }
             catch (ObjectDisposedException) { break; }
             catch { await Task.Delay(200, CancellationToken.None); }
         }
+    }
+
+    private readonly Lock _gate = new();
+    /// <summary>The current world was found by the port scan, not heard from Minecraft's broadcast.</summary>
+    private bool _scanned;
+
+    private void Set(LanWorld? world, bool scanned)
+    {
+        bool changed;
+        lock (_gate)
+        {
+            if (!scanned) _lastSeen = DateTime.UtcNow;
+            changed = world != _world;
+            _world = world;
+            _scanned = scanned && world != null;
+        }
+        if (changed) Changed?.Invoke(world);
     }
 
     private async Task ExpireLoop(CancellationToken ct)
@@ -198,11 +211,35 @@ public sealed class LanWorldWatcher : IDisposable
         {
             try { await Task.Delay(2000, ct); } catch { break; }
             // Minecraft announces every 1.5 s; a few missed pings mean the world was closed.
-            if (_world != null && DateTime.UtcNow - _lastSeen > TimeSpan.FromSeconds(7))
+            bool expired;
+            lock (_gate) expired = _world != null && !_scanned && DateTime.UtcNow - _lastSeen > TimeSpan.FromSeconds(7);
+            if (expired) Set(null, scanned: false);
+        }
+    }
+
+    /// <summary>
+    /// Fallback for when the broadcast never arrives (firewall, VPN adapters): looks for a port that a running
+    /// Minecraft opened and asks it for its status, like the server list does. Rechecks a found world so it goes
+    /// away when the world is closed.
+    /// </summary>
+    private async Task ScanLoop(CancellationToken ct)
+    {
+        try { await Task.Delay(4000, ct); } catch { return; }
+        while (!ct.IsCancellationRequested)
+        {
+            bool scan;
+            lock (_gate) scan = _world == null || _scanned;
+            if (scan)
             {
-                _world = null;
-                Changed?.Invoke(null);
+                LanWorld? found = null;
+                try { found = await LocalWorldScan.FindAsync(ct); }
+                catch (OperationCanceledException) { return; }
+                catch (Exception ex) { Log.Info("LAN world scan failed: " + ex.Message); }
+                bool apply;
+                lock (_gate) apply = _world == null || _scanned; // the broadcast wins if it arrived meanwhile
+                if (apply) Set(found, scanned: true);
             }
+            try { await Task.Delay(5000, ct); } catch { return; }
         }
     }
 
@@ -263,4 +300,95 @@ public sealed class LanWorldAnnouncer : IDisposable
     }
 
     public void Dispose() => _cts.Cancel();
+}
+
+/// <summary>
+/// Finds a world opened to LAN without Minecraft's broadcast: takes the TCP ports that running Minecraft processes
+/// listen on and asks each one for its status. Windows only (it needs the port → process table).
+/// </summary>
+internal static class LocalWorldScan
+{
+    public static async Task<LanWorld?> FindAsync(CancellationToken ct)
+    {
+        if (!OperatingSystem.IsWindows()) return null;
+        var pids = GamePids();
+        if (pids.Count == 0) return null;
+        var ports = ListeningPorts().Where(p => pids.Contains(p.Pid) && p.Port >= 1024).Select(p => p.Port).Distinct().ToList();
+        foreach (var port in ports)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (await ProbeAsync(port, ct) is { } world) return world;
+        }
+        return null;
+    }
+
+    /// <summary>Game clients started by the launcher, plus javaw.exe processes (games from other launchers).</summary>
+    private static HashSet<int> GamePids()
+    {
+        var pids = new HashSet<int>();
+        foreach (var inst in Instances.InstanceManager.Instances.ToList())
+        {
+            try { if (!inst.IsServer && inst.Process is { HasExited: false } p) pids.Add(p.Id); } catch { }
+        }
+        foreach (var p in System.Diagnostics.Process.GetProcessesByName("javaw"))
+        {
+            pids.Add(p.Id);
+            p.Dispose();
+        }
+        return pids;
+    }
+
+    private static async Task<LanWorld?> ProbeAsync(int port, CancellationToken ct)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(TimeSpan.FromSeconds(2));
+        try
+        {
+            using var tcp = new TcpClient(AddressFamily.InterNetwork);
+            await tcp.ConnectAsync(IPAddress.Loopback, port, cts.Token);
+            var (status, _) = await MinecraftLan.StatusAsync(tcp.GetStream(), "127.0.0.1", port, cts.Token);
+            if (status?.Obj("version") == null) return null;
+            var d = status["description"];
+            var motd = d is JsonObject o ? o.Str("text") : d?.GetValueKind() == System.Text.Json.JsonValueKind.String ? d.GetValue<string>() : null;
+            return new LanWorld(string.IsNullOrWhiteSpace(motd) ? "Minecraft" : motd, port);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested) { return null; }
+        catch (Exception ex) when (ex is not OperationCanceledException) { return null; }
+    }
+
+    [System.Runtime.InteropServices.DllImport("iphlpapi.dll")]
+    private static extern uint GetExtendedTcpTable(IntPtr table, ref int size, bool sort, int family, int tableClass, uint reserved);
+
+    private const int ListenerTable = 3; // TCP_TABLE_OWNER_PID_LISTENER
+
+    /// <summary>Listening TCP ports with their owning process, IPv4 and IPv6.</summary>
+    private static List<(int Port, int Pid)> ListeningPorts()
+    {
+        var list = new List<(int, int)>();
+        Read(2, 24, 8, 20, list);   // AF_INET:  MIB_TCPROW_OWNER_PID  {state, localAddr, localPort, remoteAddr, remotePort, pid}
+        Read(23, 56, 20, 52, list); // AF_INET6: MIB_TCP6ROW_OWNER_PID {localAddr[16], scope, localPort, remoteAddr[16], scope, remotePort, state, pid}
+        return list;
+    }
+
+    private static void Read(int family, int rowSize, int portOffset, int pidOffset, List<(int, int)> list)
+    {
+        var size = 0;
+        GetExtendedTcpTable(IntPtr.Zero, ref size, false, family, ListenerTable, 0);
+        if (size <= 0) return;
+        var buf = System.Runtime.InteropServices.Marshal.AllocHGlobal(size);
+        try
+        {
+            if (GetExtendedTcpTable(buf, ref size, false, family, ListenerTable, 0) != 0) return;
+            var count = System.Runtime.InteropServices.Marshal.ReadInt32(buf);
+            for (var i = 0; i < count; i++)
+            {
+                var row = buf + 4 + i * rowSize;
+                var raw = System.Runtime.InteropServices.Marshal.ReadInt32(row + portOffset);
+                var port = ((raw & 0xFF) << 8) | ((raw >> 8) & 0xFF); // network byte order in the low 16 bits
+                var pid = System.Runtime.InteropServices.Marshal.ReadInt32(row + pidOffset);
+                list.Add((port, pid));
+            }
+        }
+        finally { System.Runtime.InteropServices.Marshal.FreeHGlobal(buf); }
+    }
 }

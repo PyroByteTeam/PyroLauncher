@@ -43,6 +43,10 @@ public interface IPlatformUi
     void ShowConsole(Instance instance, bool activate);
     void CloseConsoles();
     void MainWindow(WindowAction action);
+    /// <summary>Shows a notification from the operating system (Windows notification, notify-send, macOS banner).</summary>
+    void ShowSystemNotification(string title, string body);
+    /// <summary>The launcher window is active (focused), so an OS notification would only repeat the in-app toast.</summary>
+    bool IsMainWindowActive { get; }
 }
 
 /// <summary>Access point for the platform layer plus UI-thread helpers.</summary>

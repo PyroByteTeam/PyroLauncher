@@ -216,6 +216,19 @@ public partial class LanViewModel : ObservableObject
 
     public string DefaultLobbyName => AccountManager.Selected is { } a ? L.F("{0}'s lobby", a.Username) : L.T("Lobby name");
 
+    /// <summary>Host: toast (and OS notification, if on) when a player joins, leaves or times out.</summary>
+    public bool NotifyPlayers
+    {
+        get => S.NotifyPlayers;
+        set
+        {
+            if (value == S.NotifyPlayers) return;
+            S.NotifyPlayers = value;
+            SettingsService.Save();
+            OnPropertyChanged();
+        }
+    }
+
     // ---------- host ----------
     [ObservableProperty] private string _lobbyName;
     [ObservableProperty] private string _hostPassword = "";
@@ -345,6 +358,13 @@ public partial class LanViewModel : ObservableObject
         }
         catch (LanException ex) { Dialogs.Toast(ex.Message, true); }
         finally { AcceptingReply = false; }
+    }
+
+    [RelayCommand]
+    private async Task CopyPunchAddress()
+    {
+        if (Lan.PunchAddress is not { } a) return;
+        try { await Ui.Platform.SetClipboardTextAsync(a); Dialogs.Toast(L.T("Hole punching address copied.")); } catch { }
     }
 
     [RelayCommand]

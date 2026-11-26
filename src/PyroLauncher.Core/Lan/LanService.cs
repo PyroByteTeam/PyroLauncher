@@ -67,8 +67,13 @@ public partial class LanState : ObservableObject
     [ObservableProperty] private bool _manualWorldPort;
     /// <summary>Host accepts players through hole punching (shows the "accept a reply code" box).</summary>
     [ObservableProperty] private bool _holePunching;
-    /// <summary>Host's public UDP address for hole punching, or a reason it is missing.</summary>
+    /// <summary>Hole punching status for the host, or a reason it is unavailable (the address itself is in PunchAddress).</summary>
     [ObservableProperty] private string? _punchText;
+    /// <summary>Host's public UDP address for hole punching. Masked on screen (people stream), with a copy button.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPunchAddress))]
+    private string? _punchAddress;
+    public bool HasPunchAddress => PunchAddress != null;
 
     // Guest, while hole punching
     /// <summary>Code the guest sends back to the host so both sides can punch through.</summary>
@@ -240,12 +245,14 @@ public static class LanService
         _host = host;
         _hostCts = new CancellationTokenSource();
         host.Changed += () => Ui.Post(SyncHost);
+        host.PlayerEvent += (name, e) => Ui.Post(() => OnPlayerEvent(host, name, e));
         State.Error = null;
         State.LobbyName = lobbyName;
         State.LobbyPort = port;
         State.HasPassword = host.HasPassword;
         State.HolePunching = holePunching;
         State.PunchText = holePunching ? L.T("Finding your public address for hole punching…") : null;
+        State.PunchAddress = null;
         State.InviteCode = null;
         State.AddressesText = L.T("Finding your addresses…");
         State.ReachabilityText = null;
@@ -315,9 +322,9 @@ public static class LanService
                 warn = true;
             }
             else if (m.LikelySymmetricNat)
-                punchText = L.F("Hole punching address: {0}. Your router changes ports for every destination (symmetric NAT), so punching will probably fail; port forwarding is more reliable.", udp);
+                punchText = L.T("Your router changes ports for every destination (symmetric NAT), so hole punching will probably fail; port forwarding is more reliable.");
             else
-                punchText = L.F("Hole punching address: {0}. Friends who cannot connect directly get a reply code to send you; paste it below.", udp);
+                punchText = L.T("Friends who cannot connect directly get a reply code to send you; paste it below.");
         }
 
         Ui.Post(() =>
@@ -335,6 +342,7 @@ public static class LanService
             State.ReachabilityText = string.Join("\n", notes.Select(n => "• " + n));
             State.ReachabilityWarning = warn;
             State.PunchText = punchText;
+            State.PunchAddress = udp?.ToString();
         });
 
         // UPnP leases last two hours; renew while the lobby is open.
@@ -359,6 +367,23 @@ public static class LanService
         try { await session.Established.WaitAsync(TimeSpan.FromSeconds(45)); }
         catch (TimeoutException) { throw new LanException(L.T("Could not reach the player. Both routers may block hole punching; try port forwarding or IPv6 instead.")); }
         catch (IOException) { throw new LanException(L.T("Could not reach the player. Both routers may block hole punching; try port forwarding or IPv6 instead.")); }
+    }
+
+    /// <summary>Host: a toast (Settings: LAN page) and an OS notification (Settings → Notifications) for joins and leaves.</summary>
+    private static void OnPlayerEvent(LanHost host, string name, LanPlayerEvent e)
+    {
+        if (_host != host || e == LanPlayerEvent.Kicked) return; // the host kicked them, no need to tell them
+        var text = e switch
+        {
+            LanPlayerEvent.Joined => L.F("{0} joined the lobby", name),
+            LanPlayerEvent.TimedOut => L.F("{0} timed out (no answer for 30 seconds)", name),
+            _ => L.F("{0} left the lobby", name),
+        };
+        if (S.NotifyPlayers)
+        {
+            Dialogs.Toast(text, e == LanPlayerEvent.TimedOut);
+            Notifications.Notify(State.LobbyName ?? L.T("LAN lobby"), text, NotifyKind.Lobby);
+        }
     }
 
     private static void SyncHost()
@@ -585,6 +610,7 @@ public static class LanService
         State.ManualWorldPort = false;
         State.HolePunching = false;
         State.PunchText = null;
+        State.PunchAddress = null;
         State.InviteCode = null;
         State.AddressesText = null;
         State.ReachabilityText = null;

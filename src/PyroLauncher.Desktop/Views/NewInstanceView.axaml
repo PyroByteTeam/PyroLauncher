@@ -10,14 +10,8 @@
                 <TextBlock Classes="h2" Text="{l:T 'New instance'}" FontSize="{l:F 20}"/>
             </DockPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="0,14,0,18">
-                <RadioButton Classes="tab" Content="{l:T 'Create'}" Tag="{i:I E710}" GroupName="newmode" IsEnabled="{Binding !IsBusy}"
-                             IsChecked="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=create}"/>
-                <RadioButton Classes="tab" Content="{l:T 'Import modpack'}" Tag="{i:I E8B5}" GroupName="newmode" IsEnabled="{Binding !IsBusy}"
-                             IsChecked="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=import}"/>
-            </StackPanel>
 
-            <StackPanel IsVisible="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=create}">
+            <StackPanel Margin="0,18,0,0">
                 <TextBlock Classes="overline" Text="{l:T 'NAME'}" Margin="0,0,0,6"/>
                 <TextBox Text="{Binding Name}" Watermark="{Binding NamePlaceholder}"/>
 
@@ -64,61 +58,16 @@
                     </StackPanel>
                     <TextBlock Classes="faint" Text="{l:T 'The instance is created empty; game files download on first launch.'}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,16,0"/>
                 </DockPanel>
-            </StackPanel>
 
-            <StackPanel IsVisible="{Binding Mode, Converter={StaticResource Eq}, ConverterParameter=import}">
-                <Border x:Name="DropZone" DragDrop.AllowDrop="True" Background="{StaticResource Bg1}" BorderBrush="{StaticResource Line2}" BorderThickness="1" CornerRadius="10" Padding="20,26">
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Classes="icon" Text="{i:I E896}" FontSize="{l:F 26}" HorizontalAlignment="Center" Foreground="{StaticResource Fg2}"/>
-                        <TextBlock Text="{l:T 'Drop a .mrpack (Modrinth), .zip (CurseForge) or .pyropack (PyroLauncher) here'}" HorizontalAlignment="Center" Margin="0,12,0,4" TextWrapping="Wrap" TextAlignment="Center"/>
-                        <TextBlock Classes="faint" Text="{l:T 'or'}" HorizontalAlignment="Center"/>
-                        <Button Content="{l:T 'Choose file…'}" Command="{Binding BrowseImportCommand}" HorizontalAlignment="Center" Margin="0,8,0,0" IsEnabled="{Binding !IsBusy}"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Classes="card" Padding="16,12" Margin="0,12,0,0" IsVisible="{Binding !IsBusy}">
+                <Border Classes="card" Padding="16,12" Margin="0,18,0,0">
                     <DockPanel>
-                        <Button DockPanel.Dock="Right" Content="{l:T 'Import from launcher…'}" Command="{Binding OpenLauncherImportCommand}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                        <Button DockPanel.Dock="Right" Content="{l:T 'Import…'}" Command="{Binding OpenImportCommand}" VerticalAlignment="Center" Margin="12,0,0,0"/>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{l:T 'Moving from another launcher?'}" FontWeight="SemiBold"/>
-                            <TextBlock Classes="faint" Text="{l:T 'Copy instances from Modrinth App, Prism Launcher, CurseForge or XMCL.'}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                            <TextBlock Text="{l:T 'Have a modpack file or another launcher?'}" FontWeight="SemiBold"/>
+                            <TextBlock Classes="faint" Text="{l:T 'Import a .mrpack, .zip or .pyropack file, or copy instances from Modrinth App, Prism Launcher, CurseForge or XMCL.'}" TextWrapping="Wrap" Margin="0,2,0,0"/>
                         </StackPanel>
                     </DockPanel>
                 </Border>
-
-                <Border Classes="card" Padding="16,14" Margin="0,14,0,0" IsVisible="{Binding ImportInfo, Converter={StaticResource VisibleIf}}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Classes="h3" Text="{Binding ImportInfo.Name}"/>
-                            <Border Classes="badge" Margin="10,0,0,0"><TextBlock Classes="badgeText" Text="{Binding ImportInfo.Format}"/></Border>
-                        </StackPanel>
-                        <TextBlock Classes="muted" Margin="0,6,0,0">
-                            <Run Text="Minecraft"/> <Run Text="{Binding ImportInfo.MinecraftVersion}"/>
-                            <Run Text=" · "/><Run Text="{Binding ImportInfo.Loader}"/> <Run Text="{Binding ImportInfo.LoaderVersion}"/>
-                        </TextBlock>
-                        <TextBlock Classes="faint" Text="{Binding ImportPath}" TextTrimming="CharacterEllipsis" Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <StackPanel IsVisible="{Binding ImportInfo, Converter={StaticResource VisibleIf}}">
-                    <TextBlock Classes="overline" Text="{l:T 'NAME'}" Margin="0,16,0,6"/>
-                    <TextBox Text="{Binding ImportName}" IsEnabled="{Binding !IsBusy}"/>
-                    <TextBlock Classes="overline" Text="{l:T 'CATEGORY'}" Margin="0,16,0,6"/>
-                    <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}" IsEnabled="{Binding !IsBusy}"/>
-                </StackPanel>
-
-                <TextBlock Text="{Binding ImportError}" TextWrapping="Wrap" Margin="0,12,0,0" IsVisible="{Binding ImportError, Converter={StaticResource VisibleIf}}"/>
-
-                <StackPanel Margin="0,16,0,0" IsVisible="{Binding IsBusy}">
-                    <TextBlock Classes="muted" Text="{Binding Status}" TextTrimming="CharacterEllipsis"/>
-                    <ProgressBar Margin="0,8,0,0" Maximum="100" Value="{Binding Progress, Converter={StaticResource Percent}}"
-                                 IsIndeterminate="{Binding Progress, Converter={StaticResource Indeterminate}}"/>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0" Spacing="10">
-                    <Button Content="{l:T 'Cancel'}" Command="{Binding CancelCommand}"/>
-                    <Button Classes="primary" Content="{l:T 'Import'}" Command="{Binding ImportCommand}"/>
-                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Border>

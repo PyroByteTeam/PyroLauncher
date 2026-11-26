@@ -61,6 +61,15 @@ public partial class SettingsViewModel : ObservableObject
     public bool OpenConsoleOnLaunch { get => S.OpenConsoleOnLaunch; set { S.OpenConsoleOnLaunch = value; Changed(); SettingsService.NotifyAppearance(); } }
     /// <summary>Used when the launcher starts; F11 switches fullscreen at any time.</summary>
     public bool StartFullscreen { get => S.StartFullscreen; set { S.StartFullscreen = value; Changed(); } }
+
+    // OS notifications (only while the launcher window is not focused)
+    public bool SystemNotifications { get => S.Notifications.System; set { S.Notifications.System = value; Changed(); } }
+    public bool NotifyInstalls { get => S.Notifications.Installs; set { S.Notifications.Installs = value; Changed(); } }
+    public bool NotifyLobby { get => S.Notifications.Lobby; set { S.Notifications.Lobby = value; Changed(); } }
+    public bool NotifyOther { get => S.Notifications.Other; set { S.Notifications.Other = value; Changed(); } }
+
+    [RelayCommand]
+    private void TestNotification() => Notifications.Test();
     public bool DeveloperMode
     {
         get => S.DeveloperMode;

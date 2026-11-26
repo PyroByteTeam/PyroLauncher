@@ -13,9 +13,6 @@ public partial class NewInstanceViewModel : ObservableObject
 {
     private List<McVersionInfo> _allVersions = [];
     private CancellationTokenSource? _loaderCts;
-    private CancellationTokenSource? _importCts;
-
-    [ObservableProperty] private string _mode = "create";
 
     [ObservableProperty] private string _name = "";
     [ObservableProperty] private bool _showSnapshots = SettingsService.Current.ShowSnapshots;
@@ -30,15 +27,6 @@ public partial class NewInstanceViewModel : ObservableObject
 
     public List<string> Categories { get; } = ["- None -", .. SettingsService.Current.Categories];
     [ObservableProperty] private string _category = L.T("- None -");
-
-    [ObservableProperty] private string? _importPath;
-    [ObservableProperty] private ModpackInfo? _importInfo;
-    [ObservableProperty] private string _importName = "";
-    [ObservableProperty] private string? _importError;
-
-    [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private string? _status;
-    [ObservableProperty] private double _progress = -1;
 
     public bool IsVanilla => Loader == ModLoader.Vanilla;
     public string NamePlaceholder => SelectedVersion == null ? L.T("Instance name") :
@@ -154,67 +142,8 @@ public partial class NewInstanceViewModel : ObservableObject
     private string? CategoryValue => Category == Categories[0] ? null : Category;
 
     [RelayCommand]
-    private async Task BrowseImport()
+    private void OpenImport()
     {
-        var file = await Ui.Platform.PickFileAsync(L.T("Import modpack"), [new FileFilter(L.T("Modpacks"), "*.mrpack", "*.zip", "*.pyropack")]);
-        if (file == null) return;
-        SetImportFile(file);
-    }
-
-    public void SetImportFile(string path)
-    {
-        ImportPath = path;
-        ImportError = null;
-        ImportInfo = null;
-        try
-        {
-            ImportInfo = ModpackImporter.Inspect(path);
-            ImportName = ImportInfo.Name;
-        }
-        catch (Exception ex) { ImportError = ex.Message; }
-        ImportCommand.NotifyCanExecuteChanged();
-    }
-
-    public bool CanImport => ImportInfo != null && !IsBusy;
-
-    [RelayCommand(CanExecute = nameof(CanImport))]
-    private async Task Import()
-    {
-        if (ImportPath == null || ImportInfo == null) return;
-        IsBusy = true;
-        ImportCommand.NotifyCanExecuteChanged();
-        _importCts = new CancellationTokenSource();
-        var progress = new Progress<TaskProgress>(p => { Status = p.Message; Progress = p.Fraction; });
-        try
-        {
-            var name = string.IsNullOrWhiteSpace(ImportName) ? ImportInfo.Name : ImportName.Trim();
-            var result = await ModpackImporter.ImportAsync(ImportPath, name, CategoryValue, progress, _importCts.Token);
-            Dialogs.Close(this);
-            MainViewModel.Instance.OpenInstance(result.Instance);
-            if (result.SkippedFiles.Count > 0)
-            {
-                Dialogs.Show(new ManualDownloadsViewModel(result.Instance, result.SkippedFiles));
-            }
-            else Dialogs.Toast(L.F("Imported \"{0}\"", result.Instance.Name));
-        }
-        catch (OperationCanceledException) { Status = L.T("Cancelled"); }
-        catch (Exception ex)
-        {
-            Log.Error("Import failed", ex);
-            ImportError = ex.Message;
-        }
-        finally
-        {
-            IsBusy = false;
-            Progress = -1;
-            ImportCommand.NotifyCanExecuteChanged();
-        }
-    }
-
-    [RelayCommand]
-    private void OpenLauncherImport()
-    {
-        if (IsBusy) return;
         _loaderCts?.Cancel();
         Dialogs.Close(this);
         Dialogs.Show(new ImportLauncherViewModel());
@@ -223,7 +152,6 @@ public partial class NewInstanceViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
-        if (IsBusy) { _importCts?.Cancel(); return; }
         _loaderCts?.Cancel();
         Dialogs.Close(this);
     }

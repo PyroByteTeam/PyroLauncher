@@ -136,6 +136,43 @@
                                 </StackPanel>
                             </Border>
                         </Grid>
+
+                        <!-- Walkthrough for first-time users -->
+                        <Border Classes="card" Padding="20,18" Margin="0,18,0,0">
+                            <StackPanel Spacing="14">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{i:I E946}" FontSize="{l:F 16}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Classes="h3" Text="{l:T 'First time? Here is how it works'}" VerticalAlignment="Center"/>
+                                </DockPanel>
+
+                                <Grid ColumnDefinitions="*,24,*">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="label" Text="{l:T 'If you host'}"/>
+                                        <TextBlock TextWrapping="Wrap" Text="{l:T '1. Start Minecraft from any instance and load a single-player world.'}"/>
+                                        <TextBlock TextWrapping="Wrap" Text="{l:T '2. Press Esc → Open to LAN → Start LAN World.'}"/>
+                                        <TextBlock TextWrapping="Wrap" Text="{l:T '3. Here, choose Host a lobby → Start lobby. The world is picked up automatically; if not, type the port Minecraft wrote in chat (&quot;Local game hosted on port …&quot;).'}"/>
+                                        <TextBlock TextWrapping="Wrap" Text="{l:T '4. Copy the invite code and send it privately to your friends, with the password if you set one.'}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Spacing="6">
+                                        <TextBlock Classes="label" Text="{l:T 'If you join'}"/>
+                                        <TextBlock TextWrapping="Wrap" Text="{l:T '1. Choose Join a lobby, paste the invite code and press Join.'}"/>
+                                        <TextBlock TextWrapping="Wrap" Text="{l:T '2. Start Minecraft with the same game version and mods as the host.'}"/>
+                                        <TextBlock TextWrapping="Wrap" Text="{l:T '3. Open Multiplayer: the host world appears at the bottom under LAN worlds. Double-click it.'}"/>
+                                        <TextBlock TextWrapping="Wrap" Text="{l:T '4. Not listed? Use Direct Connection with the address shown on the lobby page (127.0.0.1 and a port). Do not type the host IP address into Minecraft.'}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Border Classes="row" Padding="14,12">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock FontWeight="SemiBold" Text="{l:T 'If it does not connect'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{l:T '• Press Test connection on the join page first: it shows whether the lobby is reachable and how good the ping is.'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{l:T '• Host: when Windows Firewall asks about PyroLauncher, allow it. Otherwise nobody can connect.'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{l:T '• Host: if the lobby page warns that friends may not reach you, turn on hole punching, forward the lobby port on your router, or let a friend host instead.'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Text="{l:T '• Everyone needs the same Minecraft version and mods, or Minecraft refuses the connection.'}"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
                     <!-- ===== Step 3a: host form ===== -->
@@ -188,6 +225,11 @@
                                         <CheckBox IsChecked="{Binding HolePunching}" Content="{l:T 'Allow hole punching'}"/>
                                         <TextBlock Classes="faint" TextWrapping="Wrap" Margin="28,0,0,0"
                                                    Text="{l:T 'Lets friends join when no port is open on either side. Players who cannot connect directly get a reply code to send you, which you paste on the lobby page. Does not work with every router.'}"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <CheckBox IsChecked="{Binding NotifyPlayers}" Content="{l:T 'Notify me when players join, leave or time out'}"/>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap" Margin="28,0,0,0"
+                                                   Text="{l:T 'Shows a message in the launcher. To also get them from Windows while playing, turn on system notifications in Settings.'}"/>
                                     </StackPanel>
                                     <DockPanel Margin="0,2,0,0">
                                         <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{i:I E946}" Foreground="{StaticResource Fg3}" VerticalAlignment="Top" FontSize="{l:F 12}" Margin="0,2,6,0"/>
@@ -301,10 +343,38 @@
                                 </DockPanel>
                                 <TextBlock Classes="faint" TextWrapping="Wrap"
                                            Text="{l:T 'Send this code privately. It contains your IP address but not the lobby password - share that separately.'}"/>
+                                <!-- World not detected yet: automatic detection can miss it, so ask for the port Minecraft printed in chat -->
+                                <Border Classes="row" Padding="14,12" BorderBrush="{StaticResource LogWarn}" BorderThickness="1" IsVisible="{Binding !Lan.HasWorld}">
+                                    <StackPanel Spacing="8">
+                                        <DockPanel>
+                                            <TextBlock DockPanel.Dock="Left" Classes="icon" Text="{i:I E7BA}" Foreground="{StaticResource LogWarn}" VerticalAlignment="Top" Margin="0,2,8,0"/>
+                                            <TextBlock FontWeight="SemiBold" TextWrapping="Wrap"
+                                                       Text="{l:T 'Opened your world to LAN but it is not detected? Enter the port manually.'}"/>
+                                        </DockPanel>
+                                        <TextBlock Classes="faint" TextWrapping="Wrap"
+                                                   Text="{l:T 'When you open a world to LAN, Minecraft writes the port in chat, e.g. &quot;Local game hosted on port 51234&quot;. Automatic detection does not work on every computer (firewalls, VPNs), so type that number here. Friends do not need it - they only use the invite code.'}"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBox Classes="mono" FontFamily="{StaticResource MonoFont}" Width="120" Text="{Binding ManualWorldPortText}" Watermark="51234" MaxLength="5"/>
+                                            <Button Classes="primary" Content="{l:T 'Use this port'}" Command="{Binding ApplyWorldPortCommand}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
                                 <!-- Hole punching: accept a player's reply code -->
                                 <Border Classes="row" Padding="14,12" IsVisible="{Binding Lan.HolePunching}">
                                     <StackPanel Spacing="8">
                                         <TextBlock FontWeight="SemiBold" Text="{l:T 'Players who cannot connect directly'}"/>
+                                        <!-- The address is masked so it does not leak on stream; the button copies it -->
+                                        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding Lan.HasPunchAddress}">
+                                            <TextBlock Classes="faint" Text="{l:T 'Hole punching address:'}" VerticalAlignment="Center"/>
+                                            <TextBlock Classes="mono" FontFamily="{StaticResource MonoFont}" Text="•••.•••.•••.•••:•••••" Foreground="{StaticResource Fg2}" VerticalAlignment="Center"
+                                                       ToolTip.Tip="{l:T 'Hidden so it does not show up on stream'}"/>
+                                            <Button Classes="ghost" Padding="8,3" Command="{Binding CopyPunchAddressCommand}" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock Classes="icon" Text="{i:I E8C8}" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{l:T 'Copy'}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
                                         <TextBlock Classes="faint" TextWrapping="Wrap" Text="{Binding Lan.PunchText}"/>
                                         <DockPanel>
                                             <Button DockPanel.Dock="Right" Content="{l:T 'Accept'}" Command="{Binding AcceptReplyCommand}" IsEnabled="{Binding !AcceptingReply}" Margin="8,0,0,0"/>
@@ -347,6 +417,8 @@
                         <!-- Players -->
                         <DockPanel Margin="0,24,0,8">
                             <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{Binding Lan.PlayersText}" VerticalAlignment="Bottom"/>
+                            <CheckBox DockPanel.Dock="Right" IsChecked="{Binding NotifyPlayers}" Content="{l:T 'Join / leave messages'}" IsVisible="{Binding Lan.IsHosting}"
+                                      VerticalAlignment="Bottom" Margin="0,0,16,-4" MinHeight="0"/>
                             <TextBlock Classes="h3" Text="{l:T 'Players'}"/>
                         </DockPanel>
                         <ItemsControl ItemsSource="{Binding Lan.Players}">

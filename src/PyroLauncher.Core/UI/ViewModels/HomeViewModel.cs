@@ -13,8 +13,39 @@ public partial class CategoryGroup : ObservableObject
     public string? Key { get; init; }
     public bool IsUser => Key != null;
     public ObservableCollection<Instance> Items { get; } = [];
+    /// <summary>What the card grid shows: the instances, plus a drop placeholder while an instance is dragged over this category.</summary>
+    public ObservableCollection<object> Shown { get; } = [];
     [ObservableProperty] private bool _isExpanded = true;
     public string CountText => Items.Count == 1 ? L.T("1 instance") : L.F("{0} instances", Items.Count);
+
+    public void Add(Instance i)
+    {
+        Items.Add(i);
+        Shown.Add(i);
+    }
+
+    /// <summary>Shows the placeholder where <paramref name="dragged"/> would land (categories are sorted by last played).</summary>
+    public void ShowDropSlot(DropSlot slot, Instance dragged)
+    {
+        var key = HomeViewModel.SortKey(dragged);
+        var index = Items.Count(i => i != dragged && HomeViewModel.SortKey(i) >= key);
+        if (Shown.IndexOf(slot) is var at && at == index) return;
+        HideDropSlot();
+        Shown.Insert(Math.Min(index, Shown.Count), slot);
+    }
+
+    public void HideDropSlot()
+    {
+        for (var i = Shown.Count - 1; i >= 0; i--)
+            if (Shown[i] is DropSlot) Shown.RemoveAt(i);
+    }
+}
+
+/// <summary>Dashed placeholder card in the category an instance is being dragged over.</summary>
+public sealed class DropSlot
+{
+    public double Width { get; init; } = 204;
+    public double Height { get; init; } = 200;
 }
 
 public partial class HomeViewModel : ObservableObject
@@ -52,6 +83,9 @@ public partial class HomeViewModel : ObservableObject
 
     partial void OnFilterChanged(string value) => Rebuild();
 
+    /// <summary>Order of cards within a category: most recently played (or created) first.</summary>
+    public static DateTime SortKey(Instance i) => i.Config.LastPlayed ?? i.Config.Created;
+
     public void Rebuild()
     {
         foreach (var g in Groups) _expanded[g.Key ?? ""] = g.IsExpanded;
@@ -59,14 +93,14 @@ public partial class HomeViewModel : ObservableObject
 
         var all = InstanceManager.Instances
             .Where(i => Filter.Length == 0 || i.Name.Contains(Filter, StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(i => i.Config.LastPlayed ?? i.Config.Created)
+            .OrderByDescending(SortKey)
             .ToList();
         var cats = SettingsService.Current.Categories;
 
         foreach (var cat in cats)
         {
             var g = new CategoryGroup { Name = cat, Key = cat, IsExpanded = _expanded.GetValueOrDefault(cat, true) };
-            foreach (var i in all.Where(i => i.Config.Category == cat)) g.Items.Add(i);
+            foreach (var i in all.Where(i => i.Config.Category == cat)) g.Add(i);
             if (Filter.Length == 0 || g.Items.Count > 0) Groups.Add(g);
         }
 
@@ -74,7 +108,7 @@ public partial class HomeViewModel : ObservableObject
         if (rest.Count > 0 || (Groups.Count == 0 && InstanceManager.Instances.Count > 0))
         {
             var g = new CategoryGroup { Name = cats.Count == 0 ? L.T("All instances") : L.T("Uncategorized"), Key = null, IsExpanded = _expanded.GetValueOrDefault("", true) };
-            foreach (var i in rest) g.Items.Add(i);
+            foreach (var i in rest) g.Add(i);
             Groups.Add(g);
         }
         IsEmpty = InstanceManager.Instances.Count == 0;
