@@ -124,13 +124,66 @@
                             </StackPanel>
                         </Button>
                         <StackPanel IsVisible="{Binding HasPending}">
-                            <TextBlock Classes="faint" Text="{Binding PendingSkinPath}" TextTrimming="CharacterEllipsis" Margin="2,0,0,8"/>
+                            <TextBlock Classes="faint" Text="{Binding PendingLabel}" TextTrimming="CharacterEllipsis" Margin="2,0,0,8" ToolTip.Tip="{Binding PendingSkinPath}"/>
                             <DockPanel>
                                 <Button DockPanel.Dock="Right" Content="{l:T 'Cancel'}" Command="{Binding CancelSkinCommand}" Margin="8,0,0,0"/>
                                 <Button Classes="primary" Content="{l:T 'Upload to Minecraft'}" Command="{Binding UploadSkinCommand}"/>
                             </DockPanel>
+                            <Button Classes="ghost" Content="{l:T 'Save to my skins'}" Command="{Binding SavePendingToLibraryCommand}" HorizontalAlignment="Left" Margin="0,6,0,0"
+                                    IsVisible="{Binding PendingFromFile}"/>
                         </StackPanel>
                         <Button Classes="ghost" Content="{l:T 'Reset to default skin'}" Command="{Binding ResetSkinCommand}" HorizontalAlignment="Left" Margin="0,6,0,0"/>
+
+                        <DockPanel Margin="2,24,0,10">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                                <Button Classes="icon" Width="28" Height="28" Content="{i:I E73E}" FontSize="{l:F 13}" ToolTip.Tip="{l:T 'Save the skin you are wearing'}"
+                                        Command="{Binding SaveCurrentSkinCommand}"/>
+                                <Button Classes="icon" Width="28" Height="28" Content="{i:I E710}" FontSize="{l:F 13}" ToolTip.Tip="{l:T 'Add skin files…'}"
+                                        Command="{Binding AddSkinFilesCommand}"/>
+                                <Button Classes="icon" Width="28" Height="28" Content="{i:I E8B7}" FontSize="{l:F 13}" ToolTip.Tip="{l:T 'Open skins folder'}"
+                                        Command="{Binding OpenSkinsFolderCommand}"/>
+                            </StackPanel>
+                            <TextBlock Classes="overline" Text="{l:T 'MY SKINS'}" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <TextBlock Classes="muted" TextWrapping="Wrap" Margin="2,0,0,8" IsVisible="{Binding !HasLibrary}">
+                            <TextBlock.Text><l:T Key="Save skins here to swap between them in one click. Save the one you're wearing, or add PNG files."/></TextBlock.Text>
+                        </TextBlock>
+                        <ItemsControl ItemsSource="{Binding Library}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Classes="cape" Classes.active="{Binding IsPending}" Width="88" Margin="0,0,8,8" Padding="6,8" HorizontalContentAlignment="Center"
+                                            DoubleTapped="Skin_DoubleTapped"
+                                            Command="{Binding $parent[UserControl].DataContext.PreviewSkinCommand}" CommandParameter="{Binding}">
+                                        <ToolTip.Tip>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                <TextBlock Classes="faint" Text="{Binding VariantText}"/>
+                                                <TextBlock Classes="faint" Text="{l:T 'Click to preview, double-click to apply. Right-click for more.'}" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                        </ToolTip.Tip>
+                                        <Button.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{l:T 'Apply'}" IsEnabled="{Binding !IsActive}" Click="SkinApply_Click"/>
+                                                <MenuItem Header="{l:T 'Rename'}" Click="SkinRename_Click"/>
+                                                <MenuItem Header="{l:T 'Delete'}" Click="SkinDelete_Click"/>
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
+                                        <StackPanel>
+                                            <Grid Width="40" Height="72" HorizontalAlignment="Center">
+                                                <Border Background="{StaticResource Bg1}" CornerRadius="4"/>
+                                                <Image Source="{Binding Preview}" Width="32" Height="64" Stretch="Fill" RenderOptions.BitmapInterpolationMode="None"/>
+                                                <Border Width="16" Height="16" CornerRadius="8" Background="{StaticResource Accent}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                        Margin="0,-4,-4,0" IsVisible="{Binding IsActive}" ToolTip.Tip="{l:T 'Wearing now'}">
+                                                    <TextBlock Classes="icon" Text="{i:I E73E}" FontSize="{l:F 10}" Foreground="{StaticResource AccentFg}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                            </Grid>
+                                            <TextBlock Text="{Binding Name}" FontSize="{l:F 12}" Margin="0,6,0,0" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                     <TextBlock Classes="muted" Text="{l:T 'Skins and capes can only be changed for Microsoft accounts. Offline accounts show the public skin for that name, if any.'}"
                                TextWrapping="Wrap" IsVisible="{Binding !IsMicrosoft}"/>

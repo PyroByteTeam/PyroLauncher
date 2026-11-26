@@ -37,6 +37,8 @@ public static class AppPaths
     public static string ImageCache => Path.Combine(Cache, "images");
     public static string WebViewData => Path.Combine(Cache, "webview2");
     public static string Logs => Path.Combine(Root, "logs");
+    /// <summary>Saved skins for the profile page's skin library (PNG files plus skins.json).</summary>
+    public static string Skins => Path.Combine(Root, "skins");
     public static string SettingsFile => Path.Combine(Root, "settings.json");
     public static string AccountsFile => Path.Combine(Root, "accounts.dat");
 

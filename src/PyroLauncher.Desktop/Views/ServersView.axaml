@@ -55,7 +55,7 @@
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
                                     <TextBlock Classes="faint" Text="{Binding Address}" Margin="0,2,0,0"/>
-                                    <TextBlock Classes="muted" Text="{Binding Motd}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis" IsVisible="{Binding Motd, Converter={StaticResource VisibleIf}}"/>
+                                    <TextBlock Classes="muted" Text="{Binding Motd}" Margin="0,3,0,2" TextWrapping="Wrap" IsVisible="{Binding Motd, Converter={StaticResource VisibleIf}}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="16,0" HorizontalAlignment="Right">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -65,7 +65,7 @@
                                         </Grid>
                                         <TextBlock Classes="muted" Text="{Binding Status}"/>
                                     </StackPanel>
-                                    <TextBlock Classes="faint" Text="{Binding Ping}" HorizontalAlignment="Right" Margin="0,2,0,0"/>
+                                    <TextBlock Classes="faint" Text="{Binding Ping}" HorizontalAlignment="Right" Margin="0,2,0,0" IsVisible="{Binding Ping, Converter={StaticResource VisibleIf}}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2">
                                     <Button Classes="primary" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip.Tip="{l:T 'Launch the game and connect to this server'}"

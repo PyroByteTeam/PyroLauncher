@@ -15,7 +15,7 @@ public partial class ContentList : ObservableObject
 {
     public Instance Instance { get; }
     public ContentType Type { get; }
-    public ObservableCollection<LocalItem> Items { get; } = [];
+    public RangeObservableCollection<LocalItem> Items { get; } = [];
     public string Folder => Path.Combine(Instance.GameDir, Type.Folder());
 
     [ObservableProperty] private bool _isLoading;
@@ -26,6 +26,8 @@ public partial class ContentList : ObservableObject
     public event Action? Refreshed;
 
     private FileSystemWatcher? _watcher;
+    /// <summary>True when folder changes are picked up automatically, so no rescan is needed when a page reopens.</summary>
+    public bool IsWatching => _watcher != null;
     private readonly DispatcherTimer _debounce;
     private readonly HashSet<string> _identifyTried = new(StringComparer.OrdinalIgnoreCase);
     private Task? _running;
@@ -97,13 +99,10 @@ public partial class ContentList : ObservableObject
 
             if (!merged.SequenceEqual(Items))
             {
+                // One notification for the whole list - per-item adds made every listener re-filter hundreds of times.
                 foreach (var i in Items) i.PropertyChanged -= OnItemChanged;
-                Items.Clear();
-                foreach (var i in merged)
-                {
-                    i.PropertyChanged += OnItemChanged;
-                    Items.Add(i);
-                }
+                foreach (var i in merged) i.PropertyChanged += OnItemChanged;
+                Items.ReplaceAll(merged);
             }
             ApplyActivation();
             UpdateCounts();

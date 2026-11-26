@@ -12,7 +12,7 @@
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
                 <CheckBox Content="{l:T 'Errors &amp; warnings'}" IsChecked="{Binding #Viewer.ErrorsOnly}" Margin="0,0,10,0"/>
                 <CheckBox Content="{l:T 'Auto-scroll'}" IsChecked="{Binding #Viewer.AutoScroll}" Margin="0,0,10,0"/>
-                <Button Content="{l:T 'Copy'}" Click="Copy_Click" ToolTip.Tip="{l:T 'Copy selected lines (or everything if nothing is selected)'}"/>
+                <Button Content="{l:T 'Copy'}" Click="Copy_Click" ToolTip.Tip="{l:T 'Copy selected text (or everything if nothing is selected)'}"/>
                 <Button Content="{l:T 'Clear'}" Click="Clear_Click"/>
                 <Button Content="{l:T 'Logs folder'}" Click="Folder_Click"/>
                 <Button Classes="primary" Content="{l:T 'Kill game'}" Click="Kill_Click" IsVisible="{Binding IsRunning}"/>

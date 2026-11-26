@@ -70,11 +70,14 @@ public partial class ContentTabViewModel : ObservableObject
         Type = type;
         List = ContentStore.Get(inst, type);
         InstalledView = new ListCollectionView(List.Items) { Filter = FilterInstalled };
+        Shown = new IncrementalCollection(InstalledView);
+        ((INotifyPropertyChanged)Shown).PropertyChanged += OnShownPropertyChanged;
         List.PropertyChanged += OnListPropertyChanged;
         List.Items.CollectionChanged += OnItemsChanged;
         List.Refreshed += OnListRefreshed;
         WatchChecks();
         MarkClientOnly();
+        UpdateLoading();
 
         // Restore the suggestions toggle as it was left for this instance.
         Instance.Config.SuggestionsOn ??= [];
@@ -89,12 +92,49 @@ public partial class ContentTabViewModel : ObservableObject
     private void OnListPropertyChanged(object? s, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(ContentList.EnabledCount) or nameof(ContentList.ActiveShader)) OnPropertyChanged(nameof(CountText));
+        else if (e.PropertyName is nameof(ContentList.IsLoading)) UpdateLoading();
     }
 
     private void OnItemsChanged(object? s, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(nameof(CountText));
+        OnPropertyChanged(nameof(ShowEmpty));
         WatchChecks();
+    }
+
+    private void OnShownPropertyChanged(object? s, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(IncrementalCollection.IsFilling)) UpdateLoading();
+    }
+
+    /// <summary>Rows actually shown: filled in chunks so big lists don't block the page from appearing.</summary>
+    public IncrementalCollection Shown { get; }
+    /// <summary>Only the visible layout gets the rows, so the hidden one doesn't build hundreds of controls.</summary>
+    public IncrementalCollection? ListSource => IsGrid ? null : Shown;
+    public IncrementalCollection? GridSource => IsGrid ? Shown : null;
+    public bool ShowEmpty => Installed.Count == 0 && !List.IsLoading;
+
+    /// <summary>Loading indicator, shown only when scanning / filling takes longer than half a second.</summary>
+    [ObservableProperty] private bool _showLoading;
+    private CancellationTokenSource? _loadingDelay;
+
+    private void UpdateLoading()
+    {
+        OnPropertyChanged(nameof(ShowEmpty));
+        var busy = List.IsLoading || Shown.IsFilling;
+        if (!busy)
+        {
+            _loadingDelay?.Cancel();
+            _loadingDelay = null;
+            ShowLoading = false;
+            return;
+        }
+        if (_loadingDelay != null || ShowLoading) return;
+        var cts = _loadingDelay = new CancellationTokenSource();
+        _ = Task.Delay(500, cts.Token).ContinueWith(t =>
+        {
+            if (!t.IsCanceled) Ui.Post(() => { if (_loadingDelay == cts) { _loadingDelay = null; ShowLoading = List.IsLoading || Shown.IsFilling; } });
+        }, TaskScheduler.Default);
     }
 
     private readonly HashSet<LocalItem> _watched = [];
@@ -207,10 +247,18 @@ public partial class ContentTabViewModel : ObservableObject
         foreach (var w in _watched) w.PropertyChanged -= OnItemCheckChanged;
         _watched.Clear();
         (InstalledView as ListCollectionView)?.DetachFromSourceCollection();
+        ((INotifyPropertyChanged)Shown).PropertyChanged -= OnShownPropertyChanged;
+        Shown.Detach();
+        _loadingDelay?.Cancel();
     }
 
     /// <summary>Called by the instance page when appearance settings change.</summary>
-    public void OnAppearanceChanged() => OnPropertyChanged(nameof(IsGrid));
+    public void OnAppearanceChanged()
+    {
+        OnPropertyChanged(nameof(IsGrid));
+        OnPropertyChanged(nameof(ListSource));
+        OnPropertyChanged(nameof(GridSource));
+    }
 
     public bool IsServer => Instance.IsServer;
     public int ClientOnlyCount => Installed.Count(i => i.IsClientOnly && i.IsEnabled);
@@ -232,6 +280,7 @@ public partial class ContentTabViewModel : ObservableObject
     {
         UpdatesCount = Installed.Count(i => i.HasUpdate);
         MarkClientOnly();
+        UpdateLoading();
         if (StatusFilter != "all") InstalledView.Refresh();
         if (SuggestionsEnabled) FilterSuggestions();
         // Keep the details pane pointing at the (possibly re-created) installed item.
@@ -239,7 +288,7 @@ public partial class ContentTabViewModel : ObservableObject
             Detail.Installed = Detail.ProjectId != null ? FindInstalled(Detail.Source, Detail.ProjectId) : null;
     }
 
-    public void RefreshIfStale() => _ = List.RefreshAsync();
+    public void RefreshIfStale() { if (!List.IsWatching) _ = List.RefreshAsync(); }
 
     [RelayCommand]
     private Task Refresh() => List.RefreshAsync();

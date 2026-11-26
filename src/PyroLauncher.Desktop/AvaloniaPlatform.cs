@@ -21,6 +21,7 @@ public sealed class AvaloniaPlatform : IPlatformUi
 
     public bool CheckAccess() => Dispatcher.UIThread.CheckAccess();
     public void Post(Action action) => Dispatcher.UIThread.Post(action);
+    public void PostBackground(Action action) => Dispatcher.UIThread.Post(action, Avalonia.Threading.DispatcherPriority.Background);
 
     public object? DecodeImage(byte[] data, int decodeWidth)
     {
@@ -65,6 +66,21 @@ public sealed class AvaloniaPlatform : IPlatformUi
             using var ms = new MemoryStream(data);
             var bmp = new Bitmap(ms);
             return new CroppedBitmap(bmp, new PixelRect(x, y, width, height));
+        }
+        catch { return null; }
+    }
+
+    public object? ImageFromPixels(int width, int height, byte[] bgra)
+    {
+        try
+        {
+            var handle = GCHandle.Alloc(bgra, GCHandleType.Pinned);
+            try
+            {
+                return new Bitmap(PixelFormat.Bgra8888, AlphaFormat.Unpremul, handle.AddrOfPinnedObject(),
+                    new PixelSize(width, height), new Vector(96, 96), width * 4);
+            }
+            finally { handle.Free(); }
         }
         catch { return null; }
     }

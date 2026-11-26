@@ -16,6 +16,8 @@ public interface IPlatformUi
 {
     bool CheckAccess();
     void Post(Action action);
+    /// <summary>Queues work below input and rendering, so the UI paints and responds first.</summary>
+    void PostBackground(Action action);
 
     /// <summary>Decodes an image into the UI framework's bitmap type (thread-safe; returns null on failure).</summary>
     object? DecodeImage(byte[] data, int decodeWidth);
@@ -26,6 +28,9 @@ public interface IPlatformUi
 
     /// <summary>A region of an image, scaled up with nearest-neighbour (for pixel art like capes).</summary>
     object? CropImage(byte[] data, int x, int y, int width, int height, int scale);
+
+    /// <summary>A bitmap built from raw BGRA pixels (straight alpha, rows top to bottom), or null.</summary>
+    object? ImageFromPixels(int width, int height, byte[] bgra);
 
     Task<string?> PickFileAsync(string title, IReadOnlyList<FileFilter> filters);
     Task<IReadOnlyList<string>> PickFilesAsync(string title, IReadOnlyList<FileFilter> filters);
@@ -52,6 +57,13 @@ public static class Ui
     {
         if (CheckAccess()) action();
         else Platform.Post(action);
+    }
+
+    /// <summary>Queues at background priority (after input and rendering).</summary>
+    public static void PostBackground(Action action)
+    {
+        if (Platform == null) action();
+        else Platform.PostBackground(action);
     }
 
     /// <summary>Always queues (also from the UI thread), like Dispatcher.BeginInvoke.</summary>
