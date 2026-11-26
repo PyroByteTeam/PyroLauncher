@@ -14,9 +14,9 @@
             <TextBlock Classes="muted" Text="{l:T 'Switch accounts, preview your skin and change capes.'}" Margin="0,4,0,0"/>
         </StackPanel>
 
-        <Grid Grid.Row="1" ColumnDefinitions="310,20,*,20,300">
+        <Grid Grid.Row="1" ColumnDefinitions="310,20,*,20,312">
             <ScrollViewer DataContext="{Binding AccountsVm}">
-                <StackPanel>
+                <StackPanel Margin="0,0,12,0">
                     <TextBlock Classes="overline" Text="{l:T 'ACCOUNTS'}" Margin="2,0,0,10"/>
                     <ItemsControl ItemsSource="{Binding Accounts}">
                         <ItemsControl.ItemTemplate>
@@ -110,7 +110,7 @@
             </Border>
 
             <ScrollViewer Grid.Column="4">
-                <StackPanel IsEnabled="{Binding !IsBusy}">
+                <StackPanel IsEnabled="{Binding !IsBusy}" Margin="0,0,12,0">
                     <TextBlock Classes="overline" Text="{l:T 'SKIN'}" Margin="2,0,0,10"/>
                     <StackPanel IsVisible="{Binding IsMicrosoft}">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,10" Spacing="6">
