@@ -111,24 +111,16 @@
                         <TextBlock DockPanel.Dock="Right" Classes="faint" Text="{Binding CountText}" VerticalAlignment="Center"/>
                         <TextBlock Classes="overline" Text="{l:T 'INSTALLED'}" VerticalAlignment="Center"/>
                     </DockPanel>
-                    <ProgressBar IsIndeterminate="True" Margin="0,0,0,10" IsVisible="{Binding List.IsLoading}"/>
-                    <TextBlock Classes="muted" Text="{Binding EmptyText}" Margin="2,4,0,16" TextWrapping="Wrap" IsVisible="{Binding !Installed.Count}"/>
+                    <ProgressBar IsIndeterminate="True" Margin="0,0,0,10" IsVisible="{Binding ShowLoading}"/>
+                    <TextBlock Classes="muted" Text="{Binding EmptyText}" Margin="2,4,0,16" TextWrapping="Wrap" IsVisible="{Binding ShowEmpty}"/>
 
                     <!-- Installed: list -->
-                    <ItemsControl ItemsSource="{Binding InstalledView}" IsVisible="{Binding !IsGrid}">
+                    <ItemsControl ItemsSource="{Binding ListSource}" IsVisible="{Binding !IsGrid}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Classes="item" Classes.checked="{Binding IsChecked}" Classes.selected="{Binding IsSelected}" Classes.off="{Binding !IsEnabled}"
                                         Classes.showChk="{Binding $parent[UserControl].DataContext.HasChecked}"
-                                        Padding="12,8" Margin="0,0,0,6" c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenItemCommand}">
-                                    <Border.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{l:T 'Toggle on / off'}" Command="{Binding $parent[UserControl].DataContext.ToggleCommand}" CommandParameter="{Binding}"/>
-                                            <MenuItem Header="{l:T 'Show in Explorer'}" Command="{Binding $parent[UserControl].DataContext.RevealCommand}" CommandParameter="{Binding}"/>
-                                            <Separator/>
-                                            <MenuItem Header="{l:T 'Delete'}" Command="{Binding $parent[UserControl].DataContext.DeleteCommand}" CommandParameter="{Binding}"/>
-                                        </ContextMenu>
-                                    </Border.ContextMenu>
+                                        Padding="12,8" Margin="0,0,0,6" c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenItemCommand}" ContextRequested="Item_ContextRequested">
                                     <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
                                         <CheckBox Classes="chk" IsChecked="{Binding IsChecked}" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip.Tip="{l:T 'Select for bulk actions'}"/>
                                         <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsEnabled}" VerticalAlignment="Center" Margin="0,0,8,0" MinWidth="0"
@@ -167,7 +159,7 @@
                     </ItemsControl>
 
                     <!-- Installed: grid -->
-                    <ItemsControl ItemsSource="{Binding InstalledView}" IsVisible="{Binding IsGrid}">
+                    <ItemsControl ItemsSource="{Binding GridSource}" IsVisible="{Binding IsGrid}">
                         <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -175,15 +167,7 @@
                                         Classes.showChk="{Binding $parent[UserControl].DataContext.HasChecked}"
                                         Width="96" Height="108" Margin="0,0,8,8" ToolTip.Tip="{Binding Name}"
                                         c:Tap.Command="{Binding $parent[UserControl].DataContext.OpenItemCommand}"
-                                        c:Tap.DoubleCommand="{Binding $parent[UserControl].DataContext.ToggleCommand}">
-                                    <Border.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{l:T 'Toggle on / off'}" Command="{Binding $parent[UserControl].DataContext.ToggleCommand}" CommandParameter="{Binding}"/>
-                                            <MenuItem Header="{l:T 'Show in Explorer'}" Command="{Binding $parent[UserControl].DataContext.RevealCommand}" CommandParameter="{Binding}"/>
-                                            <Separator/>
-                                            <MenuItem Header="{l:T 'Delete'}" Command="{Binding $parent[UserControl].DataContext.DeleteCommand}" CommandParameter="{Binding}"/>
-                                        </ContextMenu>
-                                    </Border.ContextMenu>
+                                        c:Tap.DoubleCommand="{Binding $parent[UserControl].DataContext.ToggleCommand}" ContextRequested="Item_ContextRequested">
                                     <Grid>
                                         <StackPanel Classes="dim" Margin="6,10,6,6">
                                             <Border Width="52" Height="52" CornerRadius="10" Background="{StaticResource Bg3}" ClipToBounds="True" HorizontalAlignment="Center">
