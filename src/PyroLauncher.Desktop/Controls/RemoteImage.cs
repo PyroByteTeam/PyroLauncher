@@ -45,7 +45,8 @@ public class RemoteImage : AvaloniaObject
         var src = await LoadAsync(url, width);
         if (src == null) return;
         // Icons are small: keep them for the session so lists reopen without flicker. Big images stay weak.
-        if (width <= 160) Strong[key] = src;
+        // Animations hold many frames, so they are only cached weakly.
+        if (width <= 160 && src is not AnimatedBitmap) Strong[key] = src;
         else Memory[key] = new WeakReference<IImage>(src);
         if (GetUrl(img) == url) img.Source = src;
     }

@@ -27,6 +27,8 @@ public sealed class AvaloniaPlatform : IPlatformUi
     {
         try
         {
+            try { if (Controls.AnimatedBitmap.TryDecode(data, decodeWidth) is { } anim) return anim; }
+            catch (Exception ex) { Log.Warn($"Animated image decode failed: {ex.Message}"); }
             using var ms = new MemoryStream(data);
             return decodeWidth > 0 ? Bitmap.DecodeToWidth(ms, decodeWidth, BitmapInterpolationMode.HighQuality) : new Bitmap(ms);
         }

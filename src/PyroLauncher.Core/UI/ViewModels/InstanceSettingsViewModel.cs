@@ -136,7 +136,7 @@ public partial class InstanceSettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task ChangeIcon()
     {
-        var file = await Ui.Platform.PickFileAsync(L.T("Choose icon"), [new FileFilter(L.T("Images"), "*.png", "*.jpg", "*.jpeg")]);
+        var file = await Ui.Platform.PickFileAsync(L.T("Choose icon"), [new FileFilter(L.T("Images"), "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp")]);
         if (file == null) return;
         try
         {

@@ -175,7 +175,7 @@ public static class ModpackApi
                 Title = m.Str("name") ?? "",
                 Description = m.Str("summary") ?? "",
                 Author = m.Arr("authors").FirstOrDefault().Str("name") ?? "",
-                IconUrl = m.Obj("logo")?.Str("thumbnailUrl"),
+                IconUrl = CurseForgeApi.LogoUrl(m.Obj("logo")),
                 Downloads = m.Long("downloadCount"),
                 WebUrl = m.Obj("links")?.Str("websiteUrl"),
                 Created = ParseDate(m.Str("dateCreated")),
