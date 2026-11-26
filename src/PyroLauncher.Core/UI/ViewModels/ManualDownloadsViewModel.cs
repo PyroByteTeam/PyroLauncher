@@ -37,6 +37,7 @@ public partial class ManualDownloadsViewModel : ObservableObject
             _watcher = new FileSystemWatcher(DownloadsDir) { EnableRaisingEvents = true };
             _watcher.Created += (_, _) => Later();
             _watcher.Renamed += (_, _) => Later();
+            _watcher.Changed += (_, _) => Later();
         }
         catch { _watcher = null; }
     }
@@ -62,18 +63,31 @@ public partial class ManualDownloadsViewModel : ObservableObject
         foreach (var item in Items.Where(i => !i.IsDone))
         {
             var dest = Path.Combine(Instance.GameDir, item.Download.Folder, item.FileName);
-            if (File.Exists(dest)) { item.IsDone = true; continue; }
+            if (IsComplete(dest)) { item.IsDone = true; continue; }
             var src = Path.Combine(DownloadsDir, item.FileName);
             try
             {
-                if (!File.Exists(src)) continue;
+                // Browsers create an empty placeholder under the final name when a download starts.
+                if (!IsComplete(src)) continue;
                 Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
-                File.Move(src, dest);
+                File.Move(src, dest, true);
                 item.IsDone = true;
             }
             catch { /* still being written; try again later */ }
         }
         UpdateSummary();
+    }
+
+    /// <summary>True when the file exists, isn't empty and no one is still writing to it.</summary>
+    private static bool IsComplete(string path)
+    {
+        try
+        {
+            if (new FileInfo(path) is not { Exists: true, Length: > 0 }) return false;
+            using var _ = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None);
+            return true;
+        }
+        catch { return false; }
     }
 
     [RelayCommand]

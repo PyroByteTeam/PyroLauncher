@@ -120,6 +120,8 @@ public static class Http
                     progress.Report((done, total));
                 }
             }
+            if (total >= 0 && done != total)
+                throw new IOException($"Incomplete download of {Path.GetFileName(path)}: got {done} of {total} bytes");
         }
         finally
         {
