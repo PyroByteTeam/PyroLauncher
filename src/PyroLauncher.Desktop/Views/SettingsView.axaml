@@ -30,7 +30,8 @@
         <Border Grid.Row="1" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Margin="0,0,16,18">
             <StackPanel Orientation="Horizontal">
                 <RadioButton Classes="tab" Content="{l:T 'Launcher'}" Tag="{i:I E8B7}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=launcher}"/>
-                <RadioButton Classes="tab" Content="{l:T 'Appearance'}" Tag="{i:I E790}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=appearance}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Appearance'}" Tag="{i:I E1C1}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=appearance}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Themes'}" Tag="{i:I E790}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=themes}"/>
                 <RadioButton Classes="tab" Content="{l:T 'Minecraft (all instances)'}" Tag="{i:I E7FC}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=minecraft}"/>
                 <RadioButton Classes="tab" Content="{l:T 'About'}" Tag="{i:I E946}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=about}"/>
             </StackPanel>
@@ -115,7 +116,7 @@
                     </Border>
                 </StackPanel>
 
-                <StackPanel Classes="section" IsVisible="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=appearance}">
+                <StackPanel Classes="section" IsVisible="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=themes}">
                     <StackPanel DataContext="{Binding Themes}">
                         <DockPanel Margin="0,0,0,10">
                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Bottom">
@@ -271,8 +272,10 @@
                             </StackPanel>
                         </Border>
                     </StackPanel>
+                </StackPanel>
 
-                    <TextBlock Classes="h2" Text="{l:T 'Language'}" Margin="0,28,0,4"/>
+                <StackPanel Classes="section" IsVisible="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=appearance}">
+                    <TextBlock Classes="h2" Text="{l:T 'Language'}" Margin="0,0,0,4"/>
                     <Border Classes="settingRow">
                         <Grid ColumnDefinitions="*,320">
                             <StackPanel>
@@ -473,6 +476,15 @@
                             </StackPanel>
                             <ComboBox Grid.Column="1" ItemsSource="{Binding LaunchOptions}" SelectedItem="{Binding OnLaunch}" VerticalAlignment="Center"/>
                         </Grid>
+                    </Border>
+                    <Border Classes="settingRow">
+                        <DockPanel>
+                            <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding StartFullscreen}" VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock Classes="rowTitle" Text="{l:T 'Open the launcher in fullscreen'}"/>
+                                <TextBlock Classes="faint" Text="{l:T 'Takes effect the next time the launcher starts. Press F11 to switch fullscreen at any time.'}" TextWrapping="Wrap" Margin="0,3,16,0"/>
+                            </StackPanel>
+                        </DockPanel>
                     </Border>
                     <Border Classes="settingRow" BorderThickness="0">
                         <DockPanel>

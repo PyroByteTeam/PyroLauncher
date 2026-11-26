@@ -212,6 +212,15 @@ public partial class NewInstanceViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenLauncherImport()
+    {
+        if (IsBusy) return;
+        _loaderCts?.Cancel();
+        Dialogs.Close(this);
+        Dialogs.Show(new ImportLauncherViewModel());
+    }
+
+    [RelayCommand]
     private void Cancel()
     {
         if (IsBusy) { _importCts?.Cancel(); return; }

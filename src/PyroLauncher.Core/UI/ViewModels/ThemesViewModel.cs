@@ -26,7 +26,7 @@ public partial class ThemeColorItem(ThemesViewModel owner, string key, string la
     public void Reload() => OnPropertyChanged(nameof(Hex));
 }
 
-/// <summary>Settings → Appearance → Theme: pick, create, edit, rename, delete, import and export themes.</summary>
+/// <summary>Settings → Themes: pick, create, edit, rename, delete, import and export themes.</summary>
 public partial class ThemesViewModel : ObservableObject
 {
     private static readonly FileFilter ThemeFilter = new(L.T("PyroLauncher theme"), "*" + ThemeManager.FileExtension);

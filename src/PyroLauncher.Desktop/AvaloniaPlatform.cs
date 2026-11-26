@@ -154,7 +154,8 @@ public sealed class AvaloniaPlatform : IPlatformUi
             case WindowAction.Hide: w.Hide(); break;
             case WindowAction.Restore:
                 w.Show();
-                if (w.WindowState == WindowState.Minimized) w.WindowState = WindowState.Normal;
+                if (w.WindowState == WindowState.Minimized)
+                    w.WindowState = w is Desktop.MainWindow m ? m.RestoreState : WindowState.Normal;
                 w.Activate();
                 break;
             case WindowAction.Quit:

@@ -149,7 +149,7 @@
                 <TextBlock Classes="icon" Text="{i:I E73E}" FontSize="{l:F 34}" Foreground="{StaticResource AccentFg}" HorizontalAlignment="Center"/>
             </Border>
             <TextBlock Classes="h1" Text="{l:T 'You are all set'}" HorizontalAlignment="Center" Margin="0,22,0,8"/>
-            <TextBlock Classes="muted" Text="{l:T 'Layout, themes, font and menu sizes can be changed any time in Settings → Appearance.'}"
+            <TextBlock Classes="muted" Text="{l:T 'Layout, themes, font and menu sizes can be changed any time in Settings → Appearance and Settings → Themes.'}"
                        TextWrapping="Wrap" TextAlignment="Center" FontSize="{l:F 14}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" Margin="0,26,0,0">
                 <Button Content="{l:T 'Back'}" Command="{Binding BackToLayoutCommand}"/>

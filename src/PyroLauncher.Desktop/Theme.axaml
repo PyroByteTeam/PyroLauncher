@@ -164,7 +164,7 @@
         <Setter Property="Background" Value="{StaticResource AccentHover}"/>
         <Setter Property="Foreground" Value="{StaticResource AccentFg}"/>
     </Style>
-    <!-- Theme picker cards (Settings → Appearance) -->
+    <!-- Theme picker cards (Settings → Themes) -->
     <Style Selector="Button.themeCard">
         <Setter Property="Background" Value="{StaticResource Bg2}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Line}"/>

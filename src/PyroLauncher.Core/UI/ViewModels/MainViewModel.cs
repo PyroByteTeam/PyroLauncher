@@ -19,6 +19,7 @@ public partial class MainViewModel : ObservableObject
     private ServerPacksViewModel? _serverPacks;
     private ModpackPageViewModel? _modpackPage;
     private InstanceViewModel? _lastInstance;
+    private LanViewModel? _lan;
 
     [ObservableProperty] private object _currentPage;
     [ObservableProperty] private object? _dialog;
@@ -55,7 +56,26 @@ public partial class MainViewModel : ObservableObject
             OnPropertyChanged(nameof(UpdateAvailable));
             OnPropertyChanged(nameof(UpdateTip));
         });
+        SettingsService.AppearanceChanged += OnDeveloperModeMaybeChanged;
+        PyroLauncher.Lan.LanService.Disconnected += reason => Dialogs.Toast(reason, true);
+        Lan.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Lan.Enabled)) OnPropertyChanged(nameof(ShowLanStatus));
+        };
     }
+
+    public bool DeveloperMode => SettingsService.Current.DeveloperMode;
+    public PyroLauncher.Lan.LanState Lan => PyroLauncher.Lan.LanService.State;
+    /// <summary>The header LAN status only exists while LAN is turned on (LAN page toggle).</summary>
+    public bool ShowLanStatus => Lan.Enabled;
+
+    private void OnDeveloperModeMaybeChanged()
+    {
+        OnPropertyChanged(nameof(DeveloperMode));
+        OnPropertyChanged(nameof(ShowLanStatus));
+    }
+
+    [RelayCommand] private void GoLan() => Nav = "lan";
 
     public bool UpdateAvailable => Updater.Available != null;
     public string UpdateTip => Updater.Available is { } u ? L.F("Update to {0}", u.Version.ToString(3)) : "";
@@ -121,6 +141,11 @@ public partial class MainViewModel : ObservableObject
             case "discover": CurrentPage = (object?)_modpackPage ?? (_discover ??= new DiscoverViewModel()); break;
             case "settings": CurrentPage = _settings ??= new SettingsViewModel(); break;
             case "downloads": CurrentPage = _downloads ??= new DownloadsViewModel(); break;
+            case "lan":
+                _lan ??= new LanViewModel();
+                _lan.OnShown();
+                CurrentPage = _lan;
+                break;
             case "profile":
                 _profile ??= new ProfileViewModel();
                 _profile.Refresh();
