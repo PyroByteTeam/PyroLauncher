@@ -33,6 +33,7 @@
                 <RadioButton Classes="tab" Content="{l:T 'Appearance'}" Tag="{i:I E1C1}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=appearance}"/>
                 <RadioButton Classes="tab" Content="{l:T 'Themes'}" Tag="{i:I E790}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=themes}"/>
                 <RadioButton Classes="tab" Content="{l:T 'Minecraft (all instances)'}" Tag="{i:I E7FC}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=minecraft}"/>
+                <RadioButton Classes="tab" Content="{l:T 'Storage'}" Tag="{i:I EDA2}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=storage}"/>
                 <RadioButton Classes="tab" Content="{l:T 'About'}" Tag="{i:I E946}" GroupName="stab" IsChecked="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=about}"/>
             </StackPanel>
         </Border>
@@ -99,22 +100,183 @@
                     </StackPanel>
 
                     <TextBlock Classes="h2" Text="{l:T 'Advanced'}" Margin="0,28,0,4"/>
-                    <Border Classes="settingRow">
+                    <Border Classes="settingRow" BorderThickness="0">
                         <DockPanel>
                             <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding DeveloperMode}" VerticalAlignment="Center"/>
                             <TextBlock Classes="rowTitle" Text="{l:T 'Developer mode'}" VerticalAlignment="Center"/>
                         </DockPanel>
                     </Border>
-                    <Border Classes="settingRow" BorderThickness="0">
-                        <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="{l:T 'Open folder'}" Command="{Binding OpenDataFolderCommand}" VerticalAlignment="Center"/>
-                            <StackPanel>
-                                <TextBlock Classes="rowTitle" Text="{l:T 'Launcher data'}"/>
-                                <TextBlock Classes="faint" Text="{Binding DataFolder}" Margin="0,3,12,0" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding DataFolder}"/>
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
                 </StackPanel>
+                <!-- Storage: where things live, moving them, and disk usage -->
+                <Grid IsVisible="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=storage}">
+                    <StackPanel Classes="section" IsEnabled="{Binding !IsMigrating}" Opacity="{Binding !IsMigrating, Converter={x:Static l:BoolToOpacity.Instance}}">
+                        <Border Classes="card" Padding="14,10" Margin="0,0,0,14" IsVisible="{Binding StorageWarning, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <DockPanel>
+                                <TextBlock Classes="icon" Text="{i:I E7BA}" Foreground="{StaticResource LogWarn}" VerticalAlignment="Top" Margin="0,1,10,0"/>
+                                <TextBlock Text="{Binding StorageWarning}" TextWrapping="Wrap" Foreground="{StaticResource LogWarn}"/>
+                            </DockPanel>
+                        </Border>
+
+                        <!-- Usage overview -->
+                        <Border Classes="card" Padding="20,18" CornerRadius="12">
+                            <StackPanel>
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E72C}" FontSize="{l:F 14}" ToolTip.Tip="{l:T 'Measure again'}"
+                                            Command="{Binding RefreshUsageCommand}" IsEnabled="{Binding !IsMeasuring}" VerticalAlignment="Top"/>
+                                    <StackPanel>
+                                        <TextBlock Classes="muted" Text="{l:T 'Space used by PyroLauncher'}"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
+                                            <TextBlock Text="{Binding UsageTotalText}" FontSize="{l:F 28}" FontWeight="SemiBold"/>
+                                            <TextBlock Classes="faint" Text="{l:T 'Measuring…'}" VerticalAlignment="Center" IsVisible="{Binding IsMeasuring}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DockPanel>
+                                <c:UsageBar Segments="{Binding Usage.Segments}" TrackBrush="{DynamicResource Bg3}" Height="16" Margin="0,14,0,14"/>
+                                <ItemsControl ItemsSource="{Binding Usage.Segments}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,22,8" Spacing="8" ToolTip.Tip="{Binding PercentText}">
+                                                <Border Width="10" Height="10" CornerRadius="3" Background="{Binding Color, Converter={StaticResource HexColor}}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Label}" VerticalAlignment="Center"/>
+                                                <TextBlock Classes="faint" Text="{Binding SizeText}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Free space on the drives in use: blue = PyroLauncher, grey = everything else -->
+                                <ItemsControl ItemsSource="{Binding Usage.Drives}" Margin="0,8,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4,0,0">
+                                                <StackPanel Orientation="Horizontal" Spacing="8" Width="170">
+                                                    <TextBlock Classes="icon" Text="{i:I EDA2}" Foreground="{StaticResource Fg2}" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip.Tip="{Binding Name}"/>
+                                                </StackPanel>
+                                                <c:UsageBar Grid.Column="1" Height="6" Margin="8,0,14,0" VerticalAlignment="Center"
+                                                            Value="{Binding LauncherFraction}" SecondaryValue="{Binding UsedFraction}" BarColor="#FF5B8DEF"
+                                                            TrackBrush="{DynamicResource Bg3}" SecondaryBrush="{DynamicResource Line2}"/>
+                                                <TextBlock Grid.Column="2" Classes="faint" Text="{Binding Text}" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Border BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Margin="0,14,0,0" Padding="0,12,0,0">
+                                    <DockPanel>
+                                        <ToggleSwitch DockPanel.Dock="Right" IsChecked="{Binding ShowStorageBreakdown}" VerticalAlignment="Center"/>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Classes="rowTitle" Text="{l:T 'Show space per instance'}"/>
+                                            <TextBlock Classes="faint" Text="{l:T 'Size of every instance and server pack, largest first.'}" Margin="0,3,0,0"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                                <ItemsControl ItemsSource="{Binding Usage.Instances}" Margin="0,12,0,0">
+                                    <ItemsControl.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="ShowStorageBreakdown"/>
+                                            <Binding Path="HasInstanceUsage"/>
+                                        </MultiBinding>
+                                    </ItemsControl.IsVisible>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="220,*,90" Margin="0,3">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Border Width="8" Height="8" CornerRadius="4" Background="{Binding Color, Converter={StaticResource HexColor}}" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" MaxWidth="200" ToolTip.Tip="{Binding Kind}"/>
+                                                </StackPanel>
+                                                <c:UsageBar Grid.Column="1" Height="8" Margin="4,0,12,0" VerticalAlignment="Center"
+                                                            Value="{Binding Fraction}" BarColor="{Binding Color}" TrackBrush="{DynamicResource Bg3}"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding SizeText}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource Fg2}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Classes="faint" Text="{l:T 'No instances yet.'}" Margin="0,12,0,0">
+                                    <TextBlock.IsVisible>
+                                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                            <Binding Path="ShowStorageBreakdown"/>
+                                            <Binding Path="!HasInstanceUsage"/>
+                                            <Binding Path="!IsMeasuring"/>
+                                        </MultiBinding>
+                                    </TextBlock.IsVisible>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Locations -->
+                        <TextBlock Classes="h2" Text="{l:T 'Locations'}" Margin="0,28,0,2"/>
+                        <TextBlock Classes="muted" TextWrapping="Wrap" Margin="0,0,0,6"
+                                   Text="{l:T 'Settings and accounts always stay in the launcher folder. Instances and the bulky game files can live on another drive. When you change a folder, the launcher offers to move your files and restarts.'}"/>
+
+                        <Border Classes="settingRow">
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Classes="icon" Content="{i:I E838}" FontSize="{l:F 14}" ToolTip.Tip="{l:T 'Open folder'}"
+                                        Command="{Binding OpenDataFolderCommand}" VerticalAlignment="Center"/>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Border Width="10" Height="10" CornerRadius="3" Background="#FF8A8F98" VerticalAlignment="Center"/>
+                                        <TextBlock Classes="rowTitle" Text="{l:T 'Launcher folder'}"/>
+                                        <Border Classes="badge"><TextBlock Classes="badgeText" Text="{Binding HomeSizeText}" Foreground="{StaticResource Fg}"/></Border>
+                                    </StackPanel>
+                                    <TextBlock Classes="faint" Text="{l:T 'Settings, accounts, skins and logs.'}" Margin="0,3,0,0"/>
+                                    <TextBlock Classes="faint" Text="{Binding DataFolder}" Margin="0,2,12,0" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding DataFolder}" FontFamily="{StaticResource MonoFont}"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+
+                        <Border Classes="settingRow">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <Button Classes="ghost" Content="{l:T 'Reset to default'}" Command="{Binding ResetInstancesFolderCommand}" IsVisible="{Binding InstancesIsCustom}"/>
+                                    <Button Classes="icon" Content="{i:I E838}" FontSize="{l:F 14}" ToolTip.Tip="{l:T 'Open folder'}" Command="{Binding OpenInstancesFolderCommand}"/>
+                                    <Button Content="{l:T 'Change…'}" Command="{Binding ChangeInstancesFolderCommand}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Border Width="10" Height="10" CornerRadius="3" Background="#FF5B8DEF" VerticalAlignment="Center"/>
+                                        <TextBlock Classes="rowTitle" Text="{l:T 'Instances folder'}"/>
+                                        <Border Classes="badge"><TextBlock Classes="badgeText" Text="{Binding InstancesSizeText}" Foreground="{StaticResource Fg}"/></Border>
+                                    </StackPanel>
+                                    <TextBlock Classes="faint" Text="{l:T 'Instances and server packs: worlds, mods, resource packs, screenshots.'}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                    <TextBlock Classes="faint" Text="{Binding InstancesFolder}" Margin="0,2,12,0" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding InstancesFolder}" FontFamily="{StaticResource MonoFont}"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+
+                        <Border Classes="settingRow" BorderThickness="0">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <Button Classes="ghost" Content="{l:T 'Reset to default'}" Command="{Binding ResetGameDataFolderCommand}" IsVisible="{Binding GameDataIsCustom}"/>
+                                    <Button Classes="icon" Content="{i:I E838}" FontSize="{l:F 14}" ToolTip.Tip="{l:T 'Open folder'}" Command="{Binding OpenGameDataFolderCommand}"/>
+                                    <Button Content="{l:T 'Change…'}" Command="{Binding ChangeGameDataFolderCommand}"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Border Width="10" Height="10" CornerRadius="3" Background="#FF3FB98A" VerticalAlignment="Center"/>
+                                        <TextBlock Classes="rowTitle" Text="{l:T 'Game files and cache folder'}"/>
+                                        <Border Classes="badge"><TextBlock Classes="badgeText" Text="{Binding GameDataSizeText}" Foreground="{StaticResource Fg}"/></Border>
+                                    </StackPanel>
+                                    <TextBlock Classes="faint" Text="{l:T 'Shared libraries and assets, mod loader files (Forge, NeoForge, Fabric), Java runtimes, downloads and image cache.'}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                    <TextBlock Classes="faint" Text="{Binding GameDataFolder}" Margin="0,2,12,0" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding GameDataFolder}" FontFamily="{StaticResource MonoFont}"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Moving files: shown over the page until the launcher restarts -->
+                    <Border Classes="card" IsVisible="{Binding IsMigrating}" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,80,0,0" Padding="24,20" CornerRadius="12" Width="460">
+                        <StackPanel>
+                            <TextBlock Classes="h2" Text="{l:T 'Changing storage folder'}"/>
+                            <TextBlock Classes="muted" Text="{Binding MigrationText}" Margin="0,6,0,0" TextTrimming="CharacterEllipsis"/>
+                            <ProgressBar Value="{Binding MigrationProgress}" Maximum="1" Margin="0,14,0,0"/>
+                            <TextBlock Classes="faint" Text="{l:T 'Keep the launcher open. It restarts by itself when the files are in place.'}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                            <Button Content="{l:T 'Cancel'}" Command="{Binding CancelMigrationCommand}" HorizontalAlignment="Right" Margin="0,12,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
 
                 <StackPanel Classes="section" IsVisible="{Binding Section, Converter={StaticResource Eq}, ConverterParameter=themes}">
                     <StackPanel DataContext="{Binding Themes}">

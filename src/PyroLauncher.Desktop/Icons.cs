@@ -67,6 +67,8 @@ public static class Icons
         [(char)0xE71A] = (char)0xE167, // square
         [(char)0xE706] = (char)0xE178, // sun
         [(char)0xE923] = (char)0xE09E, // copy
+        [(char)0xEDA2] = (char)0xE0ED, // hard-drive
+        [(char)0xEB05] = (char)0xE06B, // chart-pie
     };
 
     /// <summary>Replaces Segoe glyphs in <paramref name="text"/> with their Lucide equivalents.</summary>
