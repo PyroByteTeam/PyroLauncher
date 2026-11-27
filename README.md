@@ -177,6 +177,18 @@ people you trust and don't post invite codes publicly. Every connection is end-t
 (ECDH key exchange, AES-256-GCM), and the invite code contains the host's key fingerprint so
 players can tell they reached you and not an impersonator.
 
+**Third parties that see your IP address.** Besides the other players, a few public services
+see your IP address. They only learn that this address asked for its own address; no lobby,
+player or game data is sent to them.
+
+- When you host, the launcher asks `ipv4-internet.yandex.net`, `api.ipify.org` and `ifconfig.me`
+  (all at once, the first answer wins) for your public IPv4 address, to put it in the invite code.
+- With hole punching on, the host also asks public STUN servers for its public UDP address:
+  `stun.l.google.com`, `stun1.l.google.com` (Google), `stun.sipnet.ru`, `stun.nextcloud.com` and
+  `stun.voipbuster.com`. A joining player asks the same servers only if the direct connection fails
+  and the host has hole punching on.
+- While LAN is turned off, none of these are contacted.
+
 ## Building from source
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).

@@ -98,6 +98,8 @@
                                        Text="{l:T 'Players connect to each other directly, with no server in between. The host sees the IP address of everyone who joins, and everyone who joins sees the host IP address (it is inside the invite code).'}"/>
                             <TextBlock Classes="muted" TextWrapping="Wrap"
                                        Text="{l:T 'An IP address can reveal your approximate location and internet provider, and a bad actor can use it to flood your connection (DDoS). Only invite people you trust, and only join lobbies of people you trust. Do not post invite codes publicly.'}"/>
+                            <TextBlock Classes="muted" TextWrapping="Wrap"
+                                       Text="{l:T 'A few public services also see your IP address, but nothing else: to put it in the invite code, the host asks ipify.org, ifconfig.me or Yandex for it, and hole punching asks public STUN servers (Google, Nextcloud, Sipnet, VoipBuster). No lobby, player or game data is sent to them.'}"/>
                             <TextBlock Classes="faint" TextWrapping="Wrap"
                                        Text="{l:T 'If you decline, LAN is turned off again.'}"/>
                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
