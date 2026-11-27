@@ -23,17 +23,18 @@ public static class AppPaths
         return Path.Combine(string.IsNullOrEmpty(xdg) ? Path.Combine(home, ".local", "share") : xdg, "PyroLauncher");
     }
 
-    public static string Instances => Path.Combine(Root, "instances");
-    public static string ServerPacks => Path.Combine(Root, "servers");
+    // Instances and game files can live elsewhere (Settings → Storage); see StorageLocations.
+    public static string Instances => Path.Combine(StorageLocations.Get(StorageRole.Instances), "instances");
+    public static string ServerPacks => Path.Combine(StorageLocations.Get(StorageRole.Instances), "servers");
 
     /// <summary>Shared ".minecraft-like" directory: libraries, assets and version JSONs shared by all instances.</summary>
-    public static string Meta => Path.Combine(Root, "meta");
+    public static string Meta => Path.Combine(StorageLocations.Get(StorageRole.GameData), "meta");
     public static string Libraries => Path.Combine(Meta, "libraries");
     public static string Assets => Path.Combine(Meta, "assets");
     public static string Versions => Path.Combine(Meta, "versions");
 
-    public static string Java => Path.Combine(Root, "java");
-    public static string Cache => Path.Combine(Root, "cache");
+    public static string Java => Path.Combine(StorageLocations.Get(StorageRole.GameData), "java");
+    public static string Cache => Path.Combine(StorageLocations.Get(StorageRole.GameData), "cache");
     public static string ImageCache => Path.Combine(Cache, "images");
     public static string WebViewData => Path.Combine(Cache, "webview2");
     public static string Logs => Path.Combine(Root, "logs");
@@ -44,6 +45,8 @@ public static class AppPaths
 
     public static void Ensure()
     {
+        // A storage folder on a removed drive or deleted by hand: fall back to the default instead of failing at start-up.
+        StorageLocations.EnsureReachable();
         foreach (var d in new[] { Root, Instances, Meta, Libraries, Assets, Versions, Java, Cache, ImageCache, Logs })
             Directory.CreateDirectory(d);
     }

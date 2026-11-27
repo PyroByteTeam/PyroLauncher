@@ -87,6 +87,9 @@ public class LauncherSettings
     /// <summary>Order of the section cards in the grid instance menu.</summary>
     public List<string> SectionOrder { get; set; } = [];
 
+    /// <summary>Settings → Storage: show the size of every instance below the usage bar.</summary>
+    public bool ShowStorageBreakdown { get; set; }
+
     /// <summary>Playtime of deleted instances, so the total never goes down.</summary>
     public long DeletedPlaytimeSeconds { get; set; }
     /// <summary>"key=value" lines applied to the server.properties of every new server pack.</summary>

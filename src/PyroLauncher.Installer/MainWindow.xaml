@@ -1,7 +1,8 @@
 <Window x:Class="PyroLauncher.Installer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="PyroLauncher Setup" Icon="/pyro.ico" Width="620" Height="520" ResizeMode="NoResize"
+        xmlns:local="clr-namespace:PyroLauncher.Installer"
+        Title="{local:T 'PyroLauncher Setup'}" Icon="/pyro.ico" Width="640" Height="600" ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen" Background="{StaticResource Bg0}" Foreground="{StaticResource Fg}"
         FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13" UseLayoutRounding="True" TextOptions.TextFormattingMode="Display">
     <WindowChrome.WindowChrome>
@@ -15,11 +16,14 @@
             </Grid.RowDefinitions>
             <DockPanel>
                 <Button DockPanel.Dock="Right" Style="{StaticResource TitleButton}" Content="&#xE8BB;" Click="Close_Click" x:Name="CloseX"/>
+                <!-- Language switch: one button per language, the active one is highlighted -->
+                <StackPanel x:Name="LanguageBar" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0"
+                            WindowChrome.IsHitTestVisibleInChrome="True"/>
                 <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
                     <Border Width="22" Height="22" CornerRadius="6" RenderOptions.BitmapScalingMode="HighQuality">
                         <Border.Background><ImageBrush ImageSource="/logo.png" Stretch="UniformToFill"/></Border.Background>
                     </Border>
-                    <TextBlock Text="PyroLauncher Setup" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource Fg2}"/>
+                    <TextBlock Text="{local:T 'PyroLauncher Setup'}" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource Fg2}"/>
                 </StackPanel>
             </DockPanel>
 
@@ -30,52 +34,58 @@
                         <TextBlock x:Name="SubHeading" Foreground="{StaticResource Fg2}" Margin="0,6,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
                     <DockPanel DockPanel.Dock="Bottom" LastChildFill="False">
-                        <Button x:Name="UninstallLink" DockPanel.Dock="Left" Style="{StaticResource Ghost}" Content="Uninstall…" Click="ShowUninstall_Click"/>
+                        <Button x:Name="UninstallLink" DockPanel.Dock="Left" Style="{StaticResource Ghost}" Content="{local:T 'Uninstall…'}" Click="ShowUninstall_Click"/>
                         <Button x:Name="PrimaryButton" DockPanel.Dock="Right" Style="{StaticResource Primary}" Click="Install_Click" MinWidth="130"/>
-                        <Button x:Name="LaunchButton" DockPanel.Dock="Right" Content="Launch" Click="Launch_Click" Margin="0,0,10,0"/>
+                        <Button x:Name="LaunchButton" DockPanel.Dock="Right" Content="{local:T 'Launch'}" Click="Launch_Click" Margin="0,0,10,0"/>
                     </DockPanel>
-                    <StackPanel x:Name="Options" Margin="0,26,0,0">
-                        <TextBlock Text="INSTALL LOCATION" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Fg3}" Margin="0,0,0,6"/>
+                    <StackPanel x:Name="Options" Margin="0,24,0,0">
+                        <TextBlock Text="{local:T 'INSTALL LOCATION'}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Fg3}" Margin="0,0,0,6"/>
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="Browse…" Click="Browse_Click" Margin="8,0,0,0"/>
+                            <Button x:Name="BrowseInstall" DockPanel.Dock="Right" Content="{local:T 'Browse…'}" Click="Browse_Click" Margin="8,0,0,0"/>
                             <TextBox x:Name="PathBox"/>
                         </DockPanel>
-                        <CheckBox x:Name="DesktopShortcut" Content="Create a desktop shortcut" IsChecked="True" Margin="0,16,0,0"/>
-                        <TextBlock Foreground="{StaticResource Fg3}" FontSize="12" Margin="0,16,0,0" TextWrapping="Wrap"
-                                   Text="Installs for the current user only - no administrator rights needed. Your instances and settings live in %APPDATA%\PyroLauncher and are kept across updates."/>
+                        <TextBlock Foreground="{StaticResource Fg3}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
+                                   Text="{local:T 'The program itself. Installs for the current user only - no administrator rights needed.'}"/>
+
+                        <TextBlock Text="{local:T 'DATA FOLDER'}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Fg3}" Margin="0,18,0,6"/>
+                        <DockPanel>
+                            <Button x:Name="ResetData" DockPanel.Dock="Right" Style="{StaticResource Ghost}" Content="{local:T 'Default'}" Click="ResetData_Click" Margin="4,0,0,0"/>
+                            <Button x:Name="BrowseData" DockPanel.Dock="Right" Content="{local:T 'Browse…'}" Click="BrowseData_Click" Margin="8,0,0,0"/>
+                            <TextBox x:Name="DataBox"/>
+                        </DockPanel>
+                        <TextBlock x:Name="DataHint" Foreground="{StaticResource Fg3}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"/>
+
+                        <CheckBox x:Name="DesktopShortcut" Content="{local:T 'Create a desktop shortcut'}" IsChecked="True" Margin="0,18,0,0"/>
                     </StackPanel>
                 </DockPanel>
 
                 <DockPanel x:Name="UninstallPage" Visibility="Collapsed">
                     <StackPanel DockPanel.Dock="Top">
-                        <TextBlock Text="Uninstall PyroLauncher" FontSize="26" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display, Segoe UI"/>
+                        <TextBlock Text="{local:T 'Uninstall PyroLauncher'}" FontSize="26" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display, Segoe UI"/>
                         <TextBlock x:Name="UninstallInfo" Foreground="{StaticResource Fg2}" Margin="0,6,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
                     <DockPanel DockPanel.Dock="Bottom" LastChildFill="False">
-                        <Button x:Name="BackButton" DockPanel.Dock="Left" Style="{StaticResource Ghost}" Content="Back" Click="Back_Click"/>
-                        <Button DockPanel.Dock="Right" Style="{StaticResource Primary}" Content="Uninstall" Click="Uninstall_Click" MinWidth="130"/>
+                        <Button x:Name="BackButton" DockPanel.Dock="Left" Style="{StaticResource Ghost}" Content="{local:T 'Back'}" Click="Back_Click"/>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource Primary}" Content="{local:T 'Uninstall'}" Click="Uninstall_Click" MinWidth="130"/>
                     </DockPanel>
                     <StackPanel Margin="0,20,0,0">
-                        <TextBlock Foreground="{StaticResource Fg2}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12">
-                            <Run Text="The program is always removed. Tick what else to delete from"/>
-                            <Run x:Name="DataPath" Foreground="{StaticResource Fg}"/><Run Text=" - anything left unticked is kept, so a reinstall picks up where you left off."/>
-                        </TextBlock>
-                        <CheckBox x:Name="SelectAll" Content="Delete everything" FontWeight="SemiBold" IsThreeState="True"
+                        <TextBlock x:Name="UninstallExplain" Foreground="{StaticResource Fg2}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                        <CheckBox x:Name="SelectAll" Content="{local:T 'Delete everything'}" FontWeight="SemiBold" IsThreeState="True"
                                   Click="SelectAll_Click"/>
                         <StackPanel x:Name="CategoryList" Margin="27,10,0,0"/>
                         <TextBlock Foreground="{StaticResource Fg3}" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
-                                   Text="Deleted data cannot be recovered."/>
+                                   Text="{local:T 'Deleted data cannot be recovered.'}"/>
                     </StackPanel>
                 </DockPanel>
 
                 <DockPanel x:Name="ProgressPage" Visibility="Collapsed">
                     <StackPanel DockPanel.Dock="Top">
                         <TextBlock x:Name="ProgressHeading" FontSize="26" FontWeight="SemiBold" FontFamily="Segoe UI Variable Display, Segoe UI"/>
-                        <TextBlock x:Name="ProgressText" Foreground="{StaticResource Fg2}" Margin="0,6,0,0" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock x:Name="ProgressText" Foreground="{StaticResource Fg2}" Margin="0,6,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
                     <DockPanel DockPanel.Dock="Bottom" LastChildFill="False">
-                        <Button x:Name="FinishButton" DockPanel.Dock="Right" Style="{StaticResource Primary}" Content="Finish" Click="Finish_Click" MinWidth="130" Visibility="Collapsed"/>
-                        <CheckBox x:Name="LaunchAfter" DockPanel.Dock="Left" Content="Launch PyroLauncher" IsChecked="True" VerticalAlignment="Center" Visibility="Collapsed"/>
+                        <Button x:Name="FinishButton" DockPanel.Dock="Right" Style="{StaticResource Primary}" Content="{local:T 'Finish'}" Click="Finish_Click" MinWidth="130" Visibility="Collapsed"/>
+                        <CheckBox x:Name="LaunchAfter" DockPanel.Dock="Left" Content="{local:T 'Launch PyroLauncher'}" IsChecked="True" VerticalAlignment="Center" Visibility="Collapsed"/>
                     </DockPanel>
                     <ProgressBar x:Name="Bar" Margin="0,40,0,0" VerticalAlignment="Top" Maximum="1"/>
                 </DockPanel>

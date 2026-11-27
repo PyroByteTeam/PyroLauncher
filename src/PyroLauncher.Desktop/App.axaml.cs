@@ -52,7 +52,13 @@ public partial class App : Application
                 Lan.LanService.Shutdown();
                 SystemNotifications.Remove();
             };
-            window.Opened += (_, _) => UI.ViewModels.MainViewModel.Instance.CheckForUpdatesOnStartup();
+            window.Opened += (_, _) =>
+            {
+                UI.ViewModels.MainViewModel.Instance.CheckForUpdatesOnStartup();
+                foreach (var (role, dir) in StorageLocations.Unavailable)
+                    Dialogs.Toast(L.F("{0} isn't available, so the default folder is used until it's back: {1}",
+                        role == StorageRole.Instances ? L.T("Instances folder") : L.T("Game files and cache folder"), dir), true);
+            };
         }
         base.OnFrameworkInitializationCompleted();
     }

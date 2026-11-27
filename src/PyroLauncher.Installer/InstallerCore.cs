@@ -56,21 +56,34 @@ public static class InstallerCore
         return new InstalledInfo(Version.TryParse(ver, out var v) ? v : new Version(0, 0), path);
     }
 
-    public static async Task InstallAsync(string dir, bool desktopShortcut, IProgress<(string msg, double pct)> progress)
+    /// <summary>Where instances and game files go on a fresh install. <see cref="DeleteEntries"/> were confirmed by the user.</summary>
+    public record DataChoice(string Dir, IReadOnlyList<string> DeleteEntries);
+
+    public static async Task InstallAsync(string dir, bool desktopShortcut, IProgress<(string msg, double pct)> progress, DataChoice? data = null)
     {
         await Task.Run(() =>
         {
-            progress.Report(("Closing running launcher…", 0.02));
+            progress.Report((Loc.T("Closing running launcher…"), 0.02));
             CloseRunning(dir);
 
             Directory.CreateDirectory(dir);
-            using var zip = OpenPayload() ?? throw new InvalidOperationException("This setup has no launcher payload. Build it with build.ps1.");
+            using var zip = OpenPayload() ?? throw new InvalidOperationException(Loc.T("This setup has no launcher payload. Build it with build.ps1."));
 
-            // Remove files from a previous version (keep nothing: user data lives in %APPDATA%).
+            // Remove files from a previous version, or what the user agreed to delete (user data never lives here).
             foreach (var f in Directory.GetFiles(dir))
-                if (!Path.GetFileName(f).Equals(SetupName, StringComparison.OrdinalIgnoreCase))
-                    TryDelete(f);
+                if (!IsSelf(f)) TryDelete(f);
             foreach (var d in Directory.GetDirectories(dir)) TryDeleteDir(d);
+
+            if (data != null)
+            {
+                progress.Report((Loc.T("Preparing the data folder…"), 0.04));
+                foreach (var e in data.DeleteEntries)
+                {
+                    if (Directory.Exists(e)) TryDeleteDir(e); else TryDelete(e);
+                }
+                Directory.CreateDirectory(data.Dir);
+                Storage.Save(data.Dir);
+            }
 
             var entries = zip.Entries.Where(e => e.Name.Length > 0 && e.FullName != "version.txt").ToList();
             var root = Path.GetFullPath(dir).TrimEnd('\\') + '\\';
@@ -81,10 +94,10 @@ public static class InstallerCore
                 if (!dest.StartsWith(root, StringComparison.OrdinalIgnoreCase)) continue;
                 Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
                 e.ExtractToFile(dest, true);
-                progress.Report(($"Installing {e.Name}", 0.05 + 0.8 * (i + 1) / entries.Count));
+                progress.Report((Loc.F("Installing {0}", e.Name), 0.05 + 0.8 * (i + 1) / entries.Count));
             }
 
-            progress.Report(("Registering…", 0.9));
+            progress.Report((Loc.T("Registering…"), 0.9));
             // Keep a copy of the setup for maintenance (update/uninstall from Apps & Features).
             var self = Environment.ProcessPath!;
             var setupCopy = Path.Combine(dir, SetupName);
@@ -108,25 +121,26 @@ public static class InstallerCore
             key.SetValue("InstallDate", DateTime.Now.ToString("yyyyMMdd"));
             key.SetValue("EstimatedSize", (int)(DirSize(dir) / 1024), RegistryValueKind.DWord);
             key.SetValue("NoRepair", 1, RegistryValueKind.DWord);
-            progress.Report(("Done", 1));
+            progress.Report((Loc.T("Done"), 1));
         });
     }
 
-    /// <summary>A group of user data that can optionally be removed on uninstall. Paths are relative to <see cref="UserDataDir"/>.</summary>
-    public record DataCategory(string Key, string Title, string Description, string[] Paths);
+    /// <summary>A group of user data that can optionally be removed on uninstall. Title and description are English keys for <see cref="Loc"/>.</summary>
+    public record DataCategory(string Key, string Title, string Description, Func<IEnumerable<string>> Paths);
 
-    /// <summary>Everything the uninstaller can remove. Add an entry here to offer another option.</summary>
+    /// <summary>Everything the uninstaller can remove. Add an entry here to offer another option.
+    /// Instances and game files may live in custom folders (storage.json), so paths are resolved when needed.</summary>
     public static readonly DataCategory[] DataCategories =
     [
         new("instances", "Instances",
-            "Worlds, mods, resource packs, shader packs, screenshots and play time of every instance.",
-            ["instances"]),
+            "Worlds, mods, resource packs, shader packs, screenshots and play time of every instance and server pack.",
+            () => Storage.InstancesSubfolders.Select(s => Path.Combine(Storage.InstancesDir, s))),
         new("settings", "Settings and accounts",
-            "Launcher settings, categories, layout choices and saved Microsoft accounts.",
-            ["settings.json", "settings.json.tmp", "accounts.dat"]),
+            "Launcher settings, categories, layout choices, saved skins and Microsoft accounts.",
+            () => new[] { "settings.json", "settings.json.tmp", "accounts.dat", "skins" }.Select(s => Path.Combine(UserDataDir, s))),
         new("downloads", "Downloaded files",
-            "Shared game libraries, Java runtimes, caches and logs. They are downloaded again when needed.",
-            ["meta", "java", "cache", "logs"]),
+            "Shared game libraries, mod loader files, Java runtimes, caches and logs. They are downloaded again when needed.",
+            () => Storage.GameDataSubfolders.Select(s => Path.Combine(Storage.GameDataDir, s)).Append(Path.Combine(UserDataDir, "logs"))),
     ];
 
     public static async Task UninstallAsync(IReadOnlyCollection<string> removeData, IProgress<(string msg, double pct)> progress)
@@ -134,14 +148,14 @@ public static class InstallerCore
         var info = GetInstalled();
         await Task.Run(() =>
         {
-            progress.Report(("Closing running launcher…", 0.1));
+            progress.Report((Loc.T("Closing running launcher…"), 0.1));
             if (info != null) CloseRunning(info.Path);
 
-            progress.Report(("Removing shortcuts…", 0.3));
+            progress.Report((Loc.T("Removing shortcuts…"), 0.3));
             TryDelete(StartMenuShortcut);
             TryDelete(DesktopShortcut);
 
-            progress.Report(("Removing files…", 0.5));
+            progress.Report((Loc.T("Removing files…"), 0.5));
             if (info != null)
             {
                 foreach (var f in Directory.GetFiles(info.Path))
@@ -149,20 +163,28 @@ public static class InstallerCore
                 foreach (var d in Directory.GetDirectories(info.Path)) TryDeleteDir(d);
             }
 
+            // Custom storage folders, read before storage.json may be deleted below.
+            var customFolders = Storage.DataFolders().Where(d => !Storage.SamePath(d, UserDataDir)).ToList();
+
             if (removeData.Count > 0 && DataCategories.All(c => removeData.Contains(c.Key)))
             {
-                // Everything selected: remove the whole data folder, including anything not covered by a category.
-                progress.Report(("Removing all launcher data…", 0.75));
+                // Everything selected: remove the whole data folder, including anything not covered by a category,
+                // plus the launcher's subfolders in custom storage folders (and those folders once they're empty).
+                progress.Report((Loc.T("Removing all launcher data…"), 0.75));
+                foreach (var dir in customFolders)
+                {
+                    foreach (var s in Storage.AllSubfolders) TryDeleteDir(Path.Combine(dir, s));
+                    try { if (Directory.Exists(dir) && !Directory.EnumerateFileSystemEntries(dir).Any()) Directory.Delete(dir); } catch { }
+                }
                 TryDeleteDir(UserDataDir);
             }
             else
             {
                 foreach (var cat in DataCategories.Where(c => removeData.Contains(c.Key)))
                 {
-                    progress.Report(($"Removing {cat.Title.ToLowerInvariant()}…", 0.75));
-                    foreach (var rel in cat.Paths)
+                    progress.Report((Loc.F("Removing {0}…", Loc.T(cat.Title).ToLower(Loc.Culture)), 0.75));
+                    foreach (var p in cat.Paths().ToList())
                     {
-                        var p = Path.Combine(UserDataDir, rel);
                         if (Directory.Exists(p)) TryDeleteDir(p);
                         else TryDelete(p);
                     }
@@ -170,7 +192,7 @@ public static class InstallerCore
             }
 
             Registry.CurrentUser.DeleteSubKeyTree(UninstallKey, false);
-            progress.Report(("Done", 1));
+            progress.Report((Loc.T("Done"), 1));
         });
 
         // The running setup may live inside the install folder; remove it (and the folder) once we exit.
@@ -240,7 +262,7 @@ public static class InstallerCore
             lnk.TargetPath = target;
             lnk.WorkingDirectory = workDir;
             lnk.IconLocation = target + ",0";
-            lnk.Description = "Minecraft launcher for modded instances";
+            lnk.Description = Loc.T("Minecraft launcher for modded instances");
             lnk.Save();
         }
         catch { /* shortcuts are a convenience */ }
